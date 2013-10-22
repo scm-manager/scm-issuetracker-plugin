@@ -91,6 +91,19 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker
     dataStore.put(repository.getId(), data);
   }
 
+  /**
+   * Method description
+   *
+   *
+   * @param repository
+   */
+  @Override
+  public void removeHandledMarks(Repository repository)
+  {
+    logger.info("remove handled marks from store {}", repository.getId());
+    dataStore.remove(repository.getId());
+  }
+
   //~--- get methods ----------------------------------------------------------
 
   /**

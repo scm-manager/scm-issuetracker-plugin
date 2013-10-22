@@ -92,6 +92,14 @@ public abstract class IssueTracker
   public abstract void markAsHandled(Repository repository,
     Changeset changeset);
 
+  /**
+   * Method description
+   *
+   *
+   * @param repository
+   */
+  public abstract void removeHandledMarks(Repository repository);
+
   //~--- get methods ----------------------------------------------------------
 
   /**

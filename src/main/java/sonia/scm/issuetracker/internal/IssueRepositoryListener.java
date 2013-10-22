@@ -33,58 +33,107 @@ package sonia.scm.issuetracker.internal;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sonia.scm.EagerSingleton;
+import sonia.scm.HandlerEvent;
 import sonia.scm.issuetracker.IssueTracker;
-
-//~--- JDK imports ------------------------------------------------------------
-
-import java.util.Set;
+import sonia.scm.plugin.ext.Extension;
+import sonia.scm.repository.Repository;
+import sonia.scm.repository.RepositoryEvent;
 
 /**
  *
  * @author Sebastian Sdorra
  */
-@Singleton
-public class IssueTrackerManager
+@Extension
+@EagerSingleton
+public class IssueRepositoryListener
 {
+
+  /**
+   * the logger for IssueRepositoryListener
+   */
+  private static final Logger logger =
+    LoggerFactory.getLogger(IssueRepositoryListener.class);
+
+  //~--- constructors ---------------------------------------------------------
 
   /**
    * Constructs ...
    *
    *
-   * @param issueTrackers
+   * @param manager
    */
   @Inject
-  public IssueTrackerManager(Set<IssueTracker> issueTrackers)
+  public IssueRepositoryListener(IssueTrackerManager manager)
   {
-    if (issueTrackers == null)
-    {
-      this.issueTrackers = ImmutableSet.of();
-    }
-    else
-    {
-      this.issueTrackers = issueTrackers;
-    }
+    this.manager = manager;
   }
 
-  //~--- get methods ----------------------------------------------------------
+  //~--- methods --------------------------------------------------------------
 
   /**
    * Method description
    *
    *
-   * @return
+   * @param event
    */
-  public Set<IssueTracker> getIssueTrackers()
+  @Subscribe
+  public void handleRepositoryEvent(RepositoryEvent event)
   {
-    return issueTrackers;
+    if (event.getEventType() == HandlerEvent.DELETE)
+    {
+      Repository repository = event.getItem();
+
+      if (repository != null)
+      {
+        logger.debug("handle repository delete event");
+
+        for (IssueTracker tracker : manager.getIssueTrackers())
+        {
+          removeHandledMarks(tracker, repository);
+        }
+      }
+      else
+      {
+        logger.warn("received repository event without repository");
+      }
+    }
+  }
+
+  /**
+   * Method description
+   *
+   *
+   * @param tracker
+   * @param repository
+   */
+  private void removeHandledMarks(IssueTracker tracker, Repository repository)
+  {
+    if (logger.isTraceEnabled())
+    {
+      logger.trace(
+        "remove handled marks of repository {} from issue tracker {}",
+        repository.getName(), tracker.getName());
+    }
+
+    try
+    {
+      tracker.removeHandledMarks(repository);
+    }
+    catch (Exception ex)
+    {
+      logger.error("could not remove handled marks", ex);
+    }
   }
 
   //~--- fields ---------------------------------------------------------------
 
   /** Field description */
-  private final Set<IssueTracker> issueTrackers;
+  private final IssueTrackerManager manager;
 }
