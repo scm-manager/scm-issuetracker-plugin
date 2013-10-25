@@ -34,8 +34,8 @@ package sonia.scm.issuetracker.internal;
 //~--- non-JDK imports --------------------------------------------------------
 
 import com.google.inject.Inject;
+
 import sonia.scm.plugin.ext.Extension;
-import sonia.scm.repository.ChangesetPreProcessor;
 import sonia.scm.repository.ChangesetPreProcessorFactory;
 import sonia.scm.repository.Repository;
 
@@ -71,7 +71,7 @@ public class IssueChangesetPreProcessorFactory
    * @return
    */
   @Override
-  public ChangesetPreProcessor createPreProcessor(Repository repository)
+  public IssueChangesetPreProcessor createPreProcessor(Repository repository)
   {
     return new IssueChangesetPreProcessor(repository, manager);
   }

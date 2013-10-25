@@ -33,51 +33,67 @@ package sonia.scm.issuetracker.internal;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import com.google.inject.Inject;
+import sonia.scm.issuetracker.IssueMatcher;
 
-import sonia.scm.plugin.ext.Extension;
-import sonia.scm.repository.BlameLinePreProcessorFactory;
-import sonia.scm.repository.Repository;
+//~--- JDK imports ------------------------------------------------------------
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author Sebastian Sdorra
  */
-@Extension
-public class IssueBlameLinePreProcessorFactory
-  implements BlameLinePreProcessorFactory
+public class JiraIssueMatcher implements IssueMatcher
 {
 
-  /**
-   * Constructs ...
-   *
-   *
-   * @param manager
-   */
-  @Inject
-  public IssueBlameLinePreProcessorFactory(IssueTrackerManager manager)
-  {
-    this.manager = manager;
-  }
+  /** Field description */
+  private static final String REPLACEMENT_LINK =
+    "<a href=\"https://jira.atlassian.com/issue/$0\">$0</a>";
 
-  //~--- methods --------------------------------------------------------------
+  /** Field description */
+  private static final Pattern KEY_PATTERN =
+    Pattern.compile("\\b([A-Z]+-\\d+)");
+
+  //~--- get methods ----------------------------------------------------------
 
   /**
    * Method description
    *
    *
-   * @param repository
+   * @param matcher
    *
    * @return
    */
   @Override
-  public IssueBlameLinePreProcessor createPreProcessor(Repository repository)
+  public String getKey(Matcher matcher)
   {
-    return new IssueBlameLinePreProcessor(repository, manager);
+    return matcher.group();
   }
 
-  //~--- fields ---------------------------------------------------------------
+  /**
+   * Method description
+   *
+   *
+   * @return
+   */
+  @Override
+  public Pattern getKeyPattern()
+  {
+    return KEY_PATTERN;
+  }
 
-  /** Field description */
-  private final IssueTrackerManager manager;
+  /**
+   * Method description
+   *
+   *
+   * @param matcher
+   *
+   * @return
+   */
+  @Override
+  public String getReplacement(Matcher matcher)
+  {
+    return REPLACEMENT_LINK;
+  }
 }

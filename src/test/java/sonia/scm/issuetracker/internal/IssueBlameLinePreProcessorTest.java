@@ -33,51 +33,49 @@ package sonia.scm.issuetracker.internal;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import com.google.inject.Inject;
-
-import sonia.scm.plugin.ext.Extension;
-import sonia.scm.repository.BlameLinePreProcessorFactory;
+import sonia.scm.repository.BlameLine;
 import sonia.scm.repository.Repository;
 
 /**
  *
  * @author Sebastian Sdorra
  */
-@Extension
-public class IssueBlameLinePreProcessorFactory
-  implements BlameLinePreProcessorFactory
+public class IssueBlameLinePreProcessorTest
+  extends PreProcessorTestBase<BlameLine>
 {
-
-  /**
-   * Constructs ...
-   *
-   *
-   * @param manager
-   */
-  @Inject
-  public IssueBlameLinePreProcessorFactory(IssueTrackerManager manager)
-  {
-    this.manager = manager;
-  }
-
-  //~--- methods --------------------------------------------------------------
 
   /**
    * Method description
    *
    *
+   * @param description
+   *
+   * @return
+   */
+  @Override
+  protected BlameLine createItem(String description)
+  {
+    BlameLine line = new BlameLine();
+
+    line.setDescription(description);
+
+    return line;
+  }
+
+  /**
+   * Method description
+   *
+   *
+   * @param manager
    * @param repository
    *
    * @return
    */
   @Override
-  public IssueBlameLinePreProcessor createPreProcessor(Repository repository)
+  protected AbstractPreProcessor<BlameLine> createPreProcessor(
+    IssueTrackerManager manager, Repository repository)
   {
-    return new IssueBlameLinePreProcessor(repository, manager);
+    return new IssueBlameLinePreProcessorFactory(manager).createPreProcessor(
+      repository);
   }
-
-  //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
-  private final IssueTrackerManager manager;
 }

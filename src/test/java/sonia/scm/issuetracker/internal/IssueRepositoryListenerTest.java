@@ -33,34 +33,55 @@ package sonia.scm.issuetracker.internal;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import com.google.inject.Inject;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.eventbus.EventBus;
 
-import sonia.scm.plugin.ext.Extension;
-import sonia.scm.repository.BlameLinePreProcessorFactory;
+import org.junit.Test;
+
+import sonia.scm.HandlerEvent;
+import sonia.scm.issuetracker.IssueTracker;
 import sonia.scm.repository.Repository;
+import sonia.scm.repository.RepositoryEvent;
+import sonia.scm.repository.RepositoryTestData;
+
+import static org.mockito.Mockito.*;
+
+//~--- JDK imports ------------------------------------------------------------
+
+import java.util.Set;
 
 /**
  *
  * @author Sebastian Sdorra
  */
-@Extension
-public class IssueBlameLinePreProcessorFactory
-  implements BlameLinePreProcessorFactory
+public class IssueRepositoryListenerTest
 {
 
   /**
-   * Constructs ...
+   * Method description
    *
-   *
-   * @param manager
    */
-  @Inject
-  public IssueBlameLinePreProcessorFactory(IssueTrackerManager manager)
+  @Test
+  public void testHandleRepositoryEvent()
   {
-    this.manager = manager;
-  }
 
-  //~--- methods --------------------------------------------------------------
+    Repository repository = RepositoryTestData.createHeartOfGold("hg");
+    IssueTrackerManager manager = createIssueTrackerManager();
+
+    IssueRepositoryListener listener = new IssueRepositoryListener(manager);
+    EventBus eventBus = new EventBus();
+
+    eventBus.register(listener);
+
+    eventBus.post(new RepositoryEvent(repository, HandlerEvent.DELETE));
+    eventBus.post(new RepositoryEvent(repository, HandlerEvent.DELETE));
+    eventBus.post(new RepositoryEvent(repository, HandlerEvent.DELETE));
+
+    for (IssueTracker tracker : manager.getIssueTrackers())
+    {
+      verify(tracker, times(3)).removeHandledMarks(repository);
+    }
+  }
 
   /**
    * Method description
@@ -70,14 +91,30 @@ public class IssueBlameLinePreProcessorFactory
    *
    * @return
    */
-  @Override
-  public IssueBlameLinePreProcessor createPreProcessor(Repository repository)
+  private IssueTrackerManager createIssueTrackerManager()
   {
-    return new IssueBlameLinePreProcessor(repository, manager);
+    IssueTracker tracker1 = mockIssueTracker("tracker1");
+    IssueTracker tracker2 = mockIssueTracker("tracker2");
+    Set<IssueTracker> trackers = ImmutableSet.of(tracker1, tracker2);
+
+    return new IssueTrackerManager(trackers);
   }
 
-  //~--- fields ---------------------------------------------------------------
+  /**
+   * Method description
+   *
+   *
+   * @param name
+   * @param repository
+   *
+   * @return
+   */
+  private IssueTracker mockIssueTracker(String name)
+  {
+    IssueTracker tracker = mock(IssueTracker.class);
 
-  /** Field description */
-  private final IssueTrackerManager manager;
+    when(tracker.getName()).thenReturn(name);
+
+    return tracker;
+  }
 }
