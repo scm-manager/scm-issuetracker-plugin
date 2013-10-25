@@ -45,10 +45,10 @@ public interface ChangeStateHandler extends Closeable
   /**
    * Method description
    *
-   * @param autoCloseWord
+   * @param keyword
    * @param issue
    */
-  public void changeState(String issue, String autoCloseWord);
+  public void changeState(String issue, String keyword);
 
   //~--- get methods ----------------------------------------------------------
 

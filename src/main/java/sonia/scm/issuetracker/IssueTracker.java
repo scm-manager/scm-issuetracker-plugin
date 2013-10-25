@@ -291,11 +291,11 @@ public abstract class IssueTracker
 
     for (String w : words)
     {
-      for (String acw : ach.getKeywords())
+      for (String kw : ach.getKeywords())
       {
-        acw = acw.trim();
+        kw = kw.trim();
 
-        if (w.equalsIgnoreCase(acw))
+        if (w.equalsIgnoreCase(kw))
         {
           keyword = w;
 
