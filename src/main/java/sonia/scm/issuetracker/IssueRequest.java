@@ -33,6 +33,8 @@ package sonia.scm.issuetracker;
 
 //~--- non-JDK imports --------------------------------------------------------
 
+import com.google.common.base.Objects;
+
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
 
@@ -61,6 +63,66 @@ public final class IssueRequest
     this.repository = repository;
     this.changeset = changeset;
     this.issueKeys = issueKeys;
+  }
+
+  //~--- methods --------------------------------------------------------------
+
+  /**
+   * Method description
+   *
+   *
+   * @param obj
+   *
+   * @return
+   */
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+
+    final IssueRequest other = (IssueRequest) obj;
+
+    return Objects.equal(repository, other.repository)
+      && Objects.equal(changeset, other.changeset)
+      && Objects.equal(issueKeys, other.issueKeys);
+  }
+
+  /**
+   * Method description
+   *
+   *
+   * @return
+   */
+  @Override
+  public int hashCode()
+  {
+    return Objects.hashCode(repository, changeset, issueKeys);
+  }
+
+  /**
+   * Method description
+   *
+   *
+   * @return
+   */
+  @Override
+  public String toString()
+  {
+    //J-
+    return Objects.toStringHelper(this)
+                  .add("repository", repository)
+                  .add("changeset", changeset)
+                  .add("issueKeys", issueKeys)
+                  .toString();
+    //J+
   }
 
   //~--- get methods ----------------------------------------------------------
