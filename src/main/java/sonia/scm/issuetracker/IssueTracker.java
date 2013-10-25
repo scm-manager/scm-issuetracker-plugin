@@ -123,13 +123,13 @@ public abstract class IssueTracker
    */
   public void handleRequest(IssueRequest request)
   {
-    AutoCloseHandler autoCloseHandler = null;
+    ChangeStateHandler changeStateHandler = null;
 
     try
     {
-      autoCloseHandler = getAutoCloseHandler(request);
+      changeStateHandler = getChangeStateHandler(request);
 
-      if (autoCloseHandler != null)
+      if (changeStateHandler != null)
       {
         if (logger.isTraceEnabled())
         {
@@ -137,15 +137,15 @@ public abstract class IssueTracker
             request.getChangeset().getId());
         }
 
-        String autoCloseWord = searchAutoCloseWord(autoCloseHandler, request);
+        String keyword = searchKeywords(changeStateHandler, request);
 
-        if (!Strings.isNullOrEmpty(autoCloseWord))
+        if (!Strings.isNullOrEmpty(keyword))
         {
-          closeIssues(autoCloseHandler, request, autoCloseWord);
+          closeIssues(changeStateHandler, request, keyword);
         }
         else
         {
-          logger.debug("no auto close word available on changeset {}",
+          logger.debug("no keyword available on changeset {}",
             request.getChangeset().getId());
 
           commentIssues(request);
@@ -153,13 +153,13 @@ public abstract class IssueTracker
       }
       else
       {
-        logger.debug("auto close is disabled or not supported by {}", name);
+        logger.debug("change state is disabled or not supported by {}", name);
         commentIssues(request);
       }
     }
     finally
     {
-      Closeables.closeQuietly(autoCloseHandler);
+      Closeables.closeQuietly(changeStateHandler);
     }
   }
 
@@ -184,7 +184,7 @@ public abstract class IssueTracker
    *
    * @return
    */
-  protected AutoCloseHandler getAutoCloseHandler(IssueRequest request)
+  protected ChangeStateHandler getChangeStateHandler(IssueRequest request)
   {
     return null;
   }
@@ -208,25 +208,25 @@ public abstract class IssueTracker
    * Method description
    *
    *
-   * @param ach
+   * @param csh
    * @param request
-   * @param autoCloseWord
+   * @param keyword
    */
-  private void closeIssues(AutoCloseHandler ach, IssueRequest request,
-    String autoCloseWord)
+  private void closeIssues(ChangeStateHandler csh, IssueRequest request,
+    String keyword)
   {
     for (String issueKey : request.getIssueKeys())
     {
-      logger.info("close issue {}, because of auto close word {}", issueKey,
-        autoCloseWord);
+      logger.info("change state of issue {}, because of keyword {}", issueKey,
+        keyword);
 
       try
       {
-        ach.closeIssue(issueKey, autoCloseWord);
+        csh.changeState(issueKey, keyword);
       }
       catch (Exception ex)
       {
-        logger.error("could not close issue", ex);
+        logger.error("could not change state of issue", ex);
       }
     }
   }
@@ -283,33 +283,33 @@ public abstract class IssueTracker
    *
    * @return
    */
-  private String searchAutoCloseWord(AutoCloseHandler ach, IssueRequest request)
+  private String searchKeywords(ChangeStateHandler ach, IssueRequest request)
   {
     String description = request.getChangeset().getDescription();
-    String autoCloseWord = null;
+    String keyword = null;
     String[] words = description.split("\\s");
 
     for (String w : words)
     {
-      for (String acw : ach.getAutoCloseWords())
+      for (String acw : ach.getKeywords())
       {
         acw = acw.trim();
 
         if (w.equalsIgnoreCase(acw))
         {
-          autoCloseWord = w;
+          keyword = w;
 
           break;
         }
       }
 
-      if (autoCloseWord != null)
+      if (keyword != null)
       {
         break;
       }
     }
 
-    return autoCloseWord;
+    return keyword;
   }
 
   //~--- fields ---------------------------------------------------------------

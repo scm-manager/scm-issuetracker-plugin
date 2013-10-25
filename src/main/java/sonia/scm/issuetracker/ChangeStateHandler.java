@@ -31,13 +31,15 @@
 
 package sonia.scm.issuetracker;
 
+//~--- JDK imports ------------------------------------------------------------
+
 import java.io.Closeable;
 
 /**
  *
  * @author Sebastian Sdorra
  */
-public interface AutoCloseHandler extends Closeable
+public interface ChangeStateHandler extends Closeable
 {
 
   /**
@@ -46,7 +48,7 @@ public interface AutoCloseHandler extends Closeable
    * @param autoCloseWord
    * @param issue
    */
-  public void closeIssue(String issue, String autoCloseWord);
+  public void changeState(String issue, String autoCloseWord);
 
   //~--- get methods ----------------------------------------------------------
 
@@ -56,5 +58,5 @@ public interface AutoCloseHandler extends Closeable
    *
    * @return
    */
-  public Iterable<String> getAutoCloseWords();
+  public Iterable<String> getKeywords();
 }

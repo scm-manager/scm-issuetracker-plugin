@@ -58,9 +58,6 @@ public abstract class TemplateBasedHandler
 {
 
   /** Field description */
-  private static final String ENV_AUTOCLOSEWORD = "autoCloseWord";
-
-  /** Field description */
   private static final String ENV_CHANGESET = "changeset";
 
   /** Field description */
@@ -68,6 +65,9 @@ public abstract class TemplateBasedHandler
 
   /** Field description */
   private static final String ENV_DIFFURL = "diffUrl";
+
+  /** Field description */
+  private static final String ENV_KEYWORD = "keyword";
 
   /** Field description */
   private static final String ENV_REPOSITORY = "repository";
@@ -130,13 +130,13 @@ public abstract class TemplateBasedHandler
    *
    *
    * @param request
-   * @param autoCloseWord
+   * @param keyword
    *
    * @return
    */
-  protected String createComment(IssueRequest request, String autoCloseWord)
+  protected String createComment(IssueRequest request, String keyword)
   {
-    Object model = createModel(request, autoCloseWord);
+    Object model = createModel(request, keyword);
 
     return createComment(model);
   }
@@ -190,17 +190,17 @@ public abstract class TemplateBasedHandler
    *
    *
    * @param request
-   * @param autoCloseWord
+   * @param keyword
    *
    * @return
    */
-  protected Object createModel(IssueRequest request, String autoCloseWord)
+  protected Object createModel(IssueRequest request, String keyword)
   {
     Map<String, Object> model = Maps.newHashMap();
 
     model.put(ENV_REPOSITORY, request.getRepository());
     model.put(ENV_CHANGESET, request.getChangeset());
-    model.put(ENV_AUTOCLOSEWORD, Strings.nullToEmpty(autoCloseWord));
+    model.put(ENV_KEYWORD, Strings.nullToEmpty(keyword));
     model.put(ENV_DIFFURL, linkHandler.getDiffUrl(request));
     model.put(ENV_DIFFRESTURL, linkHandler.getDiffRestUrl(request));
     model.put(ENV_REPOSITORYURL, linkHandler.getRepositoryUrl(request));
