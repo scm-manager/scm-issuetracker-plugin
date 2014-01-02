@@ -141,7 +141,7 @@ public abstract class AbstractPreProcessor<T> implements PreProcessor<T>
     }
     else
     {
-      logger.warn("could not create issue matcher for {}", tracker.getName());
+      logger.debug("could not create issue matcher for {}", tracker.getName());
     }
   }
 
