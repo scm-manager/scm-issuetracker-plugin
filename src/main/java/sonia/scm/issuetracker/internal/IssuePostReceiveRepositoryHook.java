@@ -224,7 +224,7 @@ public class IssuePostReceiveRepositoryHook
     }
     else
     {
-      logger.warn("could not create issue matcher for tracker {}",
+      logger.debug("could not create issue matcher for tracker {}",
         tracker.getName());
     }
   }
@@ -260,13 +260,13 @@ public class IssuePostReceiveRepositoryHook
       }
       else
       {
-        logger.warn("{} has no changeset provider supported",
+        logger.debug("{} does not support changeset provider",
           repository.getType());
       }
     }
     else
     {
-      logger.warn("{} has not hook context support", repository.getType());
+      logger.debug("{} has no hook context support", repository.getType());
     }
 
     if (changesets == null)
