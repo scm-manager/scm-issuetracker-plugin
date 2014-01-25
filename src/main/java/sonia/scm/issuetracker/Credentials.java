@@ -30,6 +30,7 @@
  */
 
 
+
 package sonia.scm.issuetracker;
 
 //~--- non-JDK imports --------------------------------------------------------
@@ -67,7 +68,7 @@ public final class Credentials
   }
 
   //~--- methods --------------------------------------------------------------
-  
+
   /**
    * Method description
    *
@@ -76,9 +77,26 @@ public final class Credentials
    */
   public static Credentials current()
   {
-    String[] credentialsArray = getUserCredentials();
+    String credentialsString = getCredentialsString();
 
-    return new Credentials(credentialsArray[0], credentialsArray[1]);
+    AssertUtil.assertIsNotEmpty(credentialsString);
+    credentialsString = CipherUtil.getInstance().decode(credentialsString);
+
+    Credentials credentials = null;
+
+    int index = credentialsString.indexOf(':');
+
+    if ((index > 0) && (index < credentialsString.length()))
+    {
+      //J-
+      credentials = new Credentials(
+        credentialsString.substring(0, index),
+        credentialsString.substring(index + 1)
+      );
+      //J+
+    }
+
+    return credentials;
   }
 
   //~--- get methods ----------------------------------------------------------
@@ -103,29 +121,6 @@ public final class Credentials
     }
 
     return crendentials;
-  }
-
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  private static String[] getUserCredentials()
-  {
-    String credentialsString = getCredentialsString();
-
-    AssertUtil.assertIsNotEmpty(credentialsString);
-    credentialsString = CipherUtil.getInstance().decode(credentialsString);
-
-    String[] credentialsArray = credentialsString.split(":");
-
-    if (credentialsArray.length < 2)
-    {
-      throw new RuntimeException("non valid credentials found");
-    }
-
-    return credentialsArray;
   }
 
   /**
