@@ -35,14 +35,13 @@ package sonia.scm.issuetracker;
 //~--- non-JDK imports --------------------------------------------------------
 
 import com.google.common.base.Strings;
-import com.google.common.io.Closeables;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sonia.scm.plugin.ExtensionPoint;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
+
+import java.io.IOException;
 
 /**
  *
@@ -124,11 +123,8 @@ public abstract class IssueTracker
    */
   public void handleRequest(IssueRequest request)
   {
-    ChangeStateHandler changeStateHandler = null;
-
-    try
+    try(ChangeStateHandler changeStateHandler = this.getChangeStateHandler(request))
     {
-      changeStateHandler = getChangeStateHandler(request);
 
       if (changeStateHandler != null)
       {
@@ -157,10 +153,8 @@ public abstract class IssueTracker
         logger.debug("change state is disabled or not supported by {}", name);
         commentIssues(request);
       }
-    }
-    finally
-    {
-      Closeables.closeQuietly(changeStateHandler);
+    } catch (IOException e) {
+        logger.error("Error on handling Issue Request",e);
     }
   }
 
@@ -240,11 +234,8 @@ public abstract class IssueTracker
    */
   private void commentIssues(IssueRequest request)
   {
-    CommentHandler commentHandler = null;
-
-    try
+    try (CommentHandler commentHandler = this.getCommentHandler(request))
     {
-      commentHandler = getCommentHandler(request);
 
       if (commentHandler != null)
       {
@@ -266,10 +257,8 @@ public abstract class IssueTracker
       {
         logger.debug("comments are disabled or not supported by {}", name);
       }
-    }
-    finally
-    {
-      Closeables.closeQuietly(commentHandler);
+    } catch (IOException e) {
+        logger.error("Error on commenting issue", e);
     }
   }
 
@@ -277,7 +266,6 @@ public abstract class IssueTracker
    * Method description
    *
    *
-   * @param changeset
    *
    * @param ach
    * @param request

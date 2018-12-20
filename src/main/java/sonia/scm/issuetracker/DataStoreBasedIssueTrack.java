@@ -56,19 +56,13 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker
   private static final Logger logger =
     LoggerFactory.getLogger(DataStoreBasedIssueTrack.class);
 
-  //~--- constructors ---------------------------------------------------------
 
-  /**
-   * Constructs ...
-   *
-   *
-   * @param name
-   * @param storeFactory
-   */
+  private DataStoreFactory storeFactory;
+
   public DataStoreBasedIssueTrack(String name, DataStoreFactory storeFactory)
   {
     super(name);
-    this.dataStore = storeFactory.getStore(IssueData.class, name);
+    this.storeFactory = storeFactory;
   }
 
   //~--- methods --------------------------------------------------------------
@@ -89,6 +83,8 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker
     IssueData data = getData(repository);
 
     data.getHandledChangesets().add(changeset.getId());
+    DataStore<IssueData> dataStore = storeFactory.withType(IssueData.class).withName(super.getName()).forRepository(repository).build();
+
     dataStore.put(repository.getId(), data);
   }
 
@@ -102,6 +98,7 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker
   public void removeHandledMarks(Repository repository)
   {
     logger.info("remove handled marks from store {}", repository.getId());
+    DataStore<IssueData> dataStore = storeFactory.withType(IssueData.class).withName(super.getName()).forRepository(repository).build();
     dataStore.remove(repository.getId());
   }
 
@@ -134,6 +131,8 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker
    */
   private IssueData getData(Repository repository)
   {
+    DataStore<IssueData> dataStore = storeFactory.withType(IssueData.class).withName(super.getName()).forRepository(repository).build();
+
     IssueData data = dataStore.get(repository.getId());
 
     if (data == null)
@@ -144,8 +143,5 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker
     return data;
   }
 
-  //~--- fields ---------------------------------------------------------------
 
-  /** Field description */
-  private final DataStore<IssueData> dataStore;
 }

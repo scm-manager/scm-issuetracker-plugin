@@ -36,10 +36,7 @@ package sonia.scm.issuetracker;
 //~--- non-JDK imports --------------------------------------------------------
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 
-import sonia.scm.url.UrlProvider;
-import sonia.scm.url.UrlProviderFactory;
 
 /**
  *
@@ -48,74 +45,26 @@ import sonia.scm.url.UrlProviderFactory;
 public final class LinkHandler
 {
 
-  /**
-   * Constructs ...
-   *
-   *
-   * @param wuiUrlProvider
-   * @param restUrlProvider
-   */
   @Inject
-  public LinkHandler(
-    @Named(UrlProviderFactory.TYPE_WUI) UrlProvider wuiUrlProvider,
-    @Named(UrlProviderFactory.TYPE_RESTAPI_XML) UrlProvider restUrlProvider)
+  public LinkHandler()
   {
-    this.wuiUrlProvider = wuiUrlProvider;
-    this.restUrlProvider = restUrlProvider;
   }
 
-  //~--- get methods ----------------------------------------------------------
-
-  /**
-   * Method description
-   *
-   *
-   *
-   *
-   * @param request
-   * @return
-   */
   public String getDiffRestUrl(IssueRequest request)
   {
-    return restUrlProvider.getRepositoryUrlProvider().getDiffUrl(
-      request.getRepository().getId(), request.getChangeset().getId());
+    // TODO get url
+    return "";
   }
 
-  /**
-   * Method description
-   *
-   *
-   *
-   *
-   * @param request
-   * @return
-   */
   public String getDiffUrl(IssueRequest request)
   {
-    return wuiUrlProvider.getRepositoryUrlProvider().getDiffUrl(
-      request.getRepository().getId(), request.getChangeset().getId());
+    // TODO get url
+    return "";
   }
 
-  /**
-   * Method description
-   *
-   *
-   *
-   *
-   * @param request
-   * @return
-   */
   public String getRepositoryUrl(IssueRequest request)
   {
-    return wuiUrlProvider.getRepositoryUrlProvider().getDetailUrl(
-      request.getRepository().getId());
+    // TODO get url
+    return "";
   }
-
-  //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
-  private final UrlProvider restUrlProvider;
-
-  /** Field description */
-  private final UrlProvider wuiUrlProvider;
 }

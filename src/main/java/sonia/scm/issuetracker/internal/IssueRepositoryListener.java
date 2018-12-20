@@ -34,16 +34,14 @@ package sonia.scm.issuetracker.internal;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import com.google.common.eventbus.Subscribe;
+import com.github.legman.Subscribe;
 import com.google.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sonia.scm.EagerSingleton;
-import sonia.scm.HandlerEvent;
+import sonia.scm.HandlerEventType;
 import sonia.scm.issuetracker.IssueTracker;
-import sonia.scm.plugin.ext.Extension;
+import sonia.scm.plugin.Extension;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryEvent;
 
@@ -87,7 +85,7 @@ public class IssueRepositoryListener
   @Subscribe
   public void handleRepositoryEvent(RepositoryEvent event)
   {
-    if (event.getEventType() == HandlerEvent.DELETE)
+    if (event.getEventType() == HandlerEventType.DELETE)
     {
       Repository repository = event.getItem();
 

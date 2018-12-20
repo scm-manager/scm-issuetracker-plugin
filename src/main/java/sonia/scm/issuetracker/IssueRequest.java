@@ -32,143 +32,27 @@
 
 package sonia.scm.issuetracker;
 
-//~--- non-JDK imports --------------------------------------------------------
-
-import com.google.common.base.Objects;
-
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.util.List;
 
 /**
  *
+ * The detected issue keys related to a repository and a changeset
+ *
  * @author Sebastian Sdorra
  */
-public final class IssueRequest
-{
-
-  /**
-   * Constructs ...
-   *
-   *
-   * @param repository
-   * @param changeset
-   * @param issueKeys
-   */
-  public IssueRequest(Repository repository, Changeset changeset,
-    List<String> issueKeys)
-  {
-    this.repository = repository;
-    this.changeset = changeset;
-    this.issueKeys = issueKeys;
-  }
-
-  //~--- methods --------------------------------------------------------------
-
-  /**
-   * Method description
-   *
-   *
-   * @param obj
-   *
-   * @return
-   */
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (obj == null)
-    {
-      return false;
-    }
-
-    if (getClass() != obj.getClass())
-    {
-      return false;
-    }
-
-    final IssueRequest other = (IssueRequest) obj;
-
-    return Objects.equal(repository, other.repository)
-      && Objects.equal(changeset, other.changeset)
-      && Objects.equal(issueKeys, other.issueKeys);
-  }
-
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  @Override
-  public int hashCode()
-  {
-    return Objects.hashCode(repository, changeset, issueKeys);
-  }
-
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  @Override
-  public String toString()
-  {
-    //J-
-    return Objects.toStringHelper(this)
-                  .add("repository", repository)
-                  .add("changeset", changeset)
-                  .add("issueKeys", issueKeys)
-                  .toString();
-    //J+
-  }
-
-  //~--- get methods ----------------------------------------------------------
-
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  public Changeset getChangeset()
-  {
-    return changeset;
-  }
-
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  public List<String> getIssueKeys()
-  {
-    return issueKeys;
-  }
-
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  public Repository getRepository()
-  {
-    return repository;
-  }
-
-  //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
-  private final Changeset changeset;
-
-  /** Field description */
-  private final List<String> issueKeys;
-
-  /** Field description */
-  private final Repository repository;
+@ToString
+@EqualsAndHashCode
+@Getter
+@AllArgsConstructor
+public final class IssueRequest {
+    private Repository repository;
+    private Changeset changeset;
+    private List<String> issueKeys;
 }

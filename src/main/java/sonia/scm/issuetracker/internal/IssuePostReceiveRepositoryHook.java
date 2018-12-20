@@ -34,26 +34,22 @@ package sonia.scm.issuetracker.internal;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import sonia.scm.issuetracker.IssueRequest;
+import com.github.legman.Subscribe;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.IssueRequest;
 import sonia.scm.issuetracker.IssueTracker;
-import sonia.scm.plugin.ext.Extension;
+import sonia.scm.plugin.Extension;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.PostReceiveRepositoryHookEvent;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.api.HookContext;
 import sonia.scm.repository.api.HookFeature;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -245,7 +241,7 @@ public class IssuePostReceiveRepositoryHook
   {
     Iterable<Changeset> changesets = null;
 
-    if (event.isContextAvailable())
+    if (event.getContext() != null)
     {
       HookContext context = event.getContext();
 
@@ -267,12 +263,6 @@ public class IssuePostReceiveRepositoryHook
     else
     {
       logger.debug("{} has no hook context support", repository.getType());
-    }
-
-    if (changesets == null)
-    {
-      logger.debug("fall back to normal event getChangesets");
-      changesets = event.getChangesets();
     }
 
     return changesets;
