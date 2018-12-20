@@ -63,13 +63,4 @@ public interface IssueMatcher
    */
   public Pattern getKeyPattern();
 
-  /**
-   * Method description
-   *
-   *
-   * @param matcher
-   *
-   * @return
-   */
-  public String getReplacement(Matcher matcher);
 }

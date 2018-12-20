@@ -37,10 +37,9 @@ package sonia.scm.issuetracker.internal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
-
+import com.google.common.collect.Sets;
 import org.junit.Test;
-
+import sonia.scm.event.ScmEventBus;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.IssueRequest;
 import sonia.scm.issuetracker.IssueTracker;
@@ -51,8 +50,19 @@ import sonia.scm.repository.RepositoryHookEvent;
 import sonia.scm.repository.RepositoryHookType;
 import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.repository.WrappedRepositoryHookEvent;
+import sonia.scm.repository.api.HookContext;
+import sonia.scm.repository.api.HookContextFactory;
+import sonia.scm.repository.api.HookFeature;
+import sonia.scm.repository.spi.HookChangesetProvider;
+import sonia.scm.repository.spi.HookChangesetResponse;
+import sonia.scm.repository.spi.HookContextProvider;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -66,8 +76,8 @@ public class IssuePostReceiveRepositoryHookTest
    *
    */
   @Test
-  public void testHandleEvent()
-  {
+  @SuppressWarnings("squid:S2925") // use Thread.sleep() to wait for the eventBus post process
+  public void testHandleEvent() throws InterruptedException {
     Repository repository = RepositoryTestData.create42Puzzle();
 
     Changeset c1 = new Changeset();
@@ -83,27 +93,21 @@ public class IssuePostReceiveRepositoryHookTest
     IssueTracker jira = createIssueTracker("jira", new JiraIssueMatcher());
     IssueTrackerManager manager = createIssueTrackerManager(jira);
 
-    IssuePostReceiveRepositoryHook hook =
-      new IssuePostReceiveRepositoryHook(manager);
-    EventBus eventBus = new EventBus();
+    ScmEventBus.getInstance().register(new IssuePostReceiveRepositoryHook(manager));
+    ScmEventBus.getInstance().post(mockEvent(repository, c1, c2));
 
-    eventBus.register(hook);
-
-    WrappedRepositoryHookEvent event = mockEvent(repository);
-
-    eventBus.post(event);
-// TODO changesets cannot be received from the event bus
-//    verify(jira, times(1)).isHandled(repository, c1);
-//    verify(jira, times(1)).isHandled(repository, c2);
+    Thread.sleep(3000);
+    verify(jira, times(1)).isHandled(repository, c1);
+    verify(jira, times(1)).isHandled(repository, c2);
 
     IssueRequest request = new IssueRequest(repository, c2,
                              Lists.newArrayList("SCM-42"));
 
-//    verify(jira, times(1)).handleRequest(request);
-//    verify(jira, times(1)).handleRequest(any(IssueRequest.class));
-//
-//    verify(jira, never()).markAsHandled(repository, c1);
-//    verify(jira, times(1)).markAsHandled(repository, c2);
+    verify(jira, times(1)).handleRequest(request);
+    verify(jira, times(1)).handleRequest(any(IssueRequest.class));
+
+    verify(jira, never()).markAsHandled(repository, c1);
+    verify(jira, times(1)).markAsHandled(repository, c2);
   }
 
   /**
@@ -147,11 +151,19 @@ public class IssuePostReceiveRepositoryHookTest
    *
    * @return
    */
-  private WrappedRepositoryHookEvent mockEvent(Repository repository)
+  private WrappedRepositoryHookEvent mockEvent(Repository repository, Changeset... changesets)
   {
     RepositoryHookEvent wrapped = mock(RepositoryHookEvent.class);
 
     when(wrapped.getRepository()).thenReturn(repository);
+    HookChangesetProvider provider = mock(HookChangesetProvider.class);
+    HookContextProvider hookContextProvider = mock(HookContextProvider.class);
+    HookContext context = new HookContextFactory(null).createContext(hookContextProvider, repository);
+    when(wrapped.getContext()).thenReturn(context);
+    when(hookContextProvider.getChangesetProvider()).thenReturn(provider);
+    HookChangesetResponse hookChangesetResponse = new HookChangesetResponse(ImmutableList.copyOf(changesets));
+    when(provider.handleRequest(any())).thenReturn(hookChangesetResponse);
+    when(hookContextProvider.getSupportedFeatures()).thenReturn(Sets.immutableEnumSet(HookFeature.CHANGESET_PROVIDER));
     when(wrapped.getType()).thenReturn(RepositoryHookType.POST_RECEIVE);
 
     return PostReceiveRepositoryHookEvent.wrap(wrapped);
