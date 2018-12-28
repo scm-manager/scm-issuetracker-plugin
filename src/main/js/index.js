@@ -3,6 +3,7 @@
 import React from "react";
 import { binder } from "@scm-manager/ui-extensions";
 import type { Changeset } from "@scm-manager/ui-types";
+import { escape } from "lodash";
 
 const ChangesetDescription = ({ changeset, description }) => {
   return (
@@ -20,7 +21,7 @@ const renderSpan = (changeset: Changeset, key: string, item: string) => {
       <span
         key={key}
         dangerouslySetInnerHTML={{
-          __html: replaceKeysWithLinks(item, changeset._links.issues) + "<br />" // TODO: Check whether this is really necessary
+          __html: replaceKeysWithLinks(item, changeset._links.issues) + "<br />"
         }}
       />
     );
@@ -35,7 +36,7 @@ const renderSpan = (changeset: Changeset, key: string, item: string) => {
 };
 
 const replaceKeysWithLinks = (line: string, issues) => {
-  let replacedString = line;
+  let replacedString = escape(line);
   for (let issue of issues) {
     const link = createLink(issue.name, issue.href);
     replacedString = replacedString.replace(issue.name, link);
