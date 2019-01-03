@@ -35,30 +35,39 @@ public class ChangesetLinkEnricher implements LinkEnricher {
 
     Repository repository = context.oneRequireByType(Repository.class);
     Changeset changeset = context.oneRequireByType(Changeset.class);
-    Map<String, String> map = new LinkedHashMap<>();
 
-    for (IssueTracker issueTracker : issueTrackerManager.getIssueTrackers()) {
-      Optional<IssueMatcher> issueMatcher = issueTracker.createMatcher(repository);
-
-      if (issueMatcher.isPresent()) {
-        Pattern pattern = issueMatcher.get().getKeyPattern();
-        Matcher matcher = pattern.matcher(Strings.nullToEmpty(changeset.getDescription()));
-        Optional<IssueLinkFactory> issueLinkFactory = issueTracker.createLinkFactory(repository);
-        if (issueLinkFactory.isPresent()) {
-          while (matcher.find()) {
-            String key = issueMatcher.get().getKey(matcher);
-            String link = issueLinkFactory.get().createLink(key);
-            map.put(key, link);
-          }
-        }
-      }
-    }
+    Map<String, String> map = createIssueLinkMap(repository, changeset);
 
     if (!map.isEmpty()) {
       LinkAppender.LinkArrayBuilder linkArrayBuilder = appender.arrayBuilder("issues");
       map.forEach(linkArrayBuilder::append);
       linkArrayBuilder.build();
     }
+  }
+
+  private Map<String, String> createIssueLinkMap(Repository repository, Changeset changeset) {
+    Map<String, String> map = new LinkedHashMap<>();
+
+    for (IssueTracker issueTracker : issueTrackerManager.getIssueTrackers()) {
+      Optional<IssueMatcher> issueMatcher = issueTracker.createMatcher(repository);
+
+      if (!issueMatcher.isPresent()) continue;
+
+      Pattern pattern = issueMatcher.get().getKeyPattern();
+      Matcher matcher = pattern.matcher(Strings.nullToEmpty(changeset.getDescription()));
+
+      Optional<IssueLinkFactory> issueLinkFactory = issueTracker.createLinkFactory(repository);
+
+      if (issueLinkFactory.isPresent()) {
+        while (matcher.find()) {
+          String key = issueMatcher.get().getKey(matcher);
+          String link = issueLinkFactory.get().createLink(key);
+          map.put(key, link);
+        }
+      }
+    }
+
+    return map;
   }
 }
 
