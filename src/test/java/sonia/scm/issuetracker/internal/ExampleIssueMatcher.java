@@ -45,56 +45,37 @@ import java.util.regex.Pattern;
  *
  * @author Sebastian Sdorra
  */
-public class JiraIssueMatcher implements IssueMatcher
+public class ExampleIssueMatcher implements IssueMatcher
 {
 
-  /** Field description */
-  private static final String REPLACEMENT_LINK =
-    "<a href=\"https://jira.atlassian.com/issue/$0\">$0</a>";
+  private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("\\b([A-Z]+-\\d+)");
+  private static final Pattern REDMINE_KEY_PATTERN = Pattern.compile("\\B(#\\d+)");
 
-  /** Field description */
-  private static final Pattern KEY_PATTERN =
-    Pattern.compile("\\b([A-Z]+-\\d+)");
+  private Pattern pattern;
 
-  //~--- get methods ----------------------------------------------------------
 
-  /**
-   * Method description
-   *
-   *
-   * @param matcher
-   *
-   * @return
-   */
+  public ExampleIssueMatcher(Pattern pattern) {
+    this.pattern = pattern;
+  }
+
   @Override
   public String getKey(Matcher matcher)
   {
     return matcher.group();
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
+
   @Override
   public Pattern getKeyPattern()
   {
-    return KEY_PATTERN;
+    return pattern;
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param matcher
-   *
-   * @return
-   */
-  @Override
-  public String getReplacement(Matcher matcher)
-  {
-    return REPLACEMENT_LINK;
+  public static ExampleIssueMatcher createJira() {
+    return new ExampleIssueMatcher(JIRA_KEY_PATTERN);
+  }
+
+  public static ExampleIssueMatcher createRedmine() {
+    return new ExampleIssueMatcher(REDMINE_KEY_PATTERN);
   }
 }

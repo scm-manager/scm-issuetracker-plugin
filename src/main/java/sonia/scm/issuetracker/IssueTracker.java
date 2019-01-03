@@ -42,6 +42,7 @@ import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  *
@@ -80,7 +81,9 @@ public abstract class IssueTracker
    *
    * @return
    */
-  public abstract IssueMatcher createMatcher(Repository repository);
+  public abstract Optional<IssueMatcher> createMatcher(Repository repository);
+
+  public abstract Optional<IssueLinkFactory> createLinkFactory(Repository repository);
 
   /**
    * Method description

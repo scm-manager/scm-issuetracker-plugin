@@ -52,6 +52,7 @@ import sonia.scm.repository.api.HookContext;
 import sonia.scm.repository.api.HookFeature;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -178,22 +179,22 @@ public class IssuePostReceiveRepositoryHook
   private void handleEvent(PostReceiveRepositoryHookEvent event,
     Repository repository, IssueTracker tracker)
   {
-    IssueMatcher matcher = tracker.createMatcher(repository);
+    Optional<IssueMatcher> matcher = tracker.createMatcher(repository);
 
-    if (matcher != null)
+    if (matcher.isPresent())
     {
       Iterable<Changeset> changesets = getChangesets(event, repository);
 
       if (changesets != null)
       {
-        Pattern pattern = matcher.getKeyPattern();
+        Pattern pattern = matcher.get().getKeyPattern();
 
         for (Changeset c : changesets)
         {
           if (!tracker.isHandled(repository, c))
           {
 
-            List<String> issueKeys = extractIssueKeys(matcher, pattern,
+            List<String> issueKeys = extractIssueKeys(matcher.get(), pattern,
                                        c.getDescription());
 
             if (!issueKeys.isEmpty())

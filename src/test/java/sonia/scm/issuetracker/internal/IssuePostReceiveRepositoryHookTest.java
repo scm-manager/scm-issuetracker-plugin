@@ -32,14 +32,13 @@
 
 package sonia.scm.issuetracker.internal;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;
 import sonia.scm.event.ScmEventBus;
+import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.IssueRequest;
 import sonia.scm.issuetracker.IssueTracker;
@@ -57,6 +56,8 @@ import sonia.scm.repository.spi.HookChangesetProvider;
 import sonia.scm.repository.spi.HookChangesetResponse;
 import sonia.scm.repository.spi.HookContextProvider;
 
+import java.util.Optional;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -68,13 +69,8 @@ import static org.mockito.Mockito.when;
  *
  * @author Sebastian Sdorra
  */
-public class IssuePostReceiveRepositoryHookTest
-{
+public class IssuePostReceiveRepositoryHookTest {
 
-  /**
-   * Method description
-   *
-   */
   @Test
   @SuppressWarnings("squid:S2925") // use Thread.sleep() to wait for the eventBus post process
   public void testHandleEvent() throws InterruptedException {
@@ -90,7 +86,7 @@ public class IssuePostReceiveRepositoryHookTest
     c2.setId("2");
     c2.setDescription("description with issue key SCM-42");
 
-    IssueTracker jira = createIssueTracker("jira", new JiraIssueMatcher());
+    IssueTracker jira = createIssueTracker("jira", ExampleIssueMatcher.createJira());
     IssueTrackerManager manager = createIssueTrackerManager(jira);
 
     ScmEventBus.getInstance().register(new IssuePostReceiveRepositoryHook(manager));
@@ -100,8 +96,7 @@ public class IssuePostReceiveRepositoryHookTest
     verify(jira, times(1)).isHandled(repository, c1);
     verify(jira, times(1)).isHandled(repository, c2);
 
-    IssueRequest request = new IssueRequest(repository, c2,
-                             Lists.newArrayList("SCM-42"));
+    IssueRequest request = new IssueRequest(repository, c2, Lists.newArrayList("SCM-42"));
 
     verify(jira, times(1)).handleRequest(request);
     verify(jira, times(1)).handleRequest(any(IssueRequest.class));
@@ -110,49 +105,21 @@ public class IssuePostReceiveRepositoryHookTest
     verify(jira, times(1)).markAsHandled(repository, c2);
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param name
-   * @param matcher
-   *
-   * @return
-   */
-  private IssueTracker createIssueTracker(String name, IssueMatcher matcher)
-  {
+
+  private IssueTracker createIssueTracker(String name, IssueMatcher matcher) {
     IssueTracker tracker = mock(IssueTracker.class);
 
     when(tracker.getName()).thenReturn(name);
-    when(tracker.createMatcher(any(Repository.class))).thenReturn(matcher);
+    when(tracker.createMatcher(any(Repository.class))).thenReturn(Optional.of(matcher));
 
     return tracker;
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param trackers
-   *
-   * @return
-   */
-  private IssueTrackerManager createIssueTrackerManager(
-    IssueTracker... trackers)
-  {
+  private IssueTrackerManager createIssueTrackerManager(IssueTracker... trackers) {
     return new IssueTrackerManager(ImmutableSet.copyOf(trackers));
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param repository
-   *
-   * @return
-   */
-  private WrappedRepositoryHookEvent mockEvent(Repository repository, Changeset... changesets)
-  {
+  private WrappedRepositoryHookEvent mockEvent(Repository repository, Changeset... changesets) {
     RepositoryHookEvent wrapped = mock(RepositoryHookEvent.class);
 
     when(wrapped.getRepository()).thenReturn(repository);
