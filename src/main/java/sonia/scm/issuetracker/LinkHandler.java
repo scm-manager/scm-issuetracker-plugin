@@ -33,38 +33,32 @@
 
 package sonia.scm.issuetracker;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import com.google.inject.Inject;
+import sonia.scm.config.ScmConfiguration;
+import sonia.scm.repository.Changeset;
+import sonia.scm.repository.Repository;
 
 
 /**
  *
  * @author Sebastian Sdorra
  */
-public final class LinkHandler
-{
+public final class LinkHandler {
+
+  ScmConfiguration configuration;
 
   @Inject
-  public LinkHandler()
-  {
+  public LinkHandler(ScmConfiguration configuration) {
+    this.configuration = configuration;
   }
 
-  public String getDiffRestUrl(IssueRequest request)
-  {
-    // TODO get url
-    return "";
+  public String getDiffUrl(IssueRequest request) {
+    Changeset changeset = request.getChangeset();
+    return  getRepositoryUrl(request) + "/changeset/" + changeset.getId();
   }
 
-  public String getDiffUrl(IssueRequest request)
-  {
-    // TODO get url
-    return "";
-  }
-
-  public String getRepositoryUrl(IssueRequest request)
-  {
-    // TODO get url
-    return "";
+  public String getRepositoryUrl(IssueRequest request) {
+    Repository repo = request.getRepository();
+    return configuration.getBaseUrl() + "/repo/" + repo.getNamespaceAndName();
   }
 }

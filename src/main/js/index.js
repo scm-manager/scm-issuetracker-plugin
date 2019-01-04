@@ -2,44 +2,13 @@
 
 import React from "react";
 import { binder } from "@scm-manager/ui-extensions";
-import type { Changeset } from "@scm-manager/ui-types";
-import { escape } from "lodash";
+import { ChangesetDescription } from "./ChangesetDescription";
 
 
 type Issue = {
   name: string,
   href: string
 }
-
-const ChangesetDescription = ({ changeset, description }) => {
-
-  return (
-    <p>
-      {description.message.split("\n").map((item, key) => {
-        return renderSpan(changeset, key, item);
-      })}
-    </p>
-  );
-};
-
-const renderSpan = (changeset: Changeset, key: string, item: string) => {
-  if (changeset._links.issues) {
-    return (
-      <span
-        key={key}
-      >
-        {React.createElement(React.Fragment, {}, ...replaceKeysWithLinks(item, changeset._links.issues))}
-      </span>
-    );
-  }
-
-  return (
-    <span key={key}>
-      {item}
-      <br />
-    </span>
-  );
-};
 
 export const replaceKeysWithLinks = (line: string, issues: Issue[]) => {
   let resultArray = [];

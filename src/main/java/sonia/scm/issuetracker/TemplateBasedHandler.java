@@ -1,19 +1,19 @@
 /**
  * Copyright (c) 2010, Sebastian Sdorra
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
+ * this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  * 3. Neither the name of SCM-Manager; nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,15 +24,12 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ * <p>
  * http://bitbucket.org/sdorra/scm-manager
- *
  */
 
 
 package sonia.scm.issuetracker;
-
-//~--- non-JDK imports --------------------------------------------------------
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -55,180 +52,77 @@ import java.util.Map;
  *
  * @author Sebastian Sdorra
  */
-public abstract class TemplateBasedHandler
-{
+public abstract class TemplateBasedHandler {
 
-  /** Field description */
   private static final String ENV_CHANGESET = "changeset";
-
-  /** Field description */
-  private static final String ENV_DIFFRESTURL = "diffRestUrl";
-
-  /** Field description */
   private static final String ENV_DIFFURL = "diffUrl";
-
-  /** Field description */
   private static final String ENV_KEYWORD = "keyword";
-
-  /** Field description */
   private static final String ENV_REPOSITORY = "repository";
-
-  /** Field description */
   private static final String ENV_REPOSITORYURL = "repositoryUrl";
 
-  /**
-   * the logger for TemplateBasedHandler
-   */
-  private static final Logger logger =
-    LoggerFactory.getLogger(TemplateBasedHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(TemplateBasedHandler.class);
 
-  //~--- constructors ---------------------------------------------------------
+  protected final LinkHandler linkHandler;
+  private final TemplateEngineFactory templateEngineFactory;
 
-  /**
-   * Constructs ...
-   *
-   *
-   * @param templateEngineFactory
-   * @param linkHandler
-   */
   protected TemplateBasedHandler(TemplateEngineFactory templateEngineFactory,
-    LinkHandler linkHandler)
-  {
+                                 LinkHandler linkHandler) {
     this.templateEngineFactory = templateEngineFactory;
     this.linkHandler = linkHandler;
   }
 
-  //~--- methods --------------------------------------------------------------
 
-  /**
-   * Method description
-   *
-   *
-   * @param engine
-   *
-   * @return
-   *
-   * @throws IOException
-   */
-  protected abstract Template loadTemplate(TemplateEngine engine)
-    throws IOException;
+  protected abstract Template loadTemplate(TemplateEngine engine) throws IOException;
 
-  /**
-   * Method description
-   *
-   *
-   * @param request
-   *
-   * @return
-   */
-  protected String createComment(IssueRequest request)
-  {
+  protected String createComment(IssueRequest request) {
     return createComment(request, null);
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param request
-   * @param keyword
-   *
-   * @return
-   */
-  protected String createComment(IssueRequest request, String keyword)
-  {
+  protected String createComment(IssueRequest request, String keyword) {
     Object model = createModel(request, keyword);
 
     return createComment(model);
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param model
-   *
-   * @return
-   */
-  protected String createComment(Object model)
-  {
+  protected String createComment(Object model) {
     String comment = null;
     TemplateEngine engine = getTemplateEngine(templateEngineFactory);
 
-    if (engine != null)
-    {
-      try
-      {
+    if (engine != null) {
+      try {
         Template template = loadTemplate(engine);
 
-        if ((template != null) && (model != null))
-        {
+        if ((template != null) && (model != null)) {
           StringWriter writer = new StringWriter();
 
           template.execute(writer, model);
           comment = writer.toString();
-        }
-        else
-        {
+        } else {
           logger.warn("template or model is not available");
         }
-      }
-      catch (IOException ex)
-      {
+      } catch (IOException ex) {
         logger.error("could not load/render template", ex);
       }
-    }
-    else
-    {
+    } else {
       logger.warn("could not create template engine");
     }
 
     return comment;
   }
 
-  /**
-   * Method description
-   *
-   *
-   * @param request
-   * @param keyword
-   *
-   * @return
-   */
-  protected Object createModel(IssueRequest request, String keyword)
-  {
+  protected Object createModel(IssueRequest request, String keyword) {
     Map<String, Object> model = Maps.newHashMap();
 
     model.put(ENV_REPOSITORY, request.getRepository());
     model.put(ENV_CHANGESET, request.getChangeset());
     model.put(ENV_KEYWORD, Strings.nullToEmpty(keyword));
     model.put(ENV_DIFFURL, linkHandler.getDiffUrl(request));
-    model.put(ENV_DIFFRESTURL, linkHandler.getDiffRestUrl(request));
     model.put(ENV_REPOSITORYURL, linkHandler.getRepositoryUrl(request));
 
     return model;
   }
 
-  //~--- get methods ----------------------------------------------------------
-
-  /**
-   * Method description
-   *
-   *
-   * @param factory
-   *
-   * @return
-   */
-  protected TemplateEngine getTemplateEngine(TemplateEngineFactory factory)
-  {
+  protected TemplateEngine getTemplateEngine(TemplateEngineFactory factory) {
     return factory.getDefaultEngine();
   }
-
-  //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
-  protected final LinkHandler linkHandler;
-
-  /** Field description */
-  private final TemplateEngineFactory templateEngineFactory;
 }
