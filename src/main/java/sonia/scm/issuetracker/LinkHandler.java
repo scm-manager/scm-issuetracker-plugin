@@ -45,7 +45,7 @@ import sonia.scm.repository.Repository;
  */
 public final class LinkHandler {
 
-  ScmConfiguration configuration;
+  private ScmConfiguration configuration;
 
   @Inject
   public LinkHandler(ScmConfiguration configuration) {

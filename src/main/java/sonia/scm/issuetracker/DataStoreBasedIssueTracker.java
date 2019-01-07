@@ -45,15 +45,15 @@ import sonia.scm.store.DataStoreFactory;
  *
  * @author Sebastian Sdorra
  */
-public abstract class DataStoreBasedIssueTrack extends IssueTracker {
+public abstract class DataStoreBasedIssueTracker extends IssueTracker {
 
   private static final Logger logger =
-    LoggerFactory.getLogger(DataStoreBasedIssueTrack.class);
+    LoggerFactory.getLogger(DataStoreBasedIssueTracker.class);
 
 
   private DataStoreFactory storeFactory;
 
-  public DataStoreBasedIssueTrack(String name, DataStoreFactory storeFactory) {
+  public DataStoreBasedIssueTracker(String name, DataStoreFactory storeFactory) {
     super(name);
     this.storeFactory = storeFactory;
   }
@@ -72,7 +72,9 @@ public abstract class DataStoreBasedIssueTrack extends IssueTracker {
   }
 
   private DataStore<IssueData> createDatastore(Repository repository) {
-    return storeFactory.withType(IssueData.class).withName(super.getName()).forRepository(repository).build();
+    return storeFactory.withType(IssueData.class)
+      .withName(super.getName())
+      .forRepository(repository).build();
   }
 
   @Override
