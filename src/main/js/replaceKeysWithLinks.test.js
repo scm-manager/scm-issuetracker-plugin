@@ -1,5 +1,6 @@
-import { replaceKeysWithLinks } from "./index";
+// @flow
 import React from "react";
+import replaceKeysWithLinks from './replaceKeysWithLinks';
 
 describe("Issue tracker plugin", () => {
   it("should replace issue names with links", () => {

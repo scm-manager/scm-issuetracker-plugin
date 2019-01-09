@@ -1,17 +1,7 @@
 // @flow
 import React from "react";
 import type { Changeset } from "@scm-manager/ui-types";
-import { replaceKeysWithLinks } from "./index";
-
-export const ChangesetDescription = ({ changeset, description }) => {
-  return (
-    <p>
-      {description.message.split("\n").map((item, key) => {
-        return renderSpan(changeset, key, item);
-      })}
-    </p>
-  );
-};
+import replaceKeysWithLinks from "./replaceKeysWithLinks";
 
 const renderSpan = (changeset: Changeset, key: string, item: string) => {
   if (changeset._links.issues) {
@@ -31,5 +21,15 @@ const renderSpan = (changeset: Changeset, key: string, item: string) => {
       {item}
       <br />
     </span>
+  );
+};
+
+export default function ChangesetDescription({ changeset, description }) {
+  return (
+    <p>
+      {description.message.split("\n").map((item, key) => {
+        return renderSpan(changeset, key, item);
+      })}
+    </p>
   );
 };
