@@ -37,8 +37,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.junit.Test;
-import sonia.scm.event.ScmEventBus;
-import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.IssueRequest;
 import sonia.scm.issuetracker.IssueTracker;
@@ -48,7 +46,6 @@ import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryHookEvent;
 import sonia.scm.repository.RepositoryHookType;
 import sonia.scm.repository.RepositoryTestData;
-import sonia.scm.repository.WrappedRepositoryHookEvent;
 import sonia.scm.repository.api.HookContext;
 import sonia.scm.repository.api.HookContextFactory;
 import sonia.scm.repository.api.HookFeature;
@@ -58,12 +55,7 @@ import sonia.scm.repository.spi.HookContextProvider;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  *
@@ -72,8 +64,7 @@ import static org.mockito.Mockito.when;
 public class IssuePostReceiveRepositoryHookTest {
 
   @Test
-  @SuppressWarnings("squid:S2925") // use Thread.sleep() to wait for the eventBus post process
-  public void testHandleEvent() throws InterruptedException {
+  public void testHandleEvent() {
     Repository repository = RepositoryTestData.create42Puzzle();
 
     Changeset c1 = new Changeset();
@@ -89,10 +80,9 @@ public class IssuePostReceiveRepositoryHookTest {
     IssueTracker jira = createIssueTracker("jira", ExampleIssueMatcher.createJira());
     IssueTrackerManager manager = createIssueTrackerManager(jira);
 
-    ScmEventBus.getInstance().register(new IssuePostReceiveRepositoryHook(manager));
-    ScmEventBus.getInstance().post(mockEvent(repository, c1, c2));
+    IssuePostReceiveRepositoryHook issuePostReceiveRepositoryHook = new IssuePostReceiveRepositoryHook(manager);
+    issuePostReceiveRepositoryHook.handleEvent(mockEvent(repository, c1, c2));
 
-    Thread.sleep(3000);
     verify(jira, times(1)).isHandled(repository, c1);
     verify(jira, times(1)).isHandled(repository, c2);
 
@@ -119,7 +109,7 @@ public class IssuePostReceiveRepositoryHookTest {
     return new IssueTrackerManager(ImmutableSet.copyOf(trackers));
   }
 
-  private WrappedRepositoryHookEvent mockEvent(Repository repository, Changeset... changesets) {
+  private PostReceiveRepositoryHookEvent mockEvent(Repository repository, Changeset... changesets) {
     RepositoryHookEvent wrapped = mock(RepositoryHookEvent.class);
 
     when(wrapped.getRepository()).thenReturn(repository);
@@ -133,6 +123,6 @@ public class IssuePostReceiveRepositoryHookTest {
     when(hookContextProvider.getSupportedFeatures()).thenReturn(Sets.immutableEnumSet(HookFeature.CHANGESET_PROVIDER));
     when(wrapped.getType()).thenReturn(RepositoryHookType.POST_RECEIVE);
 
-    return PostReceiveRepositoryHookEvent.wrap(wrapped);
+    return new PostReceiveRepositoryHookEvent(wrapped);
   }
 }
