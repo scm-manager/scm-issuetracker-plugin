@@ -54,11 +54,11 @@ public final class LinkHandler {
 
   public String getDiffUrl(IssueRequest request) {
     Changeset changeset = request.getChangeset();
-    return  getRepositoryUrl(request) + "/changeset/" + changeset.getId();
+    return getRepositoryUrl(request) + "/changeset/" + changeset.getId();
   }
 
   public String getRepositoryUrl(IssueRequest request) {
     Repository repo = request.getRepository();
-    return configuration.getBaseUrl() + "/repo/" + repo.getNamespaceAndName();
+    return String.format("%s/repo/%s/%s", configuration.getBaseUrl(), repo.getNamespace(), repo.getName());
   }
 }
