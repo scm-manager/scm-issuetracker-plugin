@@ -4,38 +4,41 @@ import React from "react";
 import { binder } from "@scm-manager/ui-extensions";
 import { ChangesetDescription } from "./ChangesetDescription";
 
-
 type Issue = {
   name: string,
   href: string
-}
+};
 
-export const replaceKeysWithLinks = (line: string, issues: Issue[]) => {
+export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
+  if (!value) {
+    return;
+  }
+
   let resultArray = [];
   const issueMap = createIssueMap(issues);
 
+  const parts = value.split(" ");
 
-  const parts = line.split(" ");
   for (let i = 0; i < parts.length; i++) {
     let part = parts[i];
 
     const issue = issueMap[part];
     if (issue) {
-      resultArray.push(createLink(issue))
+      resultArray.push(createLink(issue));
     } else {
-      resultArray.push(part)
+      resultArray.push(part);
     }
     if (i < parts.length - 1) {
-      resultArray.push(" ")
+      resultArray.push(" ");
     }
   }
-    return resultArray;
+  return resultArray;
 };
 
 const createIssueMap = (issues: Issue[]) => {
   const issueMap = new Map();
   for (const issue of issues) {
-    issueMap[issue.name] = issue
+    issueMap[issue.name] = issue;
   }
   return issueMap;
 };
