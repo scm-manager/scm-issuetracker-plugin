@@ -41,7 +41,7 @@ const createIssueMap = (issues: Issue[]) => {
 };
 
 export const createLink = (issue: Issue) => {
-  return <a href={issue.href} target={"_blank"}>{issue.name}</a>;
+  return <a href={issue.href} target={"_blank"} key={issue.name}>{issue.name}</a>;
 };
 
 type Props = {

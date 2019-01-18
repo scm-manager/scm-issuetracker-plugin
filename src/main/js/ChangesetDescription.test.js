@@ -18,23 +18,23 @@ describe("Changeset description", () => {
     const expectedResult = [
       "get",
       " ",
-      <a href="http://foo.bar" target="_blank">
+      <a href="http://foo.bar" target="_blank" key="#123">
         #123
       </a>,
       " ",
       "blabla",
       " ",
-      <a href="http://h2g2.com" target="_blank">
+      <a href="http://h2g2.com" target="_blank" key="#456">
         #456
       </a>,
       " ",
       "foofoo",
       " ",
-      <a href="http://foo.bar" target="_blank">
+      <a href="http://foo.bar" target="_blank" key="#123">
         #123
       </a>,
       " ",
-      <a href="http://h2g2.com" target="_blank">
+      <a href="http://h2g2.com" target="_blank" key="#456">
         #456
       </a>
     ];
