@@ -67,7 +67,6 @@ describe("Changeset description", () => {
         />
       </div>
     );
-    console.log(rendered.html());
     for (let l of links) {
       expect(rendered.html()).toContain(l);
     }
