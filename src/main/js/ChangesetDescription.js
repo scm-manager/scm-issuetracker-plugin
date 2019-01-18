@@ -19,7 +19,7 @@ export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
   for (let i = 0; i < parts.length; i++) {
     let part = parts[i];
 
-    const issue = issueMap[part];
+    const issue = issueMap.get(part);
     if (issue) {
       resultArray.push(createLink(issue));
     } else {
@@ -35,7 +35,7 @@ export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
 const createIssueMap = (issues: Issue[]) => {
   const issueMap = new Map();
   for (const issue of issues) {
-    issueMap[issue.name] = issue;
+    issueMap.set(issue.name, issue);
   }
   return issueMap;
 };

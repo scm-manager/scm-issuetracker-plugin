@@ -11,11 +11,13 @@ describe("Changeset description", () => {
       { name: "#456", href: "http://h2g2.com" }
     ];
 
-    const line = "#123 blabla #456 foofoo #123 #456";
+    const line = "get #123 blabla #456 foofoo #123 #456";
 
     const result = replaceKeysWithLinks(line, issues);
 
     const expectedResult = [
+      "get",
+      " ",
       <a href="http://foo.bar" target="_blank">
         #123
       </a>,
@@ -61,11 +63,11 @@ describe("Changeset description", () => {
       <div>
         <ChangesetDescription
           changeset={changeset}
-          value={"#123 blabla #456 foo #789"}
+          value={"get #123 blabla #456 foo #789"}
         />
       </div>
     );
-
+    console.log(rendered.html());
     for (let l of links) {
       expect(rendered.html()).toContain(l);
     }
