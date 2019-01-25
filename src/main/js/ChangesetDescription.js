@@ -8,7 +8,7 @@ type Issue = {
 
 export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
   if (!value || !issues) {
-    return;
+    return value;
   }
 
   let resultArray = [];
