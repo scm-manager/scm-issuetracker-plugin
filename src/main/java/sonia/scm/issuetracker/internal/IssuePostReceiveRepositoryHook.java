@@ -38,6 +38,7 @@ import com.github.legman.Subscribe;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sonia.scm.EagerSingleton;
@@ -50,6 +51,7 @@ import sonia.scm.repository.PostReceiveRepositoryHookEvent;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.api.HookContext;
 import sonia.scm.repository.api.HookFeature;
+import sonia.scm.user.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -159,7 +161,8 @@ public class IssuePostReceiveRepositoryHook
   private void handleChangeset(IssueTracker tracker, Repository repository,
     Changeset changeset, List<String> issueKeys) 
   {
-    IssueRequest request = new IssueRequest(repository, changeset, issueKeys);
+    User committer = SecurityUtils.getSubject().getPrincipals().oneByType(User.class);
+    IssueRequest request = new IssueRequest(repository, changeset, issueKeys, committer);
     try {
       tracker.handleRequest(request);
       tracker.markAsHandled(repository, changeset);

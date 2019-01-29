@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.RepositoryTestData;
+import sonia.scm.user.User;
 
 import java.util.Collections;
 
@@ -34,7 +35,7 @@ class LinkHandlerTest {
     Changeset changeset = new Changeset();
     changeset.setId("1234567890");
 
-    IssueRequest issueRequest = new IssueRequest(RepositoryTestData.createHeartOfGold(), changeset, Collections.emptyList());
+    IssueRequest issueRequest = new IssueRequest(RepositoryTestData.createHeartOfGold(), changeset, Collections.emptyList(), new User());
     String url = linkHandler.getDiffUrl(issueRequest);
     assertThat(url).isEqualTo("https://hitchhiker.com/scm/repo/hitchhiker/HeartOfGold/changeset/1234567890");
 
@@ -45,7 +46,7 @@ class LinkHandlerTest {
     Changeset changeset = new Changeset();
     changeset.setId("1234567890");
 
-    IssueRequest issueRequest = new IssueRequest(RepositoryTestData.createHeartOfGold(), changeset, Collections.emptyList());
+    IssueRequest issueRequest = new IssueRequest(RepositoryTestData.createHeartOfGold(), changeset, Collections.emptyList(), new User());
     String url = linkHandler.getRepositoryUrl(issueRequest);
     assertThat(url).isEqualTo("https://hitchhiker.com/scm/repo/hitchhiker/HeartOfGold");
   }

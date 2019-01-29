@@ -32,10 +32,15 @@
 
 package sonia.scm.issuetracker.internal;
 
+import com.github.sdorra.shiro.ShiroRule;
+import com.github.sdorra.shiro.SubjectAware;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.Subject;
+import org.junit.Rule;
 import org.junit.Test;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.IssueRequest;
@@ -52,6 +57,7 @@ import sonia.scm.repository.api.HookFeature;
 import sonia.scm.repository.spi.HookChangesetProvider;
 import sonia.scm.repository.spi.HookChangesetResponse;
 import sonia.scm.repository.spi.HookContextProvider;
+import sonia.scm.user.User;
 
 import java.util.Optional;
 
@@ -61,10 +67,25 @@ import static org.mockito.Mockito.*;
  *
  * @author Sebastian Sdorra
  */
+@SubjectAware(
+  username = "trillian",
+  password = "secret",
+  configuration = "classpath:sonia/scm/issuetracker/shiro.ini"
+)
 public class IssuePostReceiveRepositoryHookTest {
+
+  @Rule
+  public final ShiroRule shiroRule = new ShiroRule();
 
   @Test
   public void testHandleEvent() {
+    Subject subject = mock(Subject.class);
+    PrincipalCollection principalCollection = mock(PrincipalCollection.class);
+    when(subject.getPrincipals()).thenReturn(principalCollection);
+    when(principalCollection.oneByType(User.class)).thenReturn(new User());
+    shiroRule.setSubject(subject);
+
+
     Repository repository = RepositoryTestData.create42Puzzle();
 
     Changeset c1 = new Changeset();
@@ -86,7 +107,7 @@ public class IssuePostReceiveRepositoryHookTest {
     verify(jira, times(1)).isHandled(repository, c1);
     verify(jira, times(1)).isHandled(repository, c2);
 
-    IssueRequest request = new IssueRequest(repository, c2, Lists.newArrayList("SCM-42"));
+    IssueRequest request = new IssueRequest(repository, c2, Lists.newArrayList("SCM-42"), new User());
 
     verify(jira, times(1)).handleRequest(request);
     verify(jira, times(1)).handleRequest(any(IssueRequest.class));
