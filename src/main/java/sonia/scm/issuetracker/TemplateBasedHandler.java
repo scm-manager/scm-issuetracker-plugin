@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import sonia.scm.template.Template;
 import sonia.scm.template.TemplateEngine;
 import sonia.scm.template.TemplateEngineFactory;
+import sonia.scm.user.User;
 
 //~--- JDK imports ------------------------------------------------------------
 
@@ -47,6 +48,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  *
@@ -56,6 +58,8 @@ public abstract class TemplateBasedHandler {
 
   private static final String ENV_CHANGESET = "changeset";
   private static final String ENV_DIFFURL = "diffUrl";
+  private static final String ENV_AUTHOR = "author";
+  private static final String ENV_COMMITTER = "committer";
   private static final String ENV_KEYWORD = "keyword";
   private static final String ENV_REPOSITORY = "repository";
   private static final String ENV_REPOSITORYURL = "repositoryUrl";
@@ -112,6 +116,13 @@ public abstract class TemplateBasedHandler {
 
   protected Object createModel(IssueRequest request, String keyword) {
     Map<String, Object> model = Maps.newHashMap();
+
+    String author = request.getChangeset().getAuthor().getName();
+    model.put(ENV_AUTHOR, author);
+    Optional<String> committer = request.getCommitter().map(User::getDisplayName);
+    if (committer.isPresent() && !author.equals(committer.get())) {
+      model.put(ENV_COMMITTER, committer.get());
+    }
 
     model.put(ENV_REPOSITORY, request.getRepository());
     model.put(ENV_CHANGESET, request.getChangeset());

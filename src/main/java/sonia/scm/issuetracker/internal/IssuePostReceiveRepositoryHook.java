@@ -58,6 +58,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+
 /**
  *
  * @author Sebastian Sdorra
@@ -161,13 +164,23 @@ public class IssuePostReceiveRepositoryHook
   private void handleChangeset(IssueTracker tracker, Repository repository,
     Changeset changeset, List<String> issueKeys) 
   {
-    User committer = SecurityUtils.getSubject().getPrincipals().oneByType(User.class);
+    Optional<User> committer = getCommitter();
     IssueRequest request = new IssueRequest(repository, changeset, issueKeys, committer);
     try {
       tracker.handleRequest(request);
       tracker.markAsHandled(repository, changeset);
     } catch ( Exception ex ){
       logger.error("error during issue request handling", ex);
+    }
+  }
+
+  private Optional<User> getCommitter() {
+    try {
+      return ofNullable(SecurityUtils.getSubject().getPrincipals().oneByType(User.class));
+    } catch (Exception e) {
+      // reading the logged in user should not let the comment fail
+      logger.info("could not read current user from SecurityUtils", e);
+      return empty();
     }
   }
 

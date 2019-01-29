@@ -38,7 +38,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,8 +59,7 @@ import sonia.scm.repository.spi.HookChangesetResponse;
 import sonia.scm.repository.spi.HookContextProvider;
 import sonia.scm.user.User;
 
-import java.util.Optional;
-
+import static java.util.Optional.of;
 import static org.mockito.Mockito.*;
 
 /**
@@ -77,14 +76,23 @@ public class IssuePostReceiveRepositoryHookTest {
   @Rule
   public final ShiroRule shiroRule = new ShiroRule();
 
+  private final IssueTracker jira = createIssueTracker("jira", ExampleIssueMatcher.createJira());
+  private final IssueTrackerManager manager = createIssueTrackerManager(jira);
+
   @Test
   public void testHandleEvent() {
     Subject subject = mock(Subject.class);
-    PrincipalCollection principalCollection = mock(PrincipalCollection.class);
+    SimplePrincipalCollection principalCollection = new SimplePrincipalCollection(){
+      @Override
+      public <T> T oneByType(Class<T> type) {
+        if (type.isAssignableFrom(User.class)) {
+          return (T) new User();
+        }
+        return super.oneByType(type);
+      }
+    };
     when(subject.getPrincipals()).thenReturn(principalCollection);
-    when(principalCollection.oneByType(User.class)).thenReturn(new User());
     shiroRule.setSubject(subject);
-
 
     Repository repository = RepositoryTestData.create42Puzzle();
 
@@ -98,8 +106,6 @@ public class IssuePostReceiveRepositoryHookTest {
     c2.setId("2");
     c2.setDescription("description with issue key SCM-42");
 
-    IssueTracker jira = createIssueTracker("jira", ExampleIssueMatcher.createJira());
-    IssueTrackerManager manager = createIssueTrackerManager(jira);
 
     IssuePostReceiveRepositoryHook issuePostReceiveRepositoryHook = new IssuePostReceiveRepositoryHook(manager);
     issuePostReceiveRepositoryHook.handleEvent(mockEvent(repository, c1, c2));
@@ -107,7 +113,7 @@ public class IssuePostReceiveRepositoryHookTest {
     verify(jira, times(1)).isHandled(repository, c1);
     verify(jira, times(1)).isHandled(repository, c2);
 
-    IssueRequest request = new IssueRequest(repository, c2, Lists.newArrayList("SCM-42"), new User());
+    IssueRequest request = new IssueRequest(repository, c2, Lists.newArrayList("SCM-42"), of(new User()));
 
     verify(jira, times(1)).handleRequest(request);
     verify(jira, times(1)).handleRequest(any(IssueRequest.class));
@@ -116,12 +122,28 @@ public class IssuePostReceiveRepositoryHookTest {
     verify(jira, times(1)).markAsHandled(repository, c2);
   }
 
+  @Test
+  @SuppressWarnings("squid:S2925")
+  public void shouldNotFailWhenSubjectIsMissing() throws InterruptedException {
+    Repository repository = RepositoryTestData.create42Puzzle();
+
+    Changeset c1 = new Changeset();
+
+    c1.setId("1");
+    c1.setDescription("description without issue key");
+
+    IssuePostReceiveRepositoryHook issuePostReceiveRepositoryHook = new IssuePostReceiveRepositoryHook(manager);
+    issuePostReceiveRepositoryHook.handleEvent(mockEvent(repository, c1));
+
+    Thread.sleep(500);
+    verify(jira, times(1)).isHandled(repository, c1);
+  }
 
   private IssueTracker createIssueTracker(String name, IssueMatcher matcher) {
     IssueTracker tracker = mock(IssueTracker.class);
 
     when(tracker.getName()).thenReturn(name);
-    when(tracker.createMatcher(any(Repository.class))).thenReturn(Optional.of(matcher));
+    when(tracker.createMatcher(any(Repository.class))).thenReturn(of(matcher));
 
     return tracker;
   }
