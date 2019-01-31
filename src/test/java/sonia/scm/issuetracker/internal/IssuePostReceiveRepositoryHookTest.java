@@ -123,7 +123,6 @@ public class IssuePostReceiveRepositoryHookTest {
   }
 
   @Test
-  @SuppressWarnings("squid:S2925")
   public void shouldNotFailWhenSubjectIsMissing() throws InterruptedException {
     Repository repository = RepositoryTestData.create42Puzzle();
 
@@ -135,7 +134,6 @@ public class IssuePostReceiveRepositoryHookTest {
     IssuePostReceiveRepositoryHook issuePostReceiveRepositoryHook = new IssuePostReceiveRepositoryHook(manager);
     issuePostReceiveRepositoryHook.handleEvent(mockEvent(repository, c1));
 
-    Thread.sleep(500);
     verify(jira, times(1)).isHandled(repository, c1);
   }
 
