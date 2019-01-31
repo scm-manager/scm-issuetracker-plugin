@@ -38,8 +38,10 @@ import lombok.Getter;
 import lombok.ToString;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
+import sonia.scm.user.User;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -55,4 +57,5 @@ public final class IssueRequest {
     private Repository repository;
     private Changeset changeset;
     private List<String> issueKeys;
+    private Optional<User> committer;
 }
