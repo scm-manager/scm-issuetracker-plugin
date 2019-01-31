@@ -139,7 +139,7 @@ public abstract class TemplateBasedHandler {
     model.put(ENV_DIFFURL, linkHandler.getDiffUrl(request));
     model.put(ENV_REPOSITORYURL, linkHandler.getRepositoryUrl(request));
     model.put(ENV_DESCRIPTION_LINE, splitIntoLines(request.getChangeset()));
-    model.put(ENV_BRANCHES, request.getChangeset().getBranches()); // TODO:  Mercurial has empty branches for "default" ...
+    model.put(ENV_BRANCHES, request.getChangeset().getBranches());
     model.put(ENV_BOOKMARKS, request.getChangeset().getProperty("hg.bookmarks"));
 
     return model;
