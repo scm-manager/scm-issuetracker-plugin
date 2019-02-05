@@ -2,9 +2,9 @@ package sonia.scm.issuetracker.internal;
 
 import com.google.common.base.Strings;
 import sonia.scm.api.v2.resources.Enrich;
-import sonia.scm.api.v2.resources.LinkAppender;
-import sonia.scm.api.v2.resources.LinkEnricher;
-import sonia.scm.api.v2.resources.LinkEnricherContext;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricher;
+import sonia.scm.api.v2.resources.HalEnricherContext;
 import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.IssueTracker;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 @Extension
 @Enrich(Changeset.class)
-public class ChangesetLinkEnricher implements LinkEnricher {
+public class ChangesetLinkEnricher implements HalEnricher {
 
   private IssueTrackerManager issueTrackerManager;
 
@@ -31,7 +31,7 @@ public class ChangesetLinkEnricher implements LinkEnricher {
   }
 
   @Override
-  public void enrich(LinkEnricherContext context, LinkAppender appender) {
+  public void enrich(HalEnricherContext context, HalAppender appender) {
 
     Repository repository = context.oneRequireByType(Repository.class);
     Changeset changeset = context.oneRequireByType(Changeset.class);
@@ -39,9 +39,9 @@ public class ChangesetLinkEnricher implements LinkEnricher {
     Map<String, String> map = createIssueLinkMap(repository, changeset);
 
     if (!map.isEmpty()) {
-      LinkAppender.LinkArrayBuilder linkArrayBuilder = appender.arrayBuilder("issues");
-      map.forEach(linkArrayBuilder::append);
-      linkArrayBuilder.build();
+      HalAppender.LinkArrayBuilder halArrayBuilder = appender.linkArrayBuilder("issues");
+      map.forEach(halArrayBuilder::append);
+      halArrayBuilder.build();
     }
   }
 
