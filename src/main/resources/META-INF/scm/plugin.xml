@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE plugin SYSTEM "https://download.scm-manager.org/dtd/plugin/2.0.0-01.dtd">
 <!--
 
@@ -32,11 +32,15 @@
 
 
 -->
+
 <plugin>
+
   <scm-version>2</scm-version>
+
   <information>
-    <author>Sebastian Sdorra</author>
-    <category>Library Plugin</category>
+    <displayName>Issue Tracker</displayName>
+    <author>Cloudogu GmbH</author>
+    <category>Library</category>
   </information>
 
   <conditions>
