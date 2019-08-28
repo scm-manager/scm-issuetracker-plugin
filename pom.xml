@@ -14,7 +14,7 @@
   <version>2.0.0-SNAPSHOT</version>
   <name>${project.artifactId}</name>
   <description>Helper classes for issuetracker plugins</description>
-  <url>https://bitbucket.org/sdorra/scm-issuetracker-plugin</url>
+  <url>https://github.com/scm-manager/scm-issuetracker-plugin</url>
 
   <dependencies>
 
