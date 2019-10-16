@@ -1,6 +1,7 @@
 // @flow
 import React from "react";
 import type { Changeset } from "@scm-manager/ui-types";
+
 type Issue = {
   name: string,
   href: string
@@ -49,11 +50,9 @@ type Props = {
   value: string
 };
 
-class ChangesetDescription extends React.Component<Props> {
+export default class ChangesetDescription extends React.Component<Props> {
   render() {
     const { value, changeset } = this.props;
     return <>{replaceKeysWithLinks(value, changeset._links.issues)}</>;
   }
 }
-
-export default ChangesetDescription;
