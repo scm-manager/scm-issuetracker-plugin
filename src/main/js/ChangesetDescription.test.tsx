@@ -1,14 +1,20 @@
 import React from "react";
 import { mount } from "enzyme";
-import "./testing/enzyme";
+import "@scm-manager/ui-tests/enzyme";
 import { replaceKeysWithLinks } from "./ChangesetDescription";
 import ChangesetDescription from "./ChangesetDescription";
 
 describe("Changeset description", () => {
   it("should replace issue names with links", () => {
     const issues = [
-      { name: "#123", href: "http://foo.bar" },
-      { name: "#456", href: "http://h2g2.com" }
+      {
+        name: "#123",
+        href: "http://foo.bar"
+      },
+      {
+        name: "#456",
+        href: "http://h2g2.com"
+      }
     ];
 
     const line = "get #123 blabla #456 foofoo #123 #456";
@@ -46,9 +52,18 @@ describe("Changeset description", () => {
     const changeset = {
       _links: {
         issues: [
-          { name: "#123", href: "http://abc.de" },
-          { name: "#456", href: "http://fgh.ij" },
-          { name: "#789", href: "http://klm.no" }
+          {
+            name: "#123",
+            href: "http://abc.de"
+          },
+          {
+            name: "#456",
+            href: "http://fgh.ij"
+          },
+          {
+            name: "#789",
+            href: "http://klm.no"
+          }
         ]
       }
     };
@@ -61,13 +76,10 @@ describe("Changeset description", () => {
 
     const rendered = mount(
       <div>
-        <ChangesetDescription
-          changeset={changeset}
-          value={"get #123 blabla #456 foo #789"}
-        />
+        <ChangesetDescription changeset={changeset} value={"get #123 blabla #456 foo #789"} />
       </div>
     );
-    for (let l of links) {
+    for (const l of links) {
       expect(rendered.html()).toContain(l);
     }
   });
@@ -80,10 +92,7 @@ describe("Changeset description", () => {
     };
     const rendered = mount(
       <div>
-        <ChangesetDescription
-          changeset={changeset}
-          value={"#123 blabla #456 foo #789"}
-        />
+        <ChangesetDescription changeset={changeset} value={"#123 blabla #456 foo #789"} />
       </div>
     );
 

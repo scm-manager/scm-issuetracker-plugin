@@ -1,10 +1,9 @@
-// @flow
 import React from "react";
-import type { Changeset } from "@scm-manager/ui-types";
+import { Changeset } from "@scm-manager/ui-types";
 
 type Issue = {
-  name: string,
-  href: string
+  name: string;
+  href: string;
 };
 
 export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
@@ -12,13 +11,13 @@ export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
     return value;
   }
 
-  let resultArray = [];
+  const resultArray = [];
   const issueMap = createIssueMap(issues);
 
   const parts = value.split(" ");
 
   for (let i = 0; i < parts.length; i++) {
-    let part = parts[i];
+    const part = parts[i];
 
     const issue = issueMap.get(part);
     if (issue) {
@@ -42,12 +41,16 @@ const createIssueMap = (issues: Issue[]) => {
 };
 
 export const createLink = (issue: Issue) => {
-  return <a href={issue.href} target={"_blank"} key={issue.name}>{issue.name}</a>;
+  return (
+    <a href={issue.href} target={"_blank"} key={issue.name}>
+      {issue.name}
+    </a>
+  );
 };
 
 type Props = {
-  changeset: Changeset,
-  value: string
+  changeset: Changeset;
+  value: string;
 };
 
 export default class ChangesetDescription extends React.Component<Props> {
