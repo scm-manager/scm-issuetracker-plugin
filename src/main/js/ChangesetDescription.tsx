@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 import React from "react";
-import { Link } from "react-router-dom";
 import { Changeset } from "@scm-manager/ui-types";
-import { Replacement } from "@scm-manager/ui-components";
+import { Replacement, ExternalLink } from "@scm-manager/ui-components";
 
 type Issue = {
   name: string;
@@ -44,9 +43,9 @@ const ChangesetDescription: (changeset: Changeset, value: string) => Replacement
     replacements.push({
       textToReplace: issue.name,
       replacement: (
-        <Link key={issue.name} target={"_blank"} to={issue.href}>
+        <ExternalLink key={issue.name} to={issue.href}>
           {issue.name}
-        </Link>
+        </ExternalLink>
       )
     });
   }
