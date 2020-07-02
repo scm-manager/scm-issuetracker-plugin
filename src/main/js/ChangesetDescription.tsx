@@ -23,62 +23,33 @@
  */
 import React from "react";
 import { Changeset } from "@scm-manager/ui-types";
+import { Replacement, ExternalLink } from "@scm-manager/ui-components";
 
 type Issue = {
   name: string;
   href: string;
 };
 
-export const replaceKeysWithLinks = (value: string, issues: Issue[]) => {
+const ChangesetDescription: (changeset: Changeset, value: string) => Replacement[] = (
+  changeset: Changeset,
+  value: string
+) => {
+  const issues = changeset._links.issues as Issue[];
   if (!value || !issues) {
-    return value;
+    return [];
   }
-
-  const resultArray = [];
-  const issueMap = createIssueMap(issues);
-
-  const parts = value.split(" ");
-
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-
-    const issue = issueMap.get(part);
-    if (issue) {
-      resultArray.push(createLink(issue));
-    } else {
-      resultArray.push(part);
-    }
-    if (i < parts.length - 1) {
-      resultArray.push(" ");
-    }
-  }
-  return resultArray;
-};
-
-const createIssueMap = (issues: Issue[]) => {
-  const issueMap = new Map();
+  const replacements: Replacement[] = [];
   for (const issue of issues) {
-    issueMap.set(issue.name, issue);
+    replacements.push({
+      textToReplace: issue.name,
+      replacement: (
+        <ExternalLink key={issue.name} to={issue.href}>
+          {issue.name}
+        </ExternalLink>
+      )
+    });
   }
-  return issueMap;
+  return replacements;
 };
 
-export const createLink = (issue: Issue) => {
-  return (
-    <a href={issue.href} target={"_blank"} key={issue.name}>
-      {issue.name}
-    </a>
-  );
-};
-
-type Props = {
-  changeset: Changeset;
-  value: string;
-};
-
-export default class ChangesetDescription extends React.Component<Props> {
-  render() {
-    const { value, changeset } = this.props;
-    return <>{replaceKeysWithLinks(value, changeset._links.issues)}</>;
-  }
-}
+export default ChangesetDescription;
