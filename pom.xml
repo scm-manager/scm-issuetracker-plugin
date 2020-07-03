@@ -35,7 +35,7 @@
 
   <artifactId>scm-issuetracker-plugin</artifactId>
   <packaging>smp</packaging>
-  <version>2.1.0-SNAPSHOT</version>
+  <version>2.0.1</version>
   <name>${project.artifactId}</name>
   <description>Helper classes for issuetracker plugins</description>
   <url>https://github.com/scm-manager/scm-issuetracker-plugin</url>
