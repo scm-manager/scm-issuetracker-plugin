@@ -30,6 +30,11 @@ type IssueLinkMarkdownPluginOptions = { halObject: HalRepresentation };
 export default function IssueLinkMarkdownPlugin({ halObject }: IssueLinkMarkdownPluginOptions): AstPlugin {
   const issues = halObject._links.issues as Issue[];
 
+  if (!Array.isArray(issues) || issues.length === 0) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    return () => {};
+  }
+
   return ({ visit }) => {
     visit("text", (node, index, parent) => {
       if (!parent || parent.type === "link" || !node.value) {

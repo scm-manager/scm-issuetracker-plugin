@@ -39,7 +39,7 @@ describe("IssueLinkMarkdownPlugin tests", () => {
     };
     const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
     const node = { value: content };
-    const parent = { type: "text", children: [] as Node[] };
+    const parent = { type: "text", children: [node] };
     const plugin = IssueLinkMarkdownPlugin({ halObject });
     const visit = (type, visitor) => visitor(node, 0, parent);
     plugin({ visit });
@@ -69,5 +69,18 @@ describe("IssueLinkMarkdownPlugin tests", () => {
       },
       { type: "text", value: "s." }
     ]);
+  });
+  it("should do nothing if there are no issue links", () => {
+    const halObject = {
+      _links: {}
+    };
+    const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
+    const node = { value: content };
+    const parent = { type: "text", children: [node] };
+    const plugin = IssueLinkMarkdownPlugin({ halObject });
+    const visit = (type, visitor) => visitor(node, 0, parent);
+    plugin({ visit });
+    expect(parent.children).toHaveLength(1);
+    expect(parent.children[0]).toEqual(node);
   });
 });
