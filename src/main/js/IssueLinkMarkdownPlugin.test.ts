@@ -26,26 +26,32 @@ import { Issue } from "./types";
 import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
 
 describe("IssueLinkMarkdownPlugin tests", () => {
-  it("should replace issue ids with links", () => {
+  const test = (issues, content, expectedChildren) => {
     const halObject = {
-      _links: {
-        issues: [
-          {
-            name: "#22",
-            href: "https://hitchhiker.com/issues/22"
-          }
-        ] as Issue[]
-      }
+      _links: {}
     };
-    const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
+    if (issues) {
+      halObject._links.issues = issues;
+    }
     const node = { value: content };
     const parent = { type: "text", children: [node] };
     const plugin = IssueLinkMarkdownPlugin({ halObject });
     const visit = (type, visitor) => visitor(node, 0, parent);
     plugin({ visit });
     expect(parent.children).toHaveLength(1);
-    expect(parent.children[0].children).toHaveLength(7);
-    expect(parent.children[0].children).toEqual([
+    expect(parent.children[0].children).toHaveLength(expectedChildren.length);
+    expect(parent.children[0].children).toEqual(expectedChildren);
+  };
+
+  it("should replace issue ids with links #1", () => {
+    const issues = [
+      {
+        name: "#22",
+        href: "https://hitchhiker.com/issues/22"
+      }
+    ] as Issue[];
+    const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
+    const expected = [
       { type: "text", value: "I am a description of issue " },
       {
         children: [{ type: "text", value: "#22" }],
@@ -68,11 +74,81 @@ describe("IssueLinkMarkdownPlugin tests", () => {
         url: "https://hitchhiker.com/issues/22"
       },
       { type: "text", value: "s." }
-    ]);
+    ];
+    test(issues, content, expected);
+  });
+  it("should replace issue ids with links #2", () => {
+    const issues = [
+      {
+        name: "#1",
+        href: "https://hitchhiker.com/issues/1"
+      },
+      {
+        name: "#2",
+        href: "https://hitchhiker.com/issues/2"
+      }
+    ] as Issue[];
+    const content = "Something on #1 should work as described in #2 but it does not look as int ";
+    const expected = [
+      { type: "text", value: "Something on " },
+      {
+        children: [{ type: "text", value: "#1" }],
+        title: "#1",
+        type: "link",
+        url: "https://hitchhiker.com/issues/1"
+      },
+      { type: "text", value: " should work as described in " },
+      {
+        children: [{ type: "text", value: "#2" }],
+        title: "#2",
+        type: "link",
+        url: "https://hitchhiker.com/issues/2"
+      },
+      { type: "text", value: " but it does not look as int " }
+    ];
+    test(issues, content, expected);
+  });
+  it("should replace issue ids with links #3", () => {
+    const issues = [
+      {
+        name: "#1",
+        href: "https://hitchhiker.com/issues/1"
+      },
+      {
+        name: "#2",
+        href: "https://hitchhiker.com/issues/2"
+      }
+    ] as Issue[];
+    const content = "More luck in a heading? #1";
+    const expected = [
+      { type: "text", value: "More luck in a heading? " },
+      {
+        children: [{ type: "text", value: "#1" }],
+        title: "#1",
+        type: "link",
+        url: "https://hitchhiker.com/issues/1"
+      }
+    ];
+    test(issues, content, expected);
   });
   it("should do nothing if there are no issue links", () => {
     const halObject = {
       _links: {}
+    };
+    const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
+    const node = { value: content };
+    const parent = { type: "text", children: [node] };
+    const plugin = IssueLinkMarkdownPlugin({ halObject });
+    const visit = (type, visitor) => visitor(node, 0, parent);
+    plugin({ visit });
+    expect(parent.children).toHaveLength(1);
+    expect(parent.children[0]).toEqual(node);
+  });
+  it("should do nothing if the issue links are empty", () => {
+    const halObject = {
+      _links: {
+        issues: []
+      }
     };
     const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
     const node = { value: content };

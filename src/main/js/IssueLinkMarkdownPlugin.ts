@@ -67,19 +67,19 @@ export default function IssueLinkMarkdownPlugin({ halObject }: IssueLinkMarkdown
 
             nodeText = nodeText.substring(idx + name.length);
           }
-
-          if (nodeText.length > 0) {
-            children.push({
-              type: "text",
-              value: nodeText
-            });
-          }
-
-          parent.children[index] = {
-            type: "text",
-            children
-          };
         }
+
+        if (nodeText.length > 0) {
+          children.push({
+            type: "text",
+            value: nodeText
+          });
+        }
+
+        parent.children[index] = {
+          type: "text",
+          children
+        };
       }
     });
   };
