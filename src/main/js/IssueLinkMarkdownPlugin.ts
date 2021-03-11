@@ -56,7 +56,7 @@ export default function IssueLinkMarkdownPlugin({ halObject }: IssueLinkMarkdown
             children.push({
               type: "link",
               url: href,
-              title: name,
+              title: `Issue ${name}`,
               children: [
                 {
                   type: "text",
