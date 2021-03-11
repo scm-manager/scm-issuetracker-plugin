@@ -21,26 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package sonia.scm.issuetracker.internal;
 
+import com.cloudogu.scm.review.comment.service.Comment;
+import com.google.common.base.Strings;
 import sonia.scm.api.v2.resources.Enrich;
 import sonia.scm.api.v2.resources.HalAppender;
 import sonia.scm.api.v2.resources.HalEnricher;
 import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.issuetracker.IssueLinkFactory;
+import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.IssueTracker;
 import sonia.scm.plugin.Extension;
-import sonia.scm.repository.Changeset;
+import sonia.scm.plugin.Requires;
 import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Extension
-@Enrich(Changeset.class)
-public class ChangesetLinkEnricher implements HalEnricher {
+@Enrich(Comment.class)
+@Requires("scm-review-plugin")
+public class PullRequestCommentLinkEnricher implements HalEnricher {
 
-  private IssueTrackerManager issueTrackerManager;
+  private final IssueTrackerManager issueTrackerManager;
 
   @Inject
-  public ChangesetLinkEnricher(IssueTrackerManager issueTrackerManager) {
+  public PullRequestCommentLinkEnricher(IssueTrackerManager issueTrackerManager) {
     this.issueTrackerManager = issueTrackerManager;
   }
 
@@ -48,10 +60,9 @@ public class ChangesetLinkEnricher implements HalEnricher {
   public void enrich(HalEnricherContext context, HalAppender appender) {
 
     Repository repository = context.oneRequireByType(Repository.class);
-    Changeset changeset = context.oneRequireByType(Changeset.class);
+    Comment comment = context.oneRequireByType(Comment.class);
 
-    IssueLinkEnricherUtils.enrich(issueTrackerManager, repository, appender, changeset.getDescription());
+    IssueLinkEnricherUtils.enrich(issueTrackerManager, repository, appender, comment.getComment());
   }
 
 }
-

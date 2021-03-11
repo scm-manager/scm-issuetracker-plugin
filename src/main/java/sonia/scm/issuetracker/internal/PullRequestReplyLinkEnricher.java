@@ -21,10 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import ChangesetDescription from "./ChangesetDescription";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
 
-binder.bind("changeset.description.tokens", ChangesetDescription);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+package sonia.scm.issuetracker.internal;
+
+import com.cloudogu.scm.review.comment.service.Reply;
+import sonia.scm.api.v2.resources.Enrich;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricher;
+import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.plugin.Extension;
+import sonia.scm.plugin.Requires;
+import sonia.scm.repository.Repository;
+
+import javax.inject.Inject;
+
+@Extension
+@Enrich(Reply.class)
+@Requires("scm-review-plugin")
+public class PullRequestReplyLinkEnricher implements HalEnricher {
+
+  private final IssueTrackerManager issueTrackerManager;
+
+  @Inject
+  public PullRequestReplyLinkEnricher(IssueTrackerManager issueTrackerManager) {
+    this.issueTrackerManager = issueTrackerManager;
+  }
+
+  @Override
+  public void enrich(HalEnricherContext context, HalAppender appender) {
+
+    Repository repository = context.oneRequireByType(Repository.class);
+    Reply reply = context.oneRequireByType(Reply.class);
+
+    IssueLinkEnricherUtils.enrich(issueTrackerManager, repository, appender, reply.getComment());
+  }
+
+}

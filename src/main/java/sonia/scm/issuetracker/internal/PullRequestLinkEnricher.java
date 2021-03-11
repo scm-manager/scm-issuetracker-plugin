@@ -21,10 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import ChangesetDescription from "./ChangesetDescription";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
 
-binder.bind("changeset.description.tokens", ChangesetDescription);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+package sonia.scm.issuetracker.internal;
+
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
+import sonia.scm.api.v2.resources.Enrich;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricher;
+import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.plugin.Extension;
+import sonia.scm.plugin.Requires;
+import sonia.scm.repository.Repository;
+
+import javax.inject.Inject;
+
+@Extension
+@Enrich(PullRequest.class)
+@Requires("scm-review-plugin")
+public class PullRequestLinkEnricher implements HalEnricher {
+
+  private final IssueTrackerManager issueTrackerManager;
+
+  @Inject
+  public PullRequestLinkEnricher(IssueTrackerManager issueTrackerManager) {
+    this.issueTrackerManager = issueTrackerManager;
+  }
+
+  @Override
+  public void enrich(HalEnricherContext context, HalAppender appender) {
+
+    Repository repository = context.oneRequireByType(Repository.class);
+    PullRequest pullRequest = context.oneRequireByType(PullRequest.class);
+
+    IssueLinkEnricherUtils.enrich(issueTrackerManager, repository, appender, pullRequest.getDescription());
+
+  }
+}

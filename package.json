@@ -5,9 +5,9 @@
   "license" : "MIT",
   "main" : "./src/main/js/index.ts",
   "scripts" : {
-    "build" : "ui-scripts plugin",
-    "watch" : "ui-scripts plugin-watch",
-    "postinstall" : "ui-plugins postinstall"
+    "build" : "plugin-scripts build",
+    "watch" : "plugin-scripts watch",
+    "postinstall" : "plugin-scripts postinstall"
   },
   "dependencies" : {
     "@scm-manager/ui-plugins" : "2.2.0",
@@ -35,12 +35,13 @@
   "devDependencies" : {
     "@scm-manager/babel-preset" : "^2.1.0",
     "@scm-manager/eslint-config" : "^2.1.0",
-    "@scm-manager/jest-preset" : "^2.1.0",
+    "@scm-manager/jest-preset" : "^2.12.3",
     "@scm-manager/prettier-config" : "^2.1.0",
     "@scm-manager/tsconfig" : "^2.1.0",
     "@scm-manager/ui-scripts" : "^2.1.0",
     "@scm-manager/ui-tests" : "^2.1.0",
     "@scm-manager/ui-types" : "^2.1.0",
+    "@scm-manager/ui-api" : "^2.14.1",
     "@types/classnames" : "^2.2.9",
     "@types/enzyme" : "^3.10.3",
     "@types/fetch-mock" : "^7.3.1",
@@ -51,6 +52,7 @@
     "@types/react-redux" : "5.0.7",
     "@types/react-router-dom" : "^5.1.0",
     "@types/styled-components" : "^5.1.0",
-    "jest" : "^24.9.0"
+    "jest" : "^24.9.0",
+    "@scm-manager/plugin-scripts" : "1.0.2"
   }
 }
