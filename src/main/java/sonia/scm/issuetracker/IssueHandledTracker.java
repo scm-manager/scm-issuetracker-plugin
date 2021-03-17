@@ -23,6 +23,20 @@
  */
 package sonia.scm.issuetracker;
 
-public interface PullRequestCommentHandler extends AutoCloseable {
-  void comment(String issueId);
+import sonia.scm.repository.Changeset;
+import sonia.scm.repository.Repository;
+
+public interface IssueHandledTracker {
+
+  void markAsHandled(Repository repository, Changeset changeset);
+
+  boolean isHandled(Repository repository, Changeset changeset);
+
+  default void markAsHandled(Repository repository, PullRequestIssueTracker.PullRequestIssueRequestData data) {
+    markAsHandled(repository, String.format("PR/%s/%s", data.getPullRequestId(), data.getRequestType()));
+  }
+
+  void markAsHandled(Repository repository, String dataKey);
+
+  void removeHandledMarks(Repository repository);
 }

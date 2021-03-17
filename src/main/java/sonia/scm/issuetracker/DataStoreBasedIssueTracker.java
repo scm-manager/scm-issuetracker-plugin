@@ -24,77 +24,31 @@
 package sonia.scm.issuetracker;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import sonia.scm.issuetracker.internal.IssueData;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
-import sonia.scm.store.DataStore;
 import sonia.scm.store.DataStoreFactory;
 
-/**
- *
- * @author Sebastian Sdorra
- */
 public abstract class DataStoreBasedIssueTracker extends IssueTracker {
 
-  private static final Logger logger =
-    LoggerFactory.getLogger(DataStoreBasedIssueTracker.class);
+  private final IssueHandledTracker issueHandledTracker;
 
-
-  private DataStoreFactory storeFactory;
-
-  public DataStoreBasedIssueTracker(String name, DataStoreFactory storeFactory) {
+  protected DataStoreBasedIssueTracker(String name, DataStoreFactory storeFactory) {
     super(name);
-    this.storeFactory = storeFactory;
+    issueHandledTracker = new DataStoreBasedIssueHandledTracker(name, storeFactory);
   }
 
   @Override
   public void markAsHandled(Repository repository, Changeset changeset) {
-    logger.debug("mark changeset {} of repository {} as handled",
-      changeset.getId(), repository.getId());
-
-    IssueData data = getData(repository);
-
-    data.getHandledChangesets().add(changeset.getId());
-    DataStore<IssueData> dataStore = createDatastore(repository);
-
-    dataStore.put(repository.getId(), data);
-  }
-
-  private DataStore<IssueData> createDatastore(Repository repository) {
-    return storeFactory.withType(IssueData.class)
-      .withName(super.getName())
-      .forRepository(repository).build();
+    issueHandledTracker.markAsHandled(repository, changeset);
   }
 
   @Override
   public void removeHandledMarks(Repository repository) {
-    logger.info("remove handled marks from store {}", repository.getId());
-    DataStore<IssueData> dataStore = createDatastore(repository);
-    dataStore.remove(repository.getId());
+    issueHandledTracker.removeHandledMarks(repository);
   }
 
   @Override
   public boolean isHandled(Repository repository, Changeset changeset) {
-    IssueData data = getData(repository);
-
-    return data.getHandledChangesets().contains(changeset.getId());
+    return issueHandledTracker.isHandled(repository, changeset);
   }
-
-
-  private IssueData getData(Repository repository) {
-    DataStore<IssueData> dataStore = createDatastore(repository);
-
-    IssueData data = dataStore.get(repository.getId());
-
-    if (data == null) {
-      data = new IssueData();
-    }
-
-    return data;
-  }
-
-
 }

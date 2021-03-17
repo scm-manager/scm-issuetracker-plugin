@@ -23,19 +23,17 @@
  */
 package sonia.scm.issuetracker.internal;
 
-//~--- non-JDK imports --------------------------------------------------------
-
-import com.google.common.collect.Sets;
-
-//~--- JDK imports ------------------------------------------------------------
-
-import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  *
@@ -43,29 +41,42 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "issue-data")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class IssueData
-{
+public class IssueData {
 
-  /**
-   * Method description
-   *
-   *
-   * @return
-   */
-  public Set<String> getHandledChangesets()
-  {
-    if (handledChangesets == null)
-    {
-      handledChangesets = Sets.newHashSet();
-    }
-
-    return handledChangesets;
-  }
-
-  //~--- fields ---------------------------------------------------------------
-
-  /** Field description */
   @XmlElement(name = "changeset")
   @XmlElementWrapper(name = "handled-changesets")
   private Set<String> handledChangesets;
+  @XmlElement(name = "key")
+  @XmlElementWrapper(name = "handled-keys")
+  private Set<String> handledKeys;
+
+  public Set<String> getHandledChangesets() {
+    if (handledChangesets == null)
+      handledChangesets = Collections.emptySet();
+
+    return unmodifiableSet(handledChangesets);
+  }
+
+  public void addHandledChangeset(String changesetId) {
+    if (handledChangesets == null) {
+      handledChangesets = new HashSet<>(asList(changesetId));
+    } else {
+      this.handledChangesets.add(changesetId);
+    }
+  }
+
+  public Set<String> getHandledKeys() {
+    if (handledKeys == null)
+      return Collections.emptySet();
+
+    return unmodifiableSet(handledKeys);
+  }
+
+  public void addHandledKey(String key) {
+    if (handledKeys == null) {
+      handledKeys = new HashSet<>(asList(key));
+    } else {
+      this.handledKeys.add(key);
+    }
+  }
 }
