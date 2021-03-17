@@ -132,7 +132,7 @@ public abstract class IssueTracker
 
         if (!Strings.isNullOrEmpty(keyword))
         {
-          closeIssues(changeStateHandler, request, keyword);
+          changeStateOfIssues(changeStateHandler, request, keyword);
         }
         else
         {
@@ -201,8 +201,8 @@ public abstract class IssueTracker
    * @param request
    * @param keyword
    */
-  private void closeIssues(ChangeStateHandler csh, IssueRequest request,
-    String keyword)
+  private void changeStateOfIssues(ChangeStateHandler csh, IssueRequest request,
+                                   String keyword)
   {
     for (String issueKey : request.getIssueKeys())
     {
