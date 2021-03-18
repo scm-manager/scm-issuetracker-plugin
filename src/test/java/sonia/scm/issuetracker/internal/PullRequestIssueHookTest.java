@@ -131,7 +131,7 @@ class PullRequestIssueHookTest {
 
   private boolean assertCorrectRequestData(PullRequestIssueTracker.PullRequestIssueRequestData data, String modified) {
     assertThat(data.getRequestType()).isEqualTo(modified);
-    assertThat(data.getPullRequestId()).isEqualTo("1");
+    assertThat(data.getPullRequest().getId()).isEqualTo("1");
     assertThat(data.getIssueIds()).contains("#42");
     return true;
   }

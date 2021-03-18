@@ -23,6 +23,7 @@
  */
 package sonia.scm.issuetracker;
 
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.when;
 class PullRequestIssueTrackerTest {
 
   private static final Repository REPOSITORY = RepositoryTestData.createHeartOfGold();
+  private static final PullRequest PULL_REQUEST = new PullRequest("42", "feature", "develop");
 
   @Mock
   private PullRequestCommentHandler commentHandler;
@@ -63,7 +65,7 @@ class PullRequestIssueTrackerTest {
 
     @Test
     void shouldCreateCommentForRequest() {
-      PullRequestIssueRequestData requestData = new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY, "42", asList("#23", "#1337"));
+      PullRequestIssueRequestData requestData = new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY, PULL_REQUEST, asList("#23", "#1337"));
 
       issueTracker.handlePullRequestRequest(requestData);
 
@@ -83,7 +85,7 @@ class PullRequestIssueTrackerTest {
 
     @Test
     void shouldDoNothingForRequest() {
-      PullRequestIssueRequestData requestData = new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY,"42", asList("#23", "#1337"));
+      PullRequestIssueRequestData requestData = new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY,PULL_REQUEST, asList("#23", "#1337"));
 
       issueTracker.handlePullRequestRequest(requestData);
 

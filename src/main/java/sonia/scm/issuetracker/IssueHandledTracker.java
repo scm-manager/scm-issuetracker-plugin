@@ -33,7 +33,7 @@ public interface IssueHandledTracker {
   boolean isHandled(Repository repository, Changeset changeset);
 
   default void markAsHandled(Repository repository, PullRequestIssueTracker.PullRequestIssueRequestData data) {
-    markAsHandled(repository, String.format("PR/%s/%s", data.getPullRequestId(), data.getRequestType()));
+    markAsHandled(repository, String.format("PR/%s/%s", data.getPullRequest().getId(), data.getRequestType()));
   }
 
   void markAsHandled(Repository repository, String dataKey);

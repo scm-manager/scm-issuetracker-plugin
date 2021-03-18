@@ -76,7 +76,7 @@ public class PullRequestIssueHook {
       Collection<String> issueKeys = new HashSet<>();
       issueKeys.addAll(titleIssueKeys);
       issueKeys.addAll(descriptionIssueKeys);
-      tracker.handlePullRequestRequest(new PullRequestIssueTracker.PullRequestIssueRequestData(eventType, repository, pullRequest.getId(), issueKeys));
+      tracker.handlePullRequestRequest(new PullRequestIssueTracker.PullRequestIssueRequestData(eventType, repository, pullRequest, issueKeys));
     }
   }
 

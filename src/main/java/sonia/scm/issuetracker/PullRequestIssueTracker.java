@@ -23,6 +23,7 @@
  */
 package sonia.scm.issuetracker;
 
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,7 @@ public class PullRequestIssueTracker {
   public static class PullRequestIssueRequestData {
     String requestType;
     Repository repository;
-    String pullRequestId;
+    PullRequest pullRequest;
     Collection<String> issueIds;
   }
 }
