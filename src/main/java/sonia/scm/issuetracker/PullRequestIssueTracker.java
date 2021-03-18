@@ -55,7 +55,7 @@ public class PullRequestIssueTracker {
   public void handlePullRequestRequest(PullRequestIssueRequestData data) {
     try (PullRequestCommentHandler commentHandler = commentHandlerProvider.getCommentHandler(data)) {
       if (commentHandler != null) {
-        data.getIssueIds().forEach(commentHandler::comment);
+        data.getIssueIds().forEach(commentHandler::mentionedInTitleOrDescription);
         markAsHandled(data);
       }
     } catch (Exception e) {

@@ -68,8 +68,8 @@ class PullRequestIssueTrackerTest {
       issueTracker.handlePullRequestRequest(requestData);
 
       verify(commentHandlerProvider).getCommentHandler(requestData);
-      verify(commentHandler).comment("#23");
-      verify(commentHandler).comment("#1337");
+      verify(commentHandler).mentionedInTitleOrDescription("#23");
+      verify(commentHandler).mentionedInTitleOrDescription("#1337");
     }
   }
 
@@ -88,7 +88,7 @@ class PullRequestIssueTrackerTest {
       issueTracker.handlePullRequestRequest(requestData);
 
       verify(commentHandlerProvider).getCommentHandler(requestData);
-      verify(commentHandler, never()).comment(any());
+      verify(commentHandler, never()).mentionedInTitleOrDescription(any());
     }
   }
 }

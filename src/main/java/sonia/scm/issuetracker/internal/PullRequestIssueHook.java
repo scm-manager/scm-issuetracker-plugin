@@ -31,8 +31,10 @@ import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.PullRequestIssueTracker;
 import sonia.scm.plugin.Extension;
+import sonia.scm.plugin.Requires;
 import sonia.scm.repository.Repository;
 
+import javax.inject.Inject;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -42,10 +44,12 @@ import java.util.regex.Pattern;
 
 @Extension
 @EagerSingleton
+@Requires("scm-review-plugin")
 public class PullRequestIssueHook {
 
   private final Set<PullRequestIssueTracker> issueTracker;
 
+  @Inject
   public PullRequestIssueHook(Set<PullRequestIssueTracker> issueTracker) {
     this.issueTracker = issueTracker;
   }

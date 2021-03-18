@@ -24,5 +24,8 @@
 package sonia.scm.issuetracker;
 
 public interface PullRequestCommentHandler extends AutoCloseable {
-  void comment(String issueId);
+  default void mentionedInTitleOrDescription(String issueId) {}
+
+  @Override
+  default void close() {}
 }
