@@ -23,15 +23,12 @@
  */
 package sonia.scm.issuetracker;
 
-import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sonia.scm.plugin.ExtensionPoint;
 import sonia.scm.repository.Repository;
 import sonia.scm.store.DataStoreFactory;
 
-import java.util.Collection;
 import java.util.Optional;
 
 @ExtensionPoint(multi = true)
@@ -72,11 +69,4 @@ public class PullRequestIssueTracker {
     return matcherProvider.createMatcher(repository);
   }
 
-  @Value
-  public static class PullRequestIssueRequestData {
-    String requestType;
-    Repository repository;
-    PullRequest pullRequest;
-    Collection<String> issueIds;
-  }
 }

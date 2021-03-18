@@ -21,42 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package sonia.scm.issuetracker;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import com.google.inject.Inject;
-import sonia.scm.config.ScmConfiguration;
-import sonia.scm.repository.Changeset;
+import lombok.Value;
 import sonia.scm.repository.Repository;
+import sonia.scm.user.DisplayUser;
 
+import java.util.Collection;
 
-/**
- *
- * @author Sebastian Sdorra
- */
-public final class LinkHandler {
-
-  private ScmConfiguration configuration;
-
-  @Inject
-  public LinkHandler(ScmConfiguration configuration) {
-    this.configuration = configuration;
-  }
-
-  public String getDiffUrl(IssueRequest request) {
-    Changeset changeset = request.getChangeset();
-    return getRepositoryUrl(request) + "/changeset/" + changeset.getId();
-  }
-
-  public String getRepositoryUrl(IssueRequest request) {
-    Repository repo = request.getRepository();
-    return String.format("%s/repo/%s/%s", configuration.getBaseUrl(), repo.getNamespace(), repo.getName());
-  }
-
-  public String getPullRequestUrl(PullRequestIssueRequestData request) {
-    Repository repo = request.getRepository();
-    PullRequest pr = request.getPullRequest();
-    return String.format("%s/repo/%s/%s/pull-request/%s", configuration.getBaseUrl(), repo.getNamespace(), repo.getName(), pr.getId());
-  }
+@Value
+public class PullRequestIssueRequestData {
+  String requestType;
+  Repository repository;
+  PullRequest pullRequest;
+  DisplayUser author;
+  Collection<String> issueIds;
 }

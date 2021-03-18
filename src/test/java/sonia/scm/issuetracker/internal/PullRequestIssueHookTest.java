@@ -31,19 +31,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.PullRequestIssueRequestData;
 import sonia.scm.issuetracker.PullRequestIssueTracker;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
+import sonia.scm.user.DisplayUser;
+import sonia.scm.user.User;
+import sonia.scm.user.UserDisplayManager;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static sonia.scm.HandlerEventType.CREATE;
@@ -56,19 +59,26 @@ class PullRequestIssueHookTest {
   private PullRequestIssueTracker issueTracker;
   @Mock
   private IssueMatcher matcher;
+  @Mock
+  private UserDisplayManager userDisplayManager;
 
   private PullRequestIssueHook hook;
 
   @BeforeEach
   void mockMatcher() {
-    when(issueTracker.createMatcher(any())).thenReturn(Optional.of(matcher));
+    when(issueTracker.createMatcher(any())).thenReturn(of(matcher));
     when(matcher.getKeyPattern()).thenReturn(Pattern.compile("(#\\d+)"));
     when(matcher.getKey(any())).thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0, Matcher.class).group(0));
   }
 
   @BeforeEach
   void initHook() {
-    hook = new PullRequestIssueHook(Collections.singleton(issueTracker));
+    hook = new PullRequestIssueHook(Collections.singleton(issueTracker), userDisplayManager);
+  }
+
+  @BeforeEach
+  void mockUser() {
+    when(userDisplayManager.get("dent")).thenReturn(of(DisplayUser.from(new User("dent", "Arthur Dent", null))));
   }
 
   @Test
@@ -129,10 +139,11 @@ class PullRequestIssueHookTest {
     ));
   }
 
-  private boolean assertCorrectRequestData(PullRequestIssueTracker.PullRequestIssueRequestData data, String modified) {
+  private boolean assertCorrectRequestData(PullRequestIssueRequestData data, String modified) {
     assertThat(data.getRequestType()).isEqualTo(modified);
     assertThat(data.getPullRequest().getId()).isEqualTo("1");
     assertThat(data.getIssueIds()).contains("#42");
+    assertThat(data.getAuthor().getDisplayName()).isEqualTo("Arthur Dent");
     return true;
   }
 
@@ -140,6 +151,7 @@ class PullRequestIssueHookTest {
     PullRequest pullRequest = new PullRequest("1", "feature", "main");
     pullRequest.setTitle(title);
     pullRequest.setDescription(description);
+    pullRequest.setAuthor("dent");
     return pullRequest;
   }
 }

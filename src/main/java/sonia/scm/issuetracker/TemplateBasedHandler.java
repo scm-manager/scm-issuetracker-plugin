@@ -24,7 +24,6 @@
 package sonia.scm.issuetracker;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,6 +61,9 @@ public abstract class TemplateBasedHandler {
   private static final String ENV_BRANCHES = "branches";
   private static final String ENV_BOOKMARKS = "bookmarks";
   private static final String ENV_DESCRIPTION_LINE = "descriptionLine";
+
+  private static final String ENV_PULL_REQUEST = "pullRequest";
+  private static final String ENV_PULL_REQUEST_URL = "pullRequestUrl";
 
   private static final String UNIX_LINE_SEPARATOR = "\n";
   private static final String LINE_SEPARATOR = System.getProperty("line.separator", UNIX_LINE_SEPARATOR);
@@ -87,6 +90,10 @@ public abstract class TemplateBasedHandler {
     Object model = createModel(request, keyword);
 
     return createComment(model);
+  }
+
+  protected String createComment(PullRequestIssueRequestData request) {
+    return createComment(createModel(request));
   }
 
   protected String createComment(Object model) {
@@ -116,7 +123,7 @@ public abstract class TemplateBasedHandler {
   }
 
   protected Map<String, Object> createModel(IssueRequest request, String keyword) {
-    Map<String, Object> model = Maps.newHashMap();
+    Map<String, Object> model = new HashMap<>();
 
     String author = request.getChangeset().getAuthor().getName();
     model.put(ENV_AUTHOR, author);
@@ -133,6 +140,18 @@ public abstract class TemplateBasedHandler {
     model.put(ENV_DESCRIPTION_LINE, splitIntoLines(request.getChangeset()));
     model.put(ENV_BRANCHES, request.getChangeset().getBranches());
     model.put(ENV_BOOKMARKS, request.getChangeset().getProperty("hg.bookmarks"));
+
+    return model;
+  }
+
+  protected Map<String, Object> createModel(PullRequestIssueRequestData request) {
+    Map<String, Object> model = new HashMap<>();
+
+    model.put(ENV_REPOSITORY, request.getRepository());
+    model.put(ENV_PULL_REQUEST, request.getPullRequest());
+    model.put(ENV_KEYWORD, request.getRequestType());
+    model.put(ENV_AUTHOR, request.getAuthor() == null ? null : request.getAuthor().getDisplayName());
+    model.put(ENV_PULL_REQUEST_URL, linkHandler.getPullRequestUrl(request));
 
     return model;
   }

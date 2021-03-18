@@ -31,9 +31,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sonia.scm.issuetracker.PullRequestIssueTracker.PullRequestIssueRequestData;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
+import sonia.scm.user.DisplayUser;
+import sonia.scm.user.User;
 
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +47,7 @@ class PullRequestIssueTrackerTest {
 
   private static final Repository REPOSITORY = RepositoryTestData.createHeartOfGold();
   private static final PullRequest PULL_REQUEST = new PullRequest("42", "feature", "develop");
+  private static final DisplayUser DISPLAY_USER = DisplayUser.from(new User("dent", "Arthur Dent", ""));
 
   @Mock
   private PullRequestCommentHandler commentHandler;
@@ -65,7 +67,7 @@ class PullRequestIssueTrackerTest {
 
     @Test
     void shouldCreateCommentForRequest() {
-      PullRequestIssueRequestData requestData = new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY, PULL_REQUEST, asList("#23", "#1337"));
+      PullRequestIssueRequestData requestData = createRequestData();
 
       issueTracker.handlePullRequestRequest(requestData);
 
@@ -85,12 +87,17 @@ class PullRequestIssueTrackerTest {
 
     @Test
     void shouldDoNothingForRequest() {
-      PullRequestIssueRequestData requestData = new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY,PULL_REQUEST, asList("#23", "#1337"));
+      PullRequestIssueRequestData requestData = createRequestData();
 
       issueTracker.handlePullRequestRequest(requestData);
 
       verify(commentHandlerProvider).getCommentHandler(requestData);
       verify(commentHandler, never()).mentionedInTitleOrDescription(any());
     }
+
+  }
+
+  private PullRequestIssueRequestData createRequestData() {
+    return new PullRequestIssueRequestData("pullRequestCreated", REPOSITORY, PULL_REQUEST, DISPLAY_USER, asList("#23", "#1337"));
   }
 }

@@ -29,10 +29,13 @@ import com.github.legman.Subscribe;
 import com.google.common.base.Strings;
 import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.PullRequestIssueRequestData;
 import sonia.scm.issuetracker.PullRequestIssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
 import sonia.scm.repository.Repository;
+import sonia.scm.user.DisplayUser;
+import sonia.scm.user.UserDisplayManager;
 
 import javax.inject.Inject;
 import java.util.Collection;
@@ -48,10 +51,12 @@ import java.util.regex.Pattern;
 public class PullRequestIssueHook {
 
   private final Set<PullRequestIssueTracker> issueTracker;
+  private final UserDisplayManager userDisplayManager;
 
   @Inject
-  public PullRequestIssueHook(Set<PullRequestIssueTracker> issueTracker) {
+  public PullRequestIssueHook(Set<PullRequestIssueTracker> issueTracker, UserDisplayManager userDisplayManager) {
     this.issueTracker = issueTracker;
+    this.userDisplayManager = userDisplayManager;
   }
 
   @Subscribe
@@ -76,8 +81,13 @@ public class PullRequestIssueHook {
       Collection<String> issueKeys = new HashSet<>();
       issueKeys.addAll(titleIssueKeys);
       issueKeys.addAll(descriptionIssueKeys);
-      tracker.handlePullRequestRequest(new PullRequestIssueTracker.PullRequestIssueRequestData(eventType, repository, pullRequest, issueKeys));
+      tracker.handlePullRequestRequest(createRequestData(eventType, repository, pullRequest, issueKeys));
     }
+  }
+
+  private PullRequestIssueRequestData createRequestData(String eventType, Repository repository, PullRequest pullRequest, Collection<String> issueKeys) {
+    DisplayUser author = userDisplayManager.get(pullRequest.getAuthor()).orElse(null);
+    return new PullRequestIssueRequestData(eventType, repository, pullRequest, author, issueKeys);
   }
 
   private Collection<String> extractIssueKeys(IssueMatcher matcher, Pattern p, String text) {
