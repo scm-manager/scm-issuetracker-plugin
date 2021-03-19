@@ -29,9 +29,10 @@ import sonia.scm.plugin.ExtensionPoint;
 import sonia.scm.repository.Repository;
 import sonia.scm.store.DataStoreFactory;
 
+import javax.inject.Inject;
 import java.util.Optional;
 
-@ExtensionPoint(multi = true)
+@ExtensionPoint
 public class PullRequestIssueTracker {
 
   private static final Logger LOG = LoggerFactory.getLogger(PullRequestIssueTracker.class);
@@ -40,6 +41,7 @@ public class PullRequestIssueTracker {
   private final MatcherProvider matcherProvider;
   private final IssueHandledTracker issueHandledTracker;
 
+  @Inject
   protected PullRequestIssueTracker(PullRequestCommentHandlerProvider commentHandlerProvider, MatcherProvider matcherProvider, String name, DataStoreFactory dataStoreFactory) {
     this(commentHandlerProvider, matcherProvider, new DataStoreBasedIssueHandledTracker(name, dataStoreFactory));
   }
@@ -58,6 +60,17 @@ public class PullRequestIssueTracker {
       }
     } catch (Exception e) {
       LOG.error("Error commenting issues for pull request", e);
+    }
+  }
+
+  public void handlePullRequestCommentRequest(PullRequestCommentIssueRequestData data) {
+    try (PullRequestCommentHandler commentHandler = commentHandlerProvider.getCommentHandler(data)) {
+      if (commentHandler != null) {
+        data.getIssueIds().forEach(commentHandler::mentionedInComment);
+        markAsHandled(data);
+      }
+    } catch (Exception e) {
+      LOG.error("Error commenting issues for pull request comment", e);
     }
   }
 

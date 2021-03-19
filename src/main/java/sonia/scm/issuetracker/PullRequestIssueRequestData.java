@@ -24,13 +24,19 @@
 package sonia.scm.issuetracker;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import sonia.scm.repository.Repository;
 import sonia.scm.user.DisplayUser;
 
 import java.util.Collection;
 
-@Value
+@AllArgsConstructor
+@ToString
+@EqualsAndHashCode
+@Getter
 public class PullRequestIssueRequestData {
   String requestType;
   Repository repository;

@@ -21,15 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package sonia.scm.issuetracker.internal;
 
+import com.cloudogu.scm.review.comment.service.BasicComment;
+import com.cloudogu.scm.review.comment.service.BasicCommentEvent;
+import com.cloudogu.scm.review.comment.service.Comment;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
 import com.github.legman.Subscribe;
-import com.google.common.base.Strings;
 import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.IssueMatcher;
-import sonia.scm.issuetracker.PullRequestIssueRequestData;
+import sonia.scm.issuetracker.PullRequestCommentIssueRequestData;
 import sonia.scm.issuetracker.PullRequestIssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
@@ -39,54 +41,60 @@ import sonia.scm.user.UserDisplayManager;
 
 import javax.inject.Inject;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Extension
 @EagerSingleton
 @Requires("scm-review-plugin")
-public class PullRequestIssueHook {
+public class PullRequestCommentIssueHook {
 
   private final Set<PullRequestIssueTracker> issueTracker;
   private final UserDisplayManager userDisplayManager;
 
   @Inject
-  public PullRequestIssueHook(Set<PullRequestIssueTracker> issueTracker, UserDisplayManager userDisplayManager) {
+  public PullRequestCommentIssueHook(Set<PullRequestIssueTracker> issueTracker, UserDisplayManager userDisplayManager) {
     this.issueTracker = issueTracker;
     this.userDisplayManager = userDisplayManager;
   }
 
   @Subscribe
-  public void handle(PullRequestEvent event) {
+  public void handle(BasicCommentEvent event) {
     switch (event.getEventType()) {
       case MODIFY:
-        issueTracker.forEach(tracker -> handleEvent("modified", tracker, event.getRepository(), event.getPullRequest()));
+        if (shouldHandleModifyEvent(event)) {
+          issueTracker.forEach(tracker -> handleEvent("modified", tracker, event.getRepository(), event.getPullRequest(), event.getItem()));
+        }
         break;
       case CREATE:
-        issueTracker.forEach(tracker -> handleEvent("created", tracker, event.getRepository(), event.getPullRequest()));
+        issueTracker.forEach(tracker -> handleEvent("created", tracker, event.getRepository(), event.getPullRequest(), event.getItem()));
         break;
       default:
         // nothing to do
     }
   }
 
-  private void handleEvent(String eventType, PullRequestIssueTracker tracker, Repository repository, PullRequest pullRequest) {
+  private boolean shouldHandleModifyEvent(BasicCommentEvent event) {
+    BasicComment comment = event.getItem();
+    // Should not handle event if task type was changed, e.g.: COMMENT -> Task_TODO
+    if (comment instanceof Comment) {
+      return ((Comment) comment).getType().equals(((Comment) event.getOldItem()).getType());
+    }
+
+    return true;
+  }
+
+  private void handleEvent(String eventType, PullRequestIssueTracker tracker, Repository repository, PullRequest pullRequest, BasicComment comment) {
     Optional<IssueMatcher> matcher = tracker.createMatcher(repository);
     if (matcher.isPresent()) {
-      Collection<String> titleIssueKeys = IssueKeys.extract(matcher.get(), matcher.get().getKeyPattern(), pullRequest.getTitle());
-      Collection<String> descriptionIssueKeys = IssueKeys.extract(matcher.get(), matcher.get().getKeyPattern(), pullRequest.getDescription());
-      Collection<String> issueKeys = new HashSet<>();
-      issueKeys.addAll(titleIssueKeys);
-      issueKeys.addAll(descriptionIssueKeys);
-      tracker.handlePullRequestRequest(createRequestData(eventType, repository, pullRequest, issueKeys));
+      Collection<String> commentIssueKeys = IssueKeys.extract(matcher.get(), matcher.get().getKeyPattern(), comment.getComment());
+      tracker.handlePullRequestCommentRequest(createRequestData(eventType, repository, pullRequest, comment, commentIssueKeys));
     }
   }
 
-  private PullRequestIssueRequestData createRequestData(String eventType, Repository repository, PullRequest pullRequest, Collection<String> issueKeys) {
+  private PullRequestCommentIssueRequestData createRequestData(String eventType, Repository repository, PullRequest pullRequest, BasicComment comment, Collection<String> issueKeys) {
     DisplayUser author = userDisplayManager.get(pullRequest.getAuthor()).orElse(null);
-    return new PullRequestIssueRequestData(eventType, repository, pullRequest, author, issueKeys);
+    return new PullRequestCommentIssueRequestData(eventType, repository, pullRequest, author, issueKeys, comment);
   }
 }
+

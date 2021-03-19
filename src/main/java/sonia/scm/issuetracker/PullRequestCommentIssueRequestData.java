@@ -23,11 +23,20 @@
  */
 package sonia.scm.issuetracker;
 
-public interface PullRequestCommentHandler extends AutoCloseable {
-  default void mentionedInTitleOrDescription(String issueId) {}
+import com.cloudogu.scm.review.comment.service.BasicComment;
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
+import lombok.Getter;
+import sonia.scm.repository.Repository;
+import sonia.scm.user.DisplayUser;
 
-  default void mentionedInComment(String issueId) {}
+import java.util.Collection;
 
-  @Override
-  default void close() {}
+@Getter
+public class PullRequestCommentIssueRequestData extends PullRequestIssueRequestData {
+  private final BasicComment comment;
+
+  public PullRequestCommentIssueRequestData(String requestType, Repository repository, PullRequest pullRequest, DisplayUser author, Collection<String> issueIds, BasicComment comment) {
+    super(requestType, repository, pullRequest, author, issueIds);
+    this.comment = comment;
+  }
 }

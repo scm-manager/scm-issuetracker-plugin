@@ -21,13 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+package sonia.scm.issuetracker.internal;
 
-public interface PullRequestCommentHandler extends AutoCloseable {
-  default void mentionedInTitleOrDescription(String issueId) {}
+import com.google.common.base.Strings;
+import sonia.scm.issuetracker.IssueMatcher;
 
-  default void mentionedInComment(String issueId) {}
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-  @Override
-  default void close() {}
+public class IssueKeys {
+
+  static Collection<String> extract(IssueMatcher matcher, Pattern pattern, String text) {
+    Collection<String> keys = new HashSet<>();
+
+    if (!Strings.isNullOrEmpty(text)) {
+      Matcher m = pattern.matcher(text);
+
+      while (m.find()) {
+        keys.add(matcher.getKey(m));
+      }
+    }
+
+    return keys;
+  }
 }
