@@ -23,6 +23,8 @@
  */
 package sonia.scm.issuetracker;
 
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
+import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sonia.scm.plugin.ExtensionPoint;
@@ -30,6 +32,7 @@ import sonia.scm.repository.Repository;
 import sonia.scm.store.DataStoreFactory;
 
 import javax.inject.Inject;
+import java.util.Map;
 import java.util.Optional;
 
 @ExtensionPoint
@@ -40,16 +43,18 @@ public class PullRequestIssueTracker {
   private final PullRequestCommentHandlerProvider commentHandlerProvider;
   private final MatcherProvider matcherProvider;
   private final IssueHandledTracker issueHandledTracker;
+  private final ChangeStateHandler changeStateHandler;
 
   @Inject
-  protected PullRequestIssueTracker(PullRequestCommentHandlerProvider commentHandlerProvider, MatcherProvider matcherProvider, String name, DataStoreFactory dataStoreFactory) {
-    this(commentHandlerProvider, matcherProvider, new DataStoreBasedIssueHandledTracker(name, dataStoreFactory));
+  protected PullRequestIssueTracker(PullRequestCommentHandlerProvider commentHandlerProvider, MatcherProvider matcherProvider, ChangeStateHandler changeStateHandler, String name, DataStoreFactory dataStoreFactory) {
+    this(commentHandlerProvider, matcherProvider, changeStateHandler, new DataStoreBasedIssueHandledTracker(name, dataStoreFactory));
   }
 
-  protected PullRequestIssueTracker(PullRequestCommentHandlerProvider commentHandlerProvider, MatcherProvider matcherProvider, IssueHandledTracker issueHandledTracker) {
+  protected PullRequestIssueTracker(PullRequestCommentHandlerProvider commentHandlerProvider, MatcherProvider matcherProvider, ChangeStateHandler changeStateHandler, IssueHandledTracker issueHandledTracker) {
     this.commentHandlerProvider = commentHandlerProvider;
     this.matcherProvider = matcherProvider;
     this.issueHandledTracker = issueHandledTracker;
+    this.changeStateHandler = changeStateHandler;
   }
 
   public void handlePullRequestRequest(PullRequestIssueRequestData data) {
@@ -60,6 +65,14 @@ public class PullRequestIssueTracker {
       }
     } catch (Exception e) {
       LOG.error("Error commenting issues for pull request", e);
+    }
+  }
+
+  public void handleMergePullRequestMergeRequest(PullRequestMergeRequestData data) {
+    if (changeStateHandler != null) {
+      for (Map.Entry<String, String> stateTransition : data.stateTransitions.entrySet()) {
+        changeStateHandler.changeState(stateTransition.getKey(), stateTransition.getValue());
+      }
     }
   }
 
@@ -82,4 +95,14 @@ public class PullRequestIssueTracker {
     return matcherProvider.createMatcher(repository);
   }
 
+  public Iterable<String> getIssueStateKeywords() {
+    return changeStateHandler.getKeywords();
+  }
+
+  @Value
+  public static class PullRequestMergeRequestData {
+    Repository repository;
+    PullRequest pullRequest;
+    Map<String, String> stateTransitions;
+  }
 }
