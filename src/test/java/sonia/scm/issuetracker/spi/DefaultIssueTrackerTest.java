@@ -45,31 +45,33 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static sonia.scm.issuetracker.IssueReferencingObjects.ref;
+import static sonia.scm.issuetracker.IssueReferencingObjects.content;
 
 class DefaultIssueTrackerTest {
 
   @Nested
+  @ExtendWith(MockitoExtension.class)
   class Reading {
 
     private IssueTracker tracker;
+    private TemplateCommentRendererFactory rendererFactory;
 
     @BeforeEach
     void setUpIssueTracker() {
-      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory())
+      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
         .build();
     }
 
     @Test
     void shouldCollectIssues() {
-      Map<String, String> issues = tracker.findIssues(ref("Fix #42"));
+      Map<String, String> issues = tracker.findIssues(content("Fix #42"));
       assertThat(issues).containsEntry("#42", "https://redmine.hitchhiker.com/issues/42");
     }
 
     @Test
     void shouldCollectMultipleIssues() {
-      Map<String, String> issues = tracker.findIssues(ref("This should fix #42 and #21", "Perhaps #3 too"));
+      Map<String, String> issues = tracker.findIssues(content("This should fix #42 and #21", "Perhaps #3 too"));
       assertThat(issues)
         .containsEntry("#42", "https://redmine.hitchhiker.com/issues/42")
         .containsEntry("#21", "https://redmine.hitchhiker.com/issues/21")
@@ -83,6 +85,9 @@ class DefaultIssueTrackerTest {
   class Commenting {
 
     @Mock
+    private TemplateCommentRendererFactory rendererFactory;
+
+    @Mock
     private CommentRenderer renderer;
 
     @Mock
@@ -92,15 +97,16 @@ class DefaultIssueTrackerTest {
 
     @BeforeEach
     void setUpIssueTracker() {
-      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory())
+      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
-        .commenting(RepositoryTestData.createHeartOfGold(), renderer, commentator)
+        .commenting(RepositoryTestData.createHeartOfGold(), commentator)
+        .renderer(renderer)
         .build();
     }
 
     @Test
     void shouldSendComment() throws IOException {
-      IssueReferencingObject ref = ref("Comment #42");
+      IssueReferencingObject ref = content("Comment #42");
       when(renderer.reference(ref)).thenReturn("Awesome");
 
       tracker.process(ref);
@@ -110,7 +116,7 @@ class DefaultIssueTrackerTest {
 
     @Test
     void shouldSendCommentsOnlyOnce() throws IOException {
-      IssueReferencingObject ref = ref("Comment #21");
+      IssueReferencingObject ref = content("Comment #21");
       when(renderer.reference(ref)).thenReturn("Incredible");
 
       tracker.process(ref);
@@ -122,7 +128,7 @@ class DefaultIssueTrackerTest {
 
     @Test
     void shouldSendMultipleComments() throws IOException {
-      IssueReferencingObject ref = ref("Comment #21", "And comment #42");
+      IssueReferencingObject ref = content("Comment #21", "And comment #42");
       when(renderer.reference(ref)).thenReturn("Super");
 
       tracker.process(ref);
@@ -137,6 +143,9 @@ class DefaultIssueTrackerTest {
   class StateChange {
 
     @Mock
+    private TemplateCommentRendererFactory rendererFactory;
+
+    @Mock
     private CommentRenderer renderer;
 
     @Mock
@@ -149,16 +158,17 @@ class DefaultIssueTrackerTest {
 
     @BeforeEach
     void setUpIssueTracker() {
-      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory())
+      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
-        .commenting(RepositoryTestData.createHeartOfGold(), renderer, commentator)
+        .commenting(RepositoryTestData.createHeartOfGold(), commentator)
+        .renderer(renderer)
         .stateChanging(stateChanger)
         .build();
     }
 
     @Test
     void shouldChangeState() throws IOException {
-      IssueReferencingObject ref = ref("Fixes #42");
+      IssueReferencingObject ref = content("Fixes #42");
       when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
       when(renderer.stateChange(ref, "fixes")).thenReturn("Incredible");
 
@@ -169,7 +179,7 @@ class DefaultIssueTrackerTest {
 
     @Test
     void shouldChangeStateOnlyOnce() throws IOException {
-      IssueReferencingObject ref = ref("Resolves #21");
+      IssueReferencingObject ref = content("Resolves #21");
       when(stateChanger.getKeyWords("#21")).thenReturn(Collections.singleton("resolves"));
       when(renderer.stateChange(ref, "resolves")).thenReturn("Awesome");
 
@@ -183,7 +193,7 @@ class DefaultIssueTrackerTest {
 
     @Test
     void shouldChangeStateOfMultipleIssues() throws IOException {
-      IssueReferencingObject ref = ref("Resolves #21 and #12", "Fixes #42 too");
+      IssueReferencingObject ref = content("Resolves #21 and #12", "Fixes #42 too");
       Set<String> keywords = ImmutableSet.of("resolves", "fixes");
       when(stateChanger.getKeyWords("#21")).thenReturn(keywords);
       when(stateChanger.getKeyWords("#12")).thenReturn(keywords);
@@ -202,7 +212,7 @@ class DefaultIssueTrackerTest {
 
     @Test
     void shouldAddCommentWithoutKeyWord() throws IOException {
-      IssueReferencingObject ref = ref("#42 is great");
+      IssueReferencingObject ref = content("#42 is great");
       when(stateChanger.getKeyWords("#42")).thenReturn(ImmutableSet.of("resolves", "fixes"));
       when(renderer.reference(ref)).thenReturn("Great");
 

@@ -41,10 +41,12 @@ import javax.inject.Inject;
 public class IssueTrackerBuilder {
 
   private final DataStoreFactory dataStoreFactory;
+  private final TemplateCommentRendererFactory templateCommentRendererFactory;
 
   @Inject
-  public IssueTrackerBuilder(DataStoreFactory dataStoreFactory) {
+  public IssueTrackerBuilder(DataStoreFactory dataStoreFactory, TemplateCommentRendererFactory templateCommentRendererFactory) {
     this.dataStoreFactory = dataStoreFactory;
+    this.templateCommentRendererFactory = templateCommentRendererFactory;
   }
 
   /**
@@ -57,18 +59,20 @@ public class IssueTrackerBuilder {
    * @return read stage
    */
   public ReadStage start(String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
-    return new ReadStage(dataStoreFactory, name, matcher, linkFactory);
+    return new ReadStage(dataStoreFactory, templateCommentRendererFactory, name, matcher, linkFactory);
   }
 
   public static class ReadStage {
 
     private final DataStoreFactory dataStoreFactory;
+    private final TemplateCommentRendererFactory templateCommentRendererFactory;
     private final String name;
     private final IssueMatcher matcher;
     private final IssueLinkFactory linkFactory;
 
-    private ReadStage(DataStoreFactory dataStoreFactory, String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
+    private ReadStage(DataStoreFactory dataStoreFactory, TemplateCommentRendererFactory templateCommentRendererFactory, String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
       this.dataStoreFactory = dataStoreFactory;
+      this.templateCommentRendererFactory = templateCommentRendererFactory;
       this.name = name;
       this.matcher = matcher;
       this.linkFactory = linkFactory;
@@ -87,14 +91,13 @@ public class IssueTrackerBuilder {
      * Allow commenting of issues.
      *
      * @param repository repository which is target
-     * @param renderer comment renderer
      * @param commentator commentator which is able to add comments to issues
      *
      * @return commenting stage
      */
-    public CommentingStage commenting(Repository repository, CommentRenderer renderer, Commentator commentator) {
+    public CommentingStage commenting(Repository repository, Commentator commentator) {
       DataStore<ProcessedMarks> dataStore = createStore(repository);
-      return new CommentingStage(this, new ProcessedStore(dataStore), renderer, commentator);
+      return new CommentingStage(this, new ProcessedStore(dataStore), commentator);
     }
 
     private DataStore<ProcessedMarks> createStore(Repository repository) {
@@ -108,11 +111,48 @@ public class IssueTrackerBuilder {
 
     private final ReadStage readStage;
     private final ProcessedStore store;
+    private final Commentator commentator;
+
+    public CommentingStage(ReadStage readStage, ProcessedStore store, Commentator commentator) {
+      this.readStage = readStage;
+      this.store = store;
+      this.commentator = commentator;
+    }
+
+    /**
+     * Specify the renderer for the issue comments.
+     * @param renderer comment renderer
+     * @return change state stage of builder
+     */
+    public ChangeStateStage renderer(CommentRenderer renderer) {
+      return new ChangeStateStage(readStage, store, renderer, commentator);
+    }
+
+    /**
+     * Render issue comments with templates.
+     * The template are read from the given resource path.
+     * The resource path can contain place holders for type of object and the type of comment-
+     * - {0} gets replaced with type of {@link sonia.scm.issuetracker.api.IssueReferencingObject}
+     * - {1} gets replaced with the type of comment: reference or statechange
+     * @param resourcePathTemplate resource path template on the classpath
+     * @return change state stage of builder
+     */
+    public ChangeStateStage template(String resourcePathTemplate) {
+      CommentRenderer renderer = readStage.templateCommentRendererFactory.create(resourcePathTemplate);
+      return new ChangeStateStage(readStage, store, renderer, commentator);
+    }
+
+  }
+
+  public static class ChangeStateStage {
+
+    private final ReadStage readStage;
+    private final ProcessedStore store;
     private final CommentRenderer renderer;
     private final Commentator commentator;
     private StateChanger stateChanger;
 
-    private CommentingStage(ReadStage readStage, ProcessedStore store, CommentRenderer renderer, Commentator commentator) {
+    private ChangeStateStage(ReadStage readStage, ProcessedStore store, CommentRenderer renderer, Commentator commentator) {
       this.readStage = readStage;
       this.store = store;
       this.renderer = renderer;
@@ -126,7 +166,7 @@ public class IssueTrackerBuilder {
      *
      * @return commenting state of builder
      */
-    public CommentingStage stateChanging(StateChanger stateChanger) {
+    public ChangeStateStage stateChanging(StateChanger stateChanger) {
       this.stateChanger = stateChanger;
       return this;
     }

@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static sonia.scm.issuetracker.IssueReferencingObjects.ref;
+import static sonia.scm.issuetracker.IssueReferencingObjects.content;
 
 @ExtendWith(MockitoExtension.class)
 class CompositeIssueTrackerTest {
@@ -61,7 +61,7 @@ class CompositeIssueTrackerTest {
   void shouldDelegateProcessToPresentIssueTrackers() {
     CompositeIssueTracker tracker = tracker(redmine, null, jira);
 
-    IssueReferencingObject ref = ref();
+    IssueReferencingObject ref = content();
     tracker.process(ref);
     verify(redmine).process(ref);
     verify(jira).process(ref);
@@ -69,7 +69,7 @@ class CompositeIssueTrackerTest {
 
   @Test
   void shouldMergeIssues() {
-    IssueReferencingObject ref = ref();
+    IssueReferencingObject ref = content();
     when(redmine.findIssues(ref)).thenReturn(ImmutableMap.of("#42", "https://redmine/42"));
     when(jira.findIssues(ref)).thenReturn(ImmutableMap.of("ABC-21", "https://jira/ABC-21"));
 
