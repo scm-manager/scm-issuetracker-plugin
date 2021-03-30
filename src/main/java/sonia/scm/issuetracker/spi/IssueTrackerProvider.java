@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020-present Cloudogu GmbH and Contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,21 +22,29 @@
  * SOFTWARE.
  */
 
+package sonia.scm.issuetracker.spi;
 
-plugins {
-  id 'org.scm-manager.smp' version '0.8.0'
-}
+import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.repository.Repository;
 
-dependencies {
-  optionalPlugin "sonia.scm.plugins:scm-review-plugin:2.7.0"
-  optionalPlugin "sonia.scm.plugins:scm-mail-plugin:2.1.0"
-  testImplementation "com.github.sdorra:shiro-unit:1.0.1"
-}
+import java.util.Optional;
 
-scmPlugin {
-  scmVersion = "2.15.0"
-  displayName = "Issue Tracker"
-  description = "Helper classes for issuetracker plugins"
-  author = "Cloudogu GmbH"
-  category = "Library"
+/**
+ * Creates an issue tracker for an external issue tracker system such as jira or redmine.
+ * This is the main entry point for plugin developers which would to connect a new issue tracker system.
+ *
+ * @since 3.0.0
+ */
+public interface IssueTrackerProvider {
+
+  /**
+   * Create a new issue tracker for the given repository of an empty optional if no issue tracker is configured.
+   *
+   * @param builder builder to create a default implementation of the issue tracker
+   * @param repository target repository
+   *
+   * @return optional issue tracker
+   */
+  Optional<IssueTracker> create(IssueTrackerBuilder builder, Repository repository);
+
 }

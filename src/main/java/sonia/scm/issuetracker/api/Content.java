@@ -21,52 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker.internal;
 
-//~--- non-JDK imports --------------------------------------------------------
+package sonia.scm.issuetracker.api;
 
-import sonia.scm.issuetracker.IssueMatcher;
-
-//~--- JDK imports ------------------------------------------------------------
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import lombok.Value;
 
 /**
+ * Represents content of an {@link IssueReferencingObject}
+ * e.g. changeset description, pull request title and pull request description.
  *
- * @author Sebastian Sdorra
+ * @since 3.0.0
  */
-public class ExampleIssueMatcher implements IssueMatcher
-{
-
-  private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("\\b([A-Z]+-\\d+)");
-  private static final Pattern REDMINE_KEY_PATTERN = Pattern.compile("\\B(#\\d+)");
-
-  private Pattern pattern;
-
-
-  public ExampleIssueMatcher(Pattern pattern) {
-    this.pattern = pattern;
-  }
-
-  @Override
-  public String getKey(Matcher matcher)
-  {
-    return matcher.group();
-  }
-
-
-  @Override
-  public Pattern getKeyPattern()
-  {
-    return pattern;
-  }
-
-  public static ExampleIssueMatcher createJira() {
-    return new ExampleIssueMatcher(JIRA_KEY_PATTERN);
-  }
-
-  public static ExampleIssueMatcher createRedmine() {
-    return new ExampleIssueMatcher(REDMINE_KEY_PATTERN);
-  }
+@Value
+public class Content {
+  /**
+   * Type of content e.g.: title
+   */
+  String type;
+  /**
+   * Value of content e.g.: The actual title of a pull request
+   */
+  String value;
 }

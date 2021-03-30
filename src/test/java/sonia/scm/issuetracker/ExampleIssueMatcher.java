@@ -21,34 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker;
 
-import sonia.scm.issuetracker.IssueLinkFactory;
+//~--- non-JDK imports --------------------------------------------------------
 
-public class ExampleIssueLinkFactory implements IssueLinkFactory {
+//~--- JDK imports ------------------------------------------------------------
 
-  private static final String JIRA_URL = "https://jira.hitchhiker.com/issues/";
-  private static final String REDMINE_URL = "https://redmine.hitchhiker.com/issues/";
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-  private String trackerUrl;
+/**
+ *
+ * @author Sebastian Sdorra
+ */
+public class ExampleIssueMatcher implements IssueMatcher
+{
 
-  public ExampleIssueLinkFactory(String trackerUrl) {
-    this.trackerUrl = trackerUrl;
+  private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("\\b([A-Z]+-\\d+)");
+  private static final Pattern REDMINE_KEY_PATTERN = Pattern.compile("\\B(#\\d+)");
+
+  private Pattern pattern;
+
+
+  public ExampleIssueMatcher(Pattern pattern) {
+    this.pattern = pattern;
   }
 
   @Override
-  public String createLink(String key) {
-    if (key.startsWith("#")) {
-      return trackerUrl + key.substring(1);
-    }
-    return trackerUrl + key;
+  public String getKey(Matcher matcher)
+  {
+    return matcher.group();
   }
 
-  public static ExampleIssueLinkFactory createJira() {
-    return new ExampleIssueLinkFactory(JIRA_URL);
+
+  @Override
+  public Pattern getKeyPattern()
+  {
+    return pattern;
   }
 
-  public static ExampleIssueLinkFactory createRedmine() {
-    return new ExampleIssueLinkFactory(REDMINE_URL);
+  public static ExampleIssueMatcher createJira() {
+    return new ExampleIssueMatcher(JIRA_KEY_PATTERN);
+  }
+
+  public static ExampleIssueMatcher createRedmine() {
+    return new ExampleIssueMatcher(REDMINE_KEY_PATTERN);
   }
 }
