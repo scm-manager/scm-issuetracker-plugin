@@ -25,6 +25,7 @@
 package sonia.scm.issuetracker.spi;
 
 import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.plugin.ExtensionPoint;
 import sonia.scm.repository.Repository;
 
 import java.util.Optional;
@@ -35,6 +36,7 @@ import java.util.Optional;
  *
  * @since 3.0.0
  */
+@ExtensionPoint
 public interface IssueTrackerProvider {
 
   /**
