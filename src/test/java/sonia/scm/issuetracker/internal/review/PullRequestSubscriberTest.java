@@ -22,13 +22,10 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.comment.service.Comment;
-import com.cloudogu.scm.review.comment.service.CommentEvent;
-import com.cloudogu.scm.review.comment.service.Reply;
-import com.cloudogu.scm.review.comment.service.ReplyEvent;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
+import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,49 +38,33 @@ import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PullRequestCommentSubscriberTest {
+class PullRequestSubscriberTest {
 
   @Mock
   private IssueTracker issueTracker;
 
   @Mock
-  private PullRequestCommentMapper mapper;
+  private PullRequestMapper mapper;
 
   private final Repository repository = RepositoryTestData.createHeartOfGold();
   private final PullRequest pullRequest = new PullRequest();
 
-  private PullRequestCommentSubscriber subscriber;
+  private PullRequestSubscriber subscriber;
 
   @BeforeEach
   void setUp() {
-    subscriber = new PullRequestCommentSubscriber(issueTracker, mapper);
+    subscriber = new PullRequestSubscriber(issueTracker, mapper);
   }
 
   @Test
-  void shouldProcessCommentEvents() {
-    Comment comment = new Comment();
+  void shouldProcessEvent() {
+    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "21");
+    when(mapper.ref(repository, pullRequest)).thenReturn(ref);
 
-    IssueReferencingObject ref = IssueReferencingObjects.ref("comment", "42");
-    when(mapper.ref(repository, pullRequest, comment)).thenReturn(ref);
-
-    CommentEvent event = new CommentEvent(repository, pullRequest, comment, null, HandlerEventType.CREATE);
-    subscriber.handle(event);
-
-    verify(issueTracker).process(ref);
-  }
-
-  @Test
-  void shouldProcessReplyEvents() {
-    Reply reply = new Reply();
-
-    IssueReferencingObject ref = IssueReferencingObjects.ref("reply", "21");
-    when(mapper.ref(repository, pullRequest, reply)).thenReturn(ref);
-
-    ReplyEvent event = new ReplyEvent(repository, pullRequest, reply, null, new Comment(), HandlerEventType.CREATE);
+    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.CREATE);
     subscriber.handle(event);
 
     verify(issueTracker).process(ref);
@@ -91,7 +72,7 @@ class PullRequestCommentSubscriberTest {
 
   @Test
   void shouldIgnoreUnsupportedEventTypes() {
-    CommentEvent event = new CommentEvent(repository, pullRequest, new Comment(), null, HandlerEventType.BEFORE_CREATE);
+    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.DELETE);
     subscriber.handle(event);
 
     verify(issueTracker, never()).process(any());

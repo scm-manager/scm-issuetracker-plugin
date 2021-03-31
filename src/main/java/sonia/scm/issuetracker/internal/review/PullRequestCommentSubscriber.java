@@ -22,10 +22,12 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.comment.service.Comment;
-import sonia.scm.api.v2.resources.Enrich;
+import com.cloudogu.scm.review.comment.service.BasicCommentEvent;
+import com.github.legman.Subscribe;
+import sonia.scm.EagerSingleton;
+import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
@@ -33,13 +35,24 @@ import sonia.scm.plugin.Requires;
 import javax.inject.Inject;
 
 @Extension
-@Enrich(Comment.class)
+@EagerSingleton
 @Requires("scm-review-plugin")
-public class PullRequestCommentLinkEnricher extends PullRequestBaseCommentEnricher<Comment> {
+public class PullRequestCommentSubscriber {
+
+  private final IssueTracker issueTracker;
+  private final PullRequestCommentMapper commentMapper;
 
   @Inject
-  public PullRequestCommentLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {
-    super(Comment.class, issueTracker, mapper);
+  public PullRequestCommentSubscriber(IssueTracker issueTracker, PullRequestCommentMapper commentMapper) {
+    this.issueTracker = issueTracker;
+    this.commentMapper = commentMapper;
   }
 
+  @Subscribe
+  public void handle(BasicCommentEvent<?> event) {
+    if (PullRequestEvents.isSupported(event)) {
+      IssueReferencingObject ref = commentMapper.ref(event.getRepository(), event.getPullRequest(), event.getItem());
+      issueTracker.process(ref);
+    }
+  }
 }

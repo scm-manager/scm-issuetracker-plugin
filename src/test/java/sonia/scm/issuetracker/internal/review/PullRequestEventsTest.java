@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 
 import org.assertj.core.api.AbstractBooleanAssert;

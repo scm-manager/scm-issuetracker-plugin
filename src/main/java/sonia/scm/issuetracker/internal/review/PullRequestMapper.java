@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import com.google.common.base.MoreObjects;
@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
+import sonia.scm.issuetracker.internal.PersonMapper;
 import sonia.scm.plugin.Requires;
 import sonia.scm.repository.Repository;
 import sonia.scm.util.HttpUtil;

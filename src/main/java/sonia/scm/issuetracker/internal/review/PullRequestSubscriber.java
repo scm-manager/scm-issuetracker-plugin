@@ -22,44 +22,38 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import sonia.scm.api.v2.resources.Enrich;
-import sonia.scm.api.v2.resources.HalAppender;
-import sonia.scm.api.v2.resources.HalEnricher;
-import sonia.scm.api.v2.resources.HalEnricherContext;
+import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
+import com.github.legman.Subscribe;
+import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
-import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
 
 @Extension
-@Enrich(PullRequest.class)
+@EagerSingleton
 @Requires("scm-review-plugin")
-public class PullRequestLinkEnricher implements HalEnricher {
+public class PullRequestSubscriber {
 
   private final IssueTracker issueTracker;
   private final PullRequestMapper mapper;
 
   @Inject
-  public PullRequestLinkEnricher(IssueTracker issueTracker, PullRequestMapper mapper) {
+  public PullRequestSubscriber(IssueTracker issueTracker, PullRequestMapper mapper) {
     this.issueTracker = issueTracker;
     this.mapper = mapper;
   }
 
-  @Override
-  public void enrich(HalEnricherContext context, HalAppender appender) {
-    Repository repository = context.oneRequireByType(Repository.class);
-    PullRequest pullRequest = context.oneRequireByType(PullRequest.class);
-
-    IssueReferencingObject ref = mapper.ref(repository, pullRequest);
-
-    HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issues");
-    issueTracker.findIssues(ref).forEach(builder::append);
-    builder.build();
+  @Subscribe
+  public void handle(PullRequestEvent event) {
+    if (PullRequestEvents.isSupported(event)) {
+      IssueReferencingObject ref = mapper.ref(event.getRepository(), event.getItem());
+      issueTracker.process(ref);
+    }
   }
+
 }

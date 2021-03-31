@@ -22,26 +22,34 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sonia.scm.HandlerEventType;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricherContext;
 import sonia.scm.issuetracker.IssueReferencingObjects;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PullRequestSubscriberTest {
+class PullRequestLinkEnricherTest {
+
+  @Mock
+  private HalAppender.LinkArrayBuilder linkArrayBuilder;
+
+  @Mock
+  private HalAppender linkAppender;
 
   @Mock
   private IssueTracker issueTracker;
@@ -52,30 +60,27 @@ class PullRequestSubscriberTest {
   private final Repository repository = RepositoryTestData.createHeartOfGold();
   private final PullRequest pullRequest = new PullRequest();
 
-  private PullRequestSubscriber subscriber;
+  private PullRequestLinkEnricher enricher;
 
   @BeforeEach
-  void setUp() {
-    subscriber = new PullRequestSubscriber(issueTracker, mapper);
+  void setup() {
+    when(linkAppender.linkArrayBuilder("issues")).thenReturn(linkArrayBuilder);
+    enricher = new PullRequestLinkEnricher(issueTracker, mapper);
   }
 
   @Test
-  void shouldProcessEvent() {
-    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "21");
+  void shouldAppendLinkForSingleIssue() {
+    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "42");
     when(mapper.ref(repository, pullRequest)).thenReturn(ref);
+    when(issueTracker.findIssues(ref)).thenReturn(ImmutableMap.of(
+      "ABC-123", "https://jira.hitchhiker.com/issues/ABC-123"
+    ));
 
-    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.CREATE);
-    subscriber.handle(event);
+    HalEnricherContext ctx = HalEnricherContext.of(repository, pullRequest);
 
-    verify(issueTracker).process(ref);
-  }
-
-  @Test
-  void shouldIgnoreUnsupportedEventTypes() {
-    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.DELETE);
-    subscriber.handle(event);
-
-    verify(issueTracker, never()).process(any());
+    enricher.enrich(ctx, linkAppender);
+    verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
+    verify(linkArrayBuilder).build();
   }
 
 }

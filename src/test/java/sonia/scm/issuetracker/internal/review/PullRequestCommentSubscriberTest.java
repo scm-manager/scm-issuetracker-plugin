@@ -22,34 +22,30 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
+import com.cloudogu.scm.review.comment.service.Comment;
+import com.cloudogu.scm.review.comment.service.CommentEvent;
 import com.cloudogu.scm.review.comment.service.Reply;
-import com.google.common.collect.ImmutableMap;
+import com.cloudogu.scm.review.comment.service.ReplyEvent;
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sonia.scm.api.v2.resources.HalAppender;
-import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.HandlerEventType;
 import sonia.scm.issuetracker.IssueReferencingObjects;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PullRequestReplyLinkEnricherTest {
-
-  @Mock
-  private HalAppender.LinkArrayBuilder linkArrayBuilder;
-
-  @Mock
-  private HalAppender linkAppender;
+class PullRequestCommentSubscriberTest {
 
   @Mock
   private IssueTracker issueTracker;
@@ -58,27 +54,47 @@ class PullRequestReplyLinkEnricherTest {
   private PullRequestCommentMapper mapper;
 
   private final Repository repository = RepositoryTestData.createHeartOfGold();
-  private final Reply reply = new Reply();
-  private PullRequestReplyLinkEnricher enricher;
+  private final PullRequest pullRequest = new PullRequest();
+
+  private PullRequestCommentSubscriber subscriber;
 
   @BeforeEach
-  void setup() {
-    when(linkAppender.linkArrayBuilder("issues")).thenReturn(linkArrayBuilder);
-    enricher = new PullRequestReplyLinkEnricher(issueTracker, mapper);
+  void setUp() {
+    subscriber = new PullRequestCommentSubscriber(issueTracker, mapper);
   }
 
   @Test
-  void shouldAppendLinks() {
-    IssueReferencingObject ref = IssueReferencingObjects.ref("reply", "9000");
-    when(mapper.ref(repository, reply)).thenReturn(ref);
-    when(issueTracker.findIssues(ref)).thenReturn(ImmutableMap.of(
-      "CDE-456", "https://jira.hitchhiker.com/issues/CDE-456"
-    ));
+  void shouldProcessCommentEvents() {
+    Comment comment = new Comment();
 
-    HalEnricherContext ctx = HalEnricherContext.of(repository, reply);
+    IssueReferencingObject ref = IssueReferencingObjects.ref("comment", "42");
+    when(mapper.ref(repository, pullRequest, comment)).thenReturn(ref);
 
-    enricher.enrich(ctx, linkAppender);
-    verify(linkArrayBuilder).append("CDE-456", "https://jira.hitchhiker.com/issues/CDE-456");
-    verify(linkArrayBuilder).build();
+    CommentEvent event = new CommentEvent(repository, pullRequest, comment, null, HandlerEventType.CREATE);
+    subscriber.handle(event);
+
+    verify(issueTracker).process(ref);
   }
+
+  @Test
+  void shouldProcessReplyEvents() {
+    Reply reply = new Reply();
+
+    IssueReferencingObject ref = IssueReferencingObjects.ref("reply", "21");
+    when(mapper.ref(repository, pullRequest, reply)).thenReturn(ref);
+
+    ReplyEvent event = new ReplyEvent(repository, pullRequest, reply, null, new Comment(), HandlerEventType.CREATE);
+    subscriber.handle(event);
+
+    verify(issueTracker).process(ref);
+  }
+
+  @Test
+  void shouldIgnoreUnsupportedEventTypes() {
+    CommentEvent event = new CommentEvent(repository, pullRequest, new Comment(), null, HandlerEventType.BEFORE_CREATE);
+    subscriber.handle(event);
+
+    verify(issueTracker, never()).process(any());
+  }
+
 }

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.comment.service.Comment;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
+import sonia.scm.issuetracker.internal.PersonMapper;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.user.UserDisplayManager;

@@ -22,37 +22,44 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.comment.service.BasicCommentEvent;
-import com.github.legman.Subscribe;
-import sonia.scm.EagerSingleton;
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
+import sonia.scm.api.v2.resources.Enrich;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricher;
+import sonia.scm.api.v2.resources.HalEnricherContext;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
+import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
 
 @Extension
-@EagerSingleton
+@Enrich(PullRequest.class)
 @Requires("scm-review-plugin")
-public class PullRequestCommentSubscriber {
+public class PullRequestLinkEnricher implements HalEnricher {
 
   private final IssueTracker issueTracker;
-  private final PullRequestCommentMapper commentMapper;
+  private final PullRequestMapper mapper;
 
   @Inject
-  public PullRequestCommentSubscriber(IssueTracker issueTracker, PullRequestCommentMapper commentMapper) {
+  public PullRequestLinkEnricher(IssueTracker issueTracker, PullRequestMapper mapper) {
     this.issueTracker = issueTracker;
-    this.commentMapper = commentMapper;
+    this.mapper = mapper;
   }
 
-  @Subscribe
-  public void handle(BasicCommentEvent<?> event) {
-    if (PullRequestEvents.isSupported(event)) {
-      IssueReferencingObject ref = commentMapper.ref(event.getRepository(), event.getPullRequest(), event.getItem());
-      issueTracker.process(ref);
-    }
+  @Override
+  public void enrich(HalEnricherContext context, HalAppender appender) {
+    Repository repository = context.oneRequireByType(Repository.class);
+    PullRequest pullRequest = context.oneRequireByType(PullRequest.class);
+
+    IssueReferencingObject ref = mapper.ref(repository, pullRequest);
+
+    HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issues");
+    issueTracker.findIssues(ref).forEach(builder::append);
+    builder.build();
   }
 }

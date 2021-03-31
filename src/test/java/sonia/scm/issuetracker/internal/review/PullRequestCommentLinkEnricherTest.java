@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.comment.service.Comment;
 import com.google.common.collect.ImmutableMap;

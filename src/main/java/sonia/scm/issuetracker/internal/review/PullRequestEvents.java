@@ -22,22 +22,18 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.comment.service.Reply;
-import sonia.scm.api.v2.resources.Enrich;
-import sonia.scm.issuetracker.api.IssueTracker;
-import sonia.scm.plugin.Extension;
-import sonia.scm.plugin.Requires;
+import sonia.scm.HandlerEventType;
+import sonia.scm.event.HandlerEvent;
 
-import javax.inject.Inject;
+class PullRequestEvents {
 
-@Extension
-@Enrich(Reply.class)
-@Requires("scm-review-plugin")
-public class PullRequestReplyLinkEnricher extends PullRequestBaseCommentEnricher<Reply> {
-  @Inject
-  public PullRequestReplyLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {
-    super(Reply.class, issueTracker, mapper);
+  private PullRequestEvents() {
+  }
+
+  static boolean isSupported(HandlerEvent<?> event) {
+    HandlerEventType eventType = event.getEventType();
+    return eventType.isPost() && eventType != HandlerEventType.DELETE;
   }
 }

@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.pullrequest.service.PullRequest;
+import com.cloudogu.scm.review.comment.service.Reply;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PullRequestLinkEnricherTest {
+class PullRequestReplyLinkEnricherTest {
 
   @Mock
   private HalAppender.LinkArrayBuilder linkArrayBuilder;
@@ -55,32 +55,30 @@ class PullRequestLinkEnricherTest {
   private IssueTracker issueTracker;
 
   @Mock
-  private PullRequestMapper mapper;
+  private PullRequestCommentMapper mapper;
 
   private final Repository repository = RepositoryTestData.createHeartOfGold();
-  private final PullRequest pullRequest = new PullRequest();
-
-  private PullRequestLinkEnricher enricher;
+  private final Reply reply = new Reply();
+  private PullRequestReplyLinkEnricher enricher;
 
   @BeforeEach
   void setup() {
     when(linkAppender.linkArrayBuilder("issues")).thenReturn(linkArrayBuilder);
-    enricher = new PullRequestLinkEnricher(issueTracker, mapper);
+    enricher = new PullRequestReplyLinkEnricher(issueTracker, mapper);
   }
 
   @Test
-  void shouldAppendLinkForSingleIssue() {
-    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "42");
-    when(mapper.ref(repository, pullRequest)).thenReturn(ref);
+  void shouldAppendLinks() {
+    IssueReferencingObject ref = IssueReferencingObjects.ref("reply", "9000");
+    when(mapper.ref(repository, reply)).thenReturn(ref);
     when(issueTracker.findIssues(ref)).thenReturn(ImmutableMap.of(
-      "ABC-123", "https://jira.hitchhiker.com/issues/ABC-123"
+      "CDE-456", "https://jira.hitchhiker.com/issues/CDE-456"
     ));
 
-    HalEnricherContext ctx = HalEnricherContext.of(repository, pullRequest);
+    HalEnricherContext ctx = HalEnricherContext.of(repository, reply);
 
     enricher.enrich(ctx, linkAppender);
-    verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
+    verify(linkArrayBuilder).append("CDE-456", "https://jira.hitchhiker.com/issues/CDE-456");
     verify(linkArrayBuilder).build();
   }
-
 }

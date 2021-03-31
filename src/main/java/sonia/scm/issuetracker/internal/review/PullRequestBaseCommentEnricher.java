@@ -1,4 +1,4 @@
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.comment.service.BasicComment;
 import sonia.scm.api.v2.resources.HalAppender;
