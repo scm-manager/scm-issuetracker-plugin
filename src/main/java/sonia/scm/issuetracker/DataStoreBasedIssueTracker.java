@@ -36,7 +36,9 @@ import sonia.scm.store.DataStoreFactory;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated use {@link sonia.scm.issuetracker.spi.IssueTrackerProvider} instead.
  */
+@Deprecated
 public abstract class DataStoreBasedIssueTracker extends IssueTracker {
 
   private static final Logger logger =

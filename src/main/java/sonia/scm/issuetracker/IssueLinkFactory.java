@@ -23,13 +23,16 @@
  */
 package sonia.scm.issuetracker;
 
+/**
+ * Create links to issues in the external issue tracker.
+ */
 public interface IssueLinkFactory {
 
-    /**
-     * Get the link to the Issue using the given <code>key</code>
-     *
-     * @param key
-     * @return
-     */
-    String createLink(String key);
+  /**
+   * Create link to issue.
+   *
+   * @param key issue key
+   * @return link to issue
+   */
+  String createLink(String key);
 }

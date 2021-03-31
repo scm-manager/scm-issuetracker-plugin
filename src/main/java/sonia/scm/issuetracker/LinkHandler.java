@@ -33,7 +33,9 @@ import sonia.scm.repository.Repository;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated
  */
+@Deprecated
 public final class LinkHandler {
 
   private ScmConfiguration configuration;

@@ -36,7 +36,9 @@ import sonia.scm.util.AssertUtil;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated in scm-manager v2 there is no longer a way to access the credentials
  */
+@Deprecated
 public final class Credentials
 {
 

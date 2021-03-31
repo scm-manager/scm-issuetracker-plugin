@@ -38,8 +38,10 @@ import java.util.Set;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated use {@link sonia.scm.issuetracker.api.IssueTracker} instead.
  */
 @Singleton
+@Deprecated
 public class IssueTrackerManager
 {
 

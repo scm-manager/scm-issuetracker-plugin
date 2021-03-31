@@ -48,7 +48,9 @@ import java.util.Optional;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated use template methods of {@link sonia.scm.issuetracker.spi.IssueTrackerBuilder} instead.
  */
+@Deprecated
 public abstract class TemplateBasedHandler {
 
   private static final String ENV_CHANGESET = "changeset";
