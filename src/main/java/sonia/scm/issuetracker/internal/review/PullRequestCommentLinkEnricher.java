@@ -35,7 +35,7 @@ import javax.inject.Inject;
 @Extension
 @Enrich(Comment.class)
 @Requires("scm-review-plugin")
-public class PullRequestCommentLinkEnricher extends PullRequestBaseCommentEnricher<Comment> {
+public class PullRequestCommentLinkEnricher extends PullRequestBasicCommentEnricher<Comment> {
 
   @Inject
   public PullRequestCommentLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {

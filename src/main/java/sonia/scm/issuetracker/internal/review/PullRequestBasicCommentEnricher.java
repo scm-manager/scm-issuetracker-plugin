@@ -24,20 +24,34 @@
 
 package sonia.scm.issuetracker.internal.review;
 
-import com.cloudogu.scm.review.comment.service.Reply;
-import sonia.scm.api.v2.resources.Enrich;
+import com.cloudogu.scm.review.comment.service.BasicComment;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricher;
+import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
-import sonia.scm.plugin.Extension;
-import sonia.scm.plugin.Requires;
+import sonia.scm.repository.Repository;
 
-import javax.inject.Inject;
+class PullRequestBasicCommentEnricher<T extends BasicComment> implements HalEnricher  {
 
-@Extension
-@Enrich(Reply.class)
-@Requires("scm-review-plugin")
-public class PullRequestReplyLinkEnricher extends PullRequestBasicCommentEnricher<Reply> {
-  @Inject
-  public PullRequestReplyLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {
-    super(Reply.class, issueTracker, mapper);
+  private final Class<T> commentType;
+  private final IssueTracker issueTracker;
+  private final PullRequestCommentMapper mapper;
+
+  protected PullRequestBasicCommentEnricher(Class<T> commentType, IssueTracker issueTracker, PullRequestCommentMapper mapper) {
+    this.commentType = commentType;
+    this.issueTracker = issueTracker;
+    this.mapper = mapper;
+  }
+
+  @Override
+  public void enrich(HalEnricherContext context, HalAppender appender) {
+    Repository repository = context.oneRequireByType(Repository.class);
+    BasicComment comment = context.oneRequireByType(commentType);
+
+    HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issues");
+    IssueReferencingObject ref = mapper.ref(repository, comment);
+    issueTracker.findIssues(ref).forEach(builder::append);
+    builder.build();
   }
 }
