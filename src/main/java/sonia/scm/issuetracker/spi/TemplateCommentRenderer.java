@@ -35,28 +35,30 @@ import java.text.MessageFormat;
 import java.util.Optional;
 import java.util.Set;
 
-class TemplateCommentRenderer implements CommentRenderer {
+class TemplateCommentRenderer implements ReferenceCommentRenderer, StateChangeCommentRenderer {
 
-  private static final String COMMENT_TYP_REFERENCE = "reference";
-  private static final String COMMENT_TYP_STATECHANGE = "statechange";
+  static final String COMMENT_TYP_REFERENCE = "reference";
+  static final String COMMENT_TYP_STATECHANGE = "statechange";
 
   private final TemplateEngineFactory templateEngineFactory;
   private final Set<TemplateModelProvider> modelProviders;
+  private final String commentType;
   private final String resourcePathTemplate;
 
-  TemplateCommentRenderer(TemplateEngineFactory templateEngineFactory, Set<TemplateModelProvider> modelProviders, String resourcePathTemplate) {
+  TemplateCommentRenderer(TemplateEngineFactory templateEngineFactory, Set<TemplateModelProvider> modelProviders, String commentType, String resourcePathTemplate) {
     this.templateEngineFactory = templateEngineFactory;
     this.modelProviders = modelProviders;
+    this.commentType = commentType;
     this.resourcePathTemplate = resourcePathTemplate;
   }
 
   @Override
-  public String reference(IssueReferencingObject object) throws IOException {
+  public String render(IssueReferencingObject object) throws IOException {
     return render(COMMENT_TYP_REFERENCE, object, null);
   }
 
   @Override
-  public String stateChange(IssueReferencingObject object, String keyWord) throws IOException {
+  public String render(IssueReferencingObject object, String keyWord) throws IOException {
     return render(COMMENT_TYP_STATECHANGE, object, keyWord);
   }
 

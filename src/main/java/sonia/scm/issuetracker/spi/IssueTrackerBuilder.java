@@ -124,8 +124,8 @@ public class IssueTrackerBuilder {
      * @param renderer comment renderer
      * @return change state stage of builder
      */
-    public ChangeStateStage renderer(CommentRenderer renderer) {
-      return new ChangeStateStage(readStage, store, renderer, commentator);
+    public ChangeStateStage renderer(ReferenceCommentRenderer renderer) {
+      return new ChangeStateStage(this, renderer);
     }
 
     /**
@@ -133,30 +133,24 @@ public class IssueTrackerBuilder {
      * The template are read from the given resource path.
      * The resource path can contain place holders for type of object and the type of comment-
      * - {0} gets replaced with type of {@link sonia.scm.issuetracker.api.IssueReferencingObject}
-     * - {1} gets replaced with the type of comment: reference or statechange
      * @param resourcePathTemplate resource path template on the classpath
      * @return change state stage of builder
      */
     public ChangeStateStage template(String resourcePathTemplate) {
-      CommentRenderer renderer = readStage.templateCommentRendererFactory.create(resourcePathTemplate);
-      return new ChangeStateStage(readStage, store, renderer, commentator);
+      ReferenceCommentRenderer renderer = readStage.templateCommentRendererFactory.reference(resourcePathTemplate);
+      return new ChangeStateStage(this, renderer);
     }
 
   }
 
   public static class ChangeStateStage {
 
-    private final ReadStage readStage;
-    private final ProcessedStore store;
-    private final CommentRenderer renderer;
-    private final Commentator commentator;
-    private StateChanger stateChanger;
+    private final CommentingStage commentingStage;
+    private final ReferenceCommentRenderer renderer;
 
-    private ChangeStateStage(ReadStage readStage, ProcessedStore store, CommentRenderer renderer, Commentator commentator) {
-      this.readStage = readStage;
-      this.store = store;
+    private ChangeStateStage(CommentingStage commentingStage, ReferenceCommentRenderer renderer) {
+      this.commentingStage = commentingStage;
       this.renderer = renderer;
-      this.commentator = commentator;
     }
 
     /**
@@ -166,27 +160,89 @@ public class IssueTrackerBuilder {
      *
      * @return commenting state of builder
      */
-    public ChangeStateStage stateChanging(StateChanger stateChanger) {
-      this.stateChanger = stateChanger;
-      return this;
+    public ChangeStateRenderStage stateChanging(StateChanger stateChanger) {
+      return new ChangeStateRenderStage(this, stateChanger);
     }
 
     /**
-     * Creates {@link IssueTracker} which able to comment issues and optional to change the state of an issue.
+     * Creates {@link IssueTracker} which able to comment issues.
      *
      * @return new issue tracker
      */
     public IssueTracker build() {
       return new DefaultIssueTracker(
-        readStage.name,
-        readStage.matcher,
-        readStage.linkFactory,
-        store,
+        commentingStage.readStage.name,
+        commentingStage.readStage.matcher,
+        commentingStage.readStage.linkFactory,
+        commentingStage.store,
         renderer,
-        commentator,
-        stateChanger
+        commentingStage.commentator
       );
     }
+  }
+
+  public static class ChangeStateRenderStage {
+
+    private final ChangeStateStage changeStateStage;
+    private final StateChanger stateChanger;
+
+    private ChangeStateRenderStage(ChangeStateStage changeStateStage, StateChanger stateChanger) {
+      this.changeStateStage = changeStateStage;
+      this.stateChanger = stateChanger;
+    }
+
+    /**
+     * Specify the renderer for the issue comments.
+     * @param renderer comment renderer
+     * @return change state stage of builder
+     */
+    public FinalStage renderer(StateChangeCommentRenderer renderer) {
+      return new FinalStage(this, renderer);
+    }
+
+    /**
+     * Render state change issue comments with templates.
+     * The template are read from the given resource path.
+     * The resource path can contain place holders for type of object and the type of comment-
+     * - {0} gets replaced with type of {@link sonia.scm.issuetracker.api.IssueReferencingObject}
+     * @param resourcePathTemplate resource path template on the classpath
+     * @return change state stage of builder
+     */
+    public FinalStage template(String resourcePathTemplate) {
+      StateChangeCommentRenderer renderer = changeStateStage.commentingStage.readStage.templateCommentRendererFactory.stateChange(resourcePathTemplate);
+      return new FinalStage(this, renderer);
+    }
+
+  }
+
+  public static class FinalStage {
+
+    private final ChangeStateRenderStage changeStateRenderStage;
+    private final StateChangeCommentRenderer renderer;
+
+    private FinalStage(ChangeStateRenderStage changeStateRenderStage, StateChangeCommentRenderer renderer) {
+      this.changeStateRenderStage = changeStateRenderStage;
+      this.renderer = renderer;
+    }
+
+    /**
+     * Creates {@link IssueTracker} which able to comment and change the state of issues.
+     *
+     * @return new issue tracker
+     */
+    public IssueTracker build() {
+      return new DefaultIssueTracker(
+        changeStateRenderStage.changeStateStage.commentingStage.readStage.name,
+        changeStateRenderStage.changeStateStage.commentingStage.readStage.matcher,
+        changeStateRenderStage.changeStateStage.commentingStage.readStage.linkFactory,
+        changeStateRenderStage.changeStateStage.commentingStage.store,
+        changeStateRenderStage.changeStateStage.renderer,
+        changeStateRenderStage.changeStateStage.commentingStage.commentator,
+        renderer,
+        changeStateRenderStage.stateChanger
+      );
+    }
+
   }
 
 }

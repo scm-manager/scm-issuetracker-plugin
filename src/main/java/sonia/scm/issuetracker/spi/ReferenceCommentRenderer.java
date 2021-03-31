@@ -29,11 +29,12 @@ import sonia.scm.issuetracker.api.IssueReferencingObject;
 import java.io.IOException;
 
 /**
- * Renders comments.
+ * Renders comments which are referencing an object inside SCM-Manager.
  *
  * @since 3.0.0
  */
-public interface CommentRenderer {
+public interface ReferenceCommentRenderer {
+
   /**
    * Creates a reference comment.
    *
@@ -41,15 +42,5 @@ public interface CommentRenderer {
    * @return reference comment
    * @throws IOException failed to render comment
    */
-  String reference(IssueReferencingObject object) throws IOException;
-
-  /**
-   * Creates a state change comment.
-   *
-   * @param object issue reference object
-   * @param keyWord keyword which has triggered the state change
-   * @return reference comment
-   * @throws IOException failed to render comment
-   */
-  String stateChange(IssueReferencingObject object, String keyWord) throws IOException;
+  String render(IssueReferencingObject object) throws IOException;
 }

@@ -88,7 +88,7 @@ class DefaultIssueTrackerTest {
     private TemplateCommentRendererFactory rendererFactory;
 
     @Mock
-    private CommentRenderer renderer;
+    private ReferenceCommentRenderer renderer;
 
     @Mock
     private Commentator commentator;
@@ -107,7 +107,7 @@ class DefaultIssueTrackerTest {
     @Test
     void shouldSendComment() throws IOException {
       IssueReferencingObject ref = content("Comment #42");
-      when(renderer.reference(ref)).thenReturn("Awesome");
+      when(renderer.render(ref)).thenReturn("Awesome");
 
       tracker.process(ref);
 
@@ -117,7 +117,7 @@ class DefaultIssueTrackerTest {
     @Test
     void shouldSendCommentsOnlyOnce() throws IOException {
       IssueReferencingObject ref = content("Comment #21");
-      when(renderer.reference(ref)).thenReturn("Incredible");
+      when(renderer.render(ref)).thenReturn("Incredible");
 
       tracker.process(ref);
       verify(commentator).comment("#21", "Incredible");
@@ -129,7 +129,7 @@ class DefaultIssueTrackerTest {
     @Test
     void shouldSendMultipleComments() throws IOException {
       IssueReferencingObject ref = content("Comment #21", "And comment #42");
-      when(renderer.reference(ref)).thenReturn("Super");
+      when(renderer.render(ref)).thenReturn("Super");
 
       tracker.process(ref);
       verify(commentator).comment("#21", "Super");
@@ -146,7 +146,10 @@ class DefaultIssueTrackerTest {
     private TemplateCommentRendererFactory rendererFactory;
 
     @Mock
-    private CommentRenderer renderer;
+    private ReferenceCommentRenderer referenceCommentRenderer;
+
+    @Mock
+    private StateChangeCommentRenderer stateChangeCommentRenderer;
 
     @Mock
     private Commentator commentator;
@@ -161,8 +164,9 @@ class DefaultIssueTrackerTest {
       tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
         .commenting(RepositoryTestData.createHeartOfGold(), commentator)
-        .renderer(renderer)
+        .renderer(referenceCommentRenderer)
         .stateChanging(stateChanger)
+        .renderer(stateChangeCommentRenderer)
         .build();
     }
 
@@ -170,7 +174,7 @@ class DefaultIssueTrackerTest {
     void shouldChangeState() throws IOException {
       IssueReferencingObject ref = content("Fixes #42");
       when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
-      when(renderer.stateChange(ref, "fixes")).thenReturn("Incredible");
+      when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
 
       tracker.process(ref);
       verify(stateChanger).changeState("#42", "fixes");
@@ -181,7 +185,7 @@ class DefaultIssueTrackerTest {
     void shouldChangeStateOnlyOnce() throws IOException {
       IssueReferencingObject ref = content("Resolves #21");
       when(stateChanger.getKeyWords("#21")).thenReturn(Collections.singleton("resolves"));
-      when(renderer.stateChange(ref, "resolves")).thenReturn("Awesome");
+      when(stateChangeCommentRenderer.render(ref, "resolves")).thenReturn("Awesome");
 
       tracker.process(ref);
       verify(stateChanger).changeState("#21", "resolves");
@@ -198,8 +202,8 @@ class DefaultIssueTrackerTest {
       when(stateChanger.getKeyWords("#21")).thenReturn(keywords);
       when(stateChanger.getKeyWords("#12")).thenReturn(keywords);
       when(stateChanger.getKeyWords("#42")).thenReturn(keywords);
-      when(renderer.stateChange(ref, "resolves")).thenReturn("Awesome");
-      when(renderer.stateChange(ref, "fixes")).thenReturn("Incredible");
+      when(stateChangeCommentRenderer.render(ref, "resolves")).thenReturn("Awesome");
+      when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
 
       tracker.process(ref);
       verify(stateChanger).changeState("#21", "resolves");
@@ -214,7 +218,7 @@ class DefaultIssueTrackerTest {
     void shouldAddCommentWithoutKeyWord() throws IOException {
       IssueReferencingObject ref = content("#42 is great");
       when(stateChanger.getKeyWords("#42")).thenReturn(ImmutableSet.of("resolves", "fixes"));
-      when(renderer.reference(ref)).thenReturn("Great");
+      when(referenceCommentRenderer.render(ref)).thenReturn("Great");
 
       tracker.process(ref);
       verify(commentator).comment("#42", "Great");

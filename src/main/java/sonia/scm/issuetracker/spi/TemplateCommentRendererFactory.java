@@ -29,7 +29,7 @@ import sonia.scm.template.TemplateEngineFactory;
 import javax.inject.Inject;
 import java.util.Set;
 
-public class TemplateCommentRendererFactory {
+class TemplateCommentRendererFactory {
 
   private final TemplateEngineFactory engineFactory;
   private final Set<TemplateModelProvider> modelProviders;
@@ -40,7 +40,15 @@ public class TemplateCommentRendererFactory {
     this.modelProviders = modelProviders;
   }
 
-  public CommentRenderer create(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(engineFactory, modelProviders, resourcePathTemplate);
+  public ReferenceCommentRenderer reference(String resourcePathTemplate) {
+    return new TemplateCommentRenderer(
+      engineFactory, modelProviders, TemplateCommentRenderer.COMMENT_TYP_REFERENCE, resourcePathTemplate
+    );
+  }
+
+  public StateChangeCommentRenderer stateChange(String resourcePathTemplate) {
+    return new TemplateCommentRenderer(
+      engineFactory, modelProviders, TemplateCommentRenderer.COMMENT_TYP_STATECHANGE, resourcePathTemplate
+    );
   }
 }

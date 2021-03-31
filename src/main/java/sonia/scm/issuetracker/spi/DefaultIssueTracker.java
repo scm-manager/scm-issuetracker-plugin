@@ -49,29 +49,43 @@ class DefaultIssueTracker implements IssueTracker {
   private final IssueLinkFactory linkFactory;
 
   // may - if write
-  private ProcessedStore store;
-  private CommentRenderer commentRenderer;
-  private Commentator commentator;
+  private final ProcessedStore store;
+  private final ReferenceCommentRenderer referenceCommentRenderer;
+  private final Commentator commentator;
 
   // may
-  private StateChanger stateChanger;
+  private final StateChangeCommentRenderer stateChangeCommentRenderer;
+  private final StateChanger stateChanger;
 
   DefaultIssueTracker(String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
-    this.name = name;
-    this.matcher = matcher;
-    this.linkFactory = linkFactory;
+    this(name, matcher, linkFactory, null, null, null);
   }
 
-  DefaultIssueTracker(
-    String name, IssueMatcher matcher, IssueLinkFactory linkFactory,
-    ProcessedStore store, CommentRenderer commentRenderer, Commentator commentator, StateChanger stateChanger
-  ) {
+  DefaultIssueTracker(String name,
+                      IssueMatcher matcher,
+                      IssueLinkFactory linkFactory,
+                      ProcessedStore store,
+                      ReferenceCommentRenderer referenceCommentRenderer,
+                      Commentator commentator) {
+    this(name, matcher, linkFactory, store, referenceCommentRenderer, commentator, null, null);
+  }
+
+  @SuppressWarnings("java:S107") // the large constructor is ok for this use case
+  DefaultIssueTracker(String name,
+                      IssueMatcher matcher,
+                      IssueLinkFactory linkFactory,
+                      ProcessedStore store,
+                      ReferenceCommentRenderer referenceCommentRenderer,
+                      Commentator commentator,
+                      StateChangeCommentRenderer stateChangeCommentRenderer,
+                      StateChanger stateChanger) {
     this.name = name;
     this.matcher = matcher;
     this.linkFactory = linkFactory;
     this.store = store;
-    this.commentRenderer = commentRenderer;
+    this.referenceCommentRenderer = referenceCommentRenderer;
     this.commentator = commentator;
+    this.stateChangeCommentRenderer = stateChangeCommentRenderer;
     this.stateChanger = stateChanger;
   }
 
@@ -116,7 +130,7 @@ class DefaultIssueTracker implements IssueTracker {
       return;
     }
     try {
-      String comment = commentRenderer.reference(object);
+      String comment = referenceCommentRenderer.render(object);
       commentator.comment(issueKey, comment);
       store.mark(issueKey, object);
     } catch (IOException ex) {
@@ -140,7 +154,7 @@ class DefaultIssueTracker implements IssueTracker {
       return;
     }
     try {
-      String comment = commentRenderer.stateChange(object, keyWord);
+      String comment = stateChangeCommentRenderer.render(object, keyWord);
       stateChanger.changeState(issueKey, keyWord);
       commentator.comment(issueKey, comment);
       store.mark(issueKey, object, keyWord);
@@ -153,7 +167,7 @@ class DefaultIssueTracker implements IssueTracker {
     try {
       return stateChanger.getKeyWords(issueKey);
     } catch (IOException ex) {
-      LOG.warn("failed to get key workds for {}", issueKey, ex);
+      LOG.warn("failed to get key words for {}", issueKey, ex);
       return Collections.emptySet();
     }
   }

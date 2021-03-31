@@ -69,9 +69,9 @@ class TemplateCommentRendererTest {
     }).when(template).execute(any(Writer.class), eq(ref));
 
     TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory, Collections.emptySet());
-    CommentRenderer renderer = factory.create("/tpls/{0}_{1}.mustache");
+    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}_{1}.mustache");
 
-    String comment = renderer.reference(ref);
+    String comment = renderer.render(ref);
     assertThat(comment).isEqualTo("Awesome");
   }
 
@@ -88,9 +88,9 @@ class TemplateCommentRendererTest {
     }).when(template).execute(any(Writer.class), eq(ref));
 
     TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory, Collections.emptySet());
-    CommentRenderer renderer = factory.create("/tpls/{0}_{1}.mustache");
+    StateChangeCommentRenderer renderer = factory.stateChange("/tpls/{0}_{1}.mustache");
 
-    String comment = renderer.stateChange(ref, "resolved");
+    String comment = renderer.render(ref, "resolved");
     assertThat(comment).isEqualTo("Incredible");
   }
 
@@ -110,9 +110,9 @@ class TemplateCommentRendererTest {
     TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(
       engineFactory, Collections.singleton(new SampleProvider())
     );
-    CommentRenderer renderer = factory.create("/tpls/{0}_{1}.mustache");
+    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}_{1}.mustache");
 
-    String comment = renderer.reference(ref);
+    String comment = renderer.render(ref);
     assertThat(comment).isEqualTo("Hello World");
   }
 
