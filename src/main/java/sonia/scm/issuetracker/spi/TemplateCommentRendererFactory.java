@@ -42,10 +42,10 @@ class TemplateCommentRendererFactory {
   }
 
   public ReferenceCommentRenderer reference(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(engineFactory, mapper,  resourcePathTemplate);
+    return new TemplateCommentRenderer(engineFactory, mapper, resourcePathTemplate);
   }
 
   public StateChangeCommentRenderer stateChange(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(engineFactory, mapper,  resourcePathTemplate);
+    return new TemplateCommentRenderer(engineFactory, mapper, resourcePathTemplate);
   }
 }
