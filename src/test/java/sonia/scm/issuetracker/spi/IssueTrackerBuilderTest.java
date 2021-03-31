@@ -28,18 +28,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
-import sonia.scm.store.DataStoreFactory;
 import sonia.scm.store.InMemoryDataStoreFactory;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class IssueTrackerBuilderTest {
