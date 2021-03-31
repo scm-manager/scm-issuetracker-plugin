@@ -24,36 +24,23 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
-import com.github.legman.Subscribe;
-import sonia.scm.EagerSingleton;
-import sonia.scm.issuetracker.api.IssueReferencingObject;
-import sonia.scm.issuetracker.api.IssueTracker;
-import sonia.scm.plugin.Extension;
-import sonia.scm.plugin.Requires;
+import sonia.scm.repository.Person;
+import sonia.scm.user.UserDisplayManager;
 
 import javax.inject.Inject;
 
-@Extension
-@EagerSingleton
-@Requires("scm-review-plugin")
-public class PullRequestSubscriber {
+public class PersonMapper {
 
-  private final IssueTracker issueTracker;
-  private final PullRequestMapper mapper;
+  private final UserDisplayManager userDisplayManager;
 
   @Inject
-  public PullRequestSubscriber(IssueTracker issueTracker, PullRequestMapper mapper) {
-    this.issueTracker = issueTracker;
-    this.mapper = mapper;
+  public PersonMapper(UserDisplayManager userDisplayManager) {
+    this.userDisplayManager = userDisplayManager;
   }
 
-  @Subscribe
-  public void handle(PullRequestEvent event) {
-    if (PullRequestEvents.isSupported(event)) {
-      IssueReferencingObject ref = mapper.ref(event.getRepository(), event.getItem());
-      issueTracker.process(ref);
-    }
+  public Person person(String name) {
+    return userDisplayManager.get(name)
+      .map(displayUser -> new Person(displayUser.getDisplayName(), displayUser.getMail()))
+      .orElse(Person.toPerson(name));
   }
-
 }

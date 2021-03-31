@@ -24,36 +24,16 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
-import com.github.legman.Subscribe;
-import sonia.scm.EagerSingleton;
-import sonia.scm.issuetracker.api.IssueReferencingObject;
-import sonia.scm.issuetracker.api.IssueTracker;
-import sonia.scm.plugin.Extension;
-import sonia.scm.plugin.Requires;
+import sonia.scm.HandlerEventType;
+import sonia.scm.event.HandlerEvent;
 
-import javax.inject.Inject;
+class PullRequestEvents {
 
-@Extension
-@EagerSingleton
-@Requires("scm-review-plugin")
-public class PullRequestSubscriber {
-
-  private final IssueTracker issueTracker;
-  private final PullRequestMapper mapper;
-
-  @Inject
-  public PullRequestSubscriber(IssueTracker issueTracker, PullRequestMapper mapper) {
-    this.issueTracker = issueTracker;
-    this.mapper = mapper;
+  private PullRequestEvents() {
   }
 
-  @Subscribe
-  public void handle(PullRequestEvent event) {
-    if (PullRequestEvents.isSupported(event)) {
-      IssueReferencingObject ref = mapper.ref(event.getRepository(), event.getItem());
-      issueTracker.process(ref);
-    }
+  static boolean isSupported(HandlerEvent<?> event) {
+    HandlerEventType eventType = event.getEventType();
+    return eventType.isPost() && eventType != HandlerEventType.DELETE;
   }
-
 }

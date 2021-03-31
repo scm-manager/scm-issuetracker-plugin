@@ -59,7 +59,7 @@ class PullRequestMapperTest {
   void setUp() {
     ScmConfiguration configuration = new ScmConfiguration();
     configuration.setBaseUrl("https://hitchhiker.com");
-    mapper = new PullRequestMapper(configuration, userDisplayManager);
+    mapper = new PullRequestMapper(configuration, new PersonMapper(userDisplayManager));
   }
 
   @Test
@@ -76,11 +76,13 @@ class PullRequestMapperTest {
     IssueReferencingObject ref = mapper.ref(repository, pr);
     assertThat(ref.getRepository()).isSameAs(repository);
     assertThat(ref.getType()).isEqualTo(PullRequestMapper.TYPE);
+    assertThat(ref.getAuthor().getName()).isEqualTo("tricia");
     assertThat(ref.getDate()).isSameAs(now);
     assertThat(ref.getContent())
       .anyMatch(c -> "title".equals(c.getType()) && "Awesome".equals(c.getValue()))
       .anyMatch(c -> "description".equals(c.getType()) && "This pr so awesome".equals(c.getValue()));
     assertThat(ref.getLink()).isEqualTo("https://hitchhiker.com/repo/hitchhiker/HeartOfGold/pull-request/42");
+    assertThat(ref.getOrigin()).isSameAs(pr);
   }
 
   @Test
@@ -113,46 +115,6 @@ class PullRequestMapperTest {
 
     IssueReferencingObject ref = mapper.ref(repository, pr);
     assertThat(ref.getDate()).isSameAs(creationDate);
-  }
-
-  @Test
-  void shouldUseUsernameAsAuthorWithoutDisplayUser() {
-    Instant creationDate = Instant.now();
-    PullRequest pr = PullRequest.builder()
-      .id("42")
-      .author("tricia")
-      .title("Awesome")
-      .description("This pr so awesome")
-      .creationDate(creationDate)
-      .build();
-
-    IssueReferencingObject ref = mapper.ref(repository, pr);
-    assertThat(ref.getAuthor()).satisfies(person -> {
-      assertThat(person.getName()).isEqualTo("tricia");
-      assertThat(person.getMail()).isNull();
-    });
-  }
-
-  @Test
-  void shouldUseDisplayUserAsAuthor() {
-    when(userDisplayManager.get("tricia")).thenReturn(
-      Optional.of(DisplayUser.from(UserTestData.createTrillian()))
-    );
-
-    Instant creationDate = Instant.now();
-    PullRequest pr = PullRequest.builder()
-      .id("42")
-      .author("tricia")
-      .title("Awesome")
-      .description("This pr so awesome")
-      .creationDate(creationDate)
-      .build();
-
-    IssueReferencingObject ref = mapper.ref(repository, pr);
-    assertThat(ref.getAuthor()).satisfies(person -> {
-      assertThat(person.getName()).isEqualTo("Tricia McMillan");
-      assertThat(person.getMail()).isEqualTo("tricia.mcmillan@hitchhiker.com");
-    });
   }
 
 }

@@ -29,8 +29,6 @@ import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.HandlerEventType;
@@ -72,10 +70,9 @@ class PullRequestSubscriberTest {
     verify(issueTracker).process(ref);
   }
 
-  @ParameterizedTest
-  @EnumSource(value = HandlerEventType.class, mode = EnumSource.Mode.EXCLUDE, names = {"CREATE", "MODIFY"})
-  void shouldIgnorePreAndDeleteTypes(HandlerEventType eventType) {
-    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, eventType);
+  @Test
+  void shouldIgnoreUnsupportedEventTypes() {
+    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.DELETE);
     subscriber.handle(event);
 
     verify(issueTracker, never()).process(any());

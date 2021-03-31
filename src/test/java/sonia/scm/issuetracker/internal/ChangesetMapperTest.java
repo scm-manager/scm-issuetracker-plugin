@@ -67,6 +67,8 @@ class ChangesetMapperTest {
     assertThat(content.getValue()).isEqualTo("ABC-42 is fixed");
 
     assertThat(ref.getLink()).isEqualTo("https://hitchhiker.com/scm/repo/hitchhiker/HeartOfGold/code/changeset/42");
+
+    assertThat(ref.getOrigin()).isSameAs(changeset);
   }
 
 }

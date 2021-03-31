@@ -24,8 +24,9 @@
 
 package sonia.scm.issuetracker.internal;
 
+import com.cloudogu.scm.review.comment.service.Comment;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import com.google.common.base.MoreObjects;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
@@ -34,55 +35,57 @@ import sonia.scm.plugin.Requires;
 import sonia.scm.repository.Repository;
 import sonia.scm.util.HttpUtil;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.time.Instant;
 import java.util.List;
 
 @Requires("scm-review-plugin")
-public class PullRequestMapper {
+public class PullRequestCommentMapper {
 
-  static final String TYPE = "pull-request";
+  @VisibleForTesting
+  static final String TYPE = "comment";
 
   private final ScmConfiguration configuration;
   private final PersonMapper personMapper;
 
   @Inject
-  public PullRequestMapper(ScmConfiguration configuration, PersonMapper personMapper) {
+  public PullRequestCommentMapper(ScmConfiguration configuration, PersonMapper personMapper) {
     this.configuration = configuration;
     this.personMapper = personMapper;
   }
 
-  public IssueReferencingObject ref(Repository repository, PullRequest pr) {
+  public IssueReferencingObject ref(Repository repository, Comment comment) {
+    return ref(repository, null, comment);
+  }
+
+  public IssueReferencingObject ref(Repository repository, PullRequest pullRequest, Comment comment) {
     return new IssueReferencingObject(
       repository,
       TYPE,
-      pr.getId(),
-      personMapper.person(pr.getAuthor()),
-      date(pr),
-      content(pr),
-      link(repository, pr),
-      pr
+      comment.getId(),
+      personMapper.person(comment.getAuthor()),
+      comment.getDate(),
+      content(comment),
+      link(repository, pullRequest, comment),
+      comment
     );
   }
 
-  private Instant date(PullRequest pr) {
-    return MoreObjects.firstNonNull(pr.getLastModified(), pr.getCreationDate());
-  }
-
-  private List<Content> content(PullRequest pr) {
+  @SuppressWarnings("java:S1192") // same content different meaning
+  private List<Content> content(Comment comment) {
     return ImmutableList.of(
-      new Content("title", pr.getTitle()),
-      new Content("description", pr.getDescription())
+      new Content("comment", comment.getComment())
     );
   }
 
-  @SuppressWarnings("java:S1192")
-  private String link(Repository repository, PullRequest pr) {
-    return HttpUtil.concatenate(
-      configuration.getBaseUrl(), "repo",
-      repository.getNamespace(), repository.getName(),
-      "pull-request", pr.getId()
+  private String link(Repository repository, @Nullable PullRequest pr, Comment comment) {
+    String repoUrl = HttpUtil.concatenate(
+      configuration.getBaseUrl(), "repo", repository.getNamespace(), repository.getName()
     );
+    if (pr == null) {
+      return HttpUtil.concatenate(repoUrl, "pull-requests");
+    }
+    return HttpUtil.concatenate(repoUrl, "pull-request", pr.getId(), "comments#comment-" + comment.getId());
   }
 
 }

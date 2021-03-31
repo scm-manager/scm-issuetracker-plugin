@@ -21,63 +21,62 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package sonia.scm.issuetracker.internal;
 
 import com.cloudogu.scm.review.comment.service.Comment;
-import com.google.common.collect.ImmutableMap;
+import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sonia.scm.api.v2.resources.HalAppender;
-import sonia.scm.api.v2.resources.HalEnricherContext;
-import sonia.scm.issuetracker.IssueReferencingObjects;
+import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
-import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
+import sonia.scm.user.UserDisplayManager;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class PullRequestCommentLinkEnricherTest {
+class PullRequestCommentMapperTest {
 
   @Mock
-  private HalAppender.LinkArrayBuilder linkArrayBuilder;
+  private UserDisplayManager userDisplayManager;
 
-  @Mock
-  private HalAppender linkAppender;
-
-  @Mock
-  private IssueTracker issueTracker;
-
-  @Mock
   private PullRequestCommentMapper mapper;
 
   private final Repository repository = RepositoryTestData.createHeartOfGold();
-  private final Comment comment = new Comment();
-  private PullRequestCommentLinkEnricher enricher;
+  private final PullRequest pullRequest = PullRequest.builder().id("4211").build();
 
   @BeforeEach
-  void setup() {
-    when(linkAppender.linkArrayBuilder("issues")).thenReturn(linkArrayBuilder);
-    enricher = new PullRequestCommentLinkEnricher(issueTracker, mapper);
+  void setUpMapper() {
+    ScmConfiguration configuration = new ScmConfiguration();
+    configuration.setBaseUrl("https://scm");
+    mapper = new PullRequestCommentMapper(configuration, new PersonMapper(userDisplayManager));
   }
 
   @Test
-  void shouldAppendLinks() {
-    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "42");
-    when(mapper.ref(repository, comment)).thenReturn(ref);
-    when(issueTracker.findIssues(ref)).thenReturn(ImmutableMap.of(
-      "ABC-123", "https://jira.hitchhiker.com/issues/ABC-123"
-    ));
+  void shouldMapWithPullRequest() {
+    Comment comment = Comment.createComment("3", "Awesome Comment", "tricia", null);
+    IssueReferencingObject ref = mapper.ref(repository, pullRequest, comment);
+    assertThat(ref.getId()).isEqualTo("3");
+    assertThat(ref.getType()).isEqualTo(PullRequestCommentMapper.TYPE);
+    assertThat(ref.getAuthor().getName()).isEqualTo("tricia");
+    assertThat(ref.getDate()).isSameAs(comment.getDate());
+    assertThat(ref.getContent()).first().satisfies(c -> {
+      assertThat(c.getType()).isEqualTo("comment");
+      assertThat(c.getValue()).isEqualTo("Awesome Comment");
+    });
+    assertThat(ref.getLink()).isEqualTo("https://scm/repo/hitchhiker/HeartOfGold/pull-request/4211/comments#comment-3");
+    assertThat(ref.getOrigin()).isSameAs(comment);
+  }
 
-    HalEnricherContext ctx = HalEnricherContext.of(repository, comment);
-
-    enricher.enrich(ctx, linkAppender);
-    verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
-    verify(linkArrayBuilder).build();
+  @Test
+  void shouldMapLinkWithoutPullRequest() {
+    Comment comment = Comment.createComment("21", "Incredible Comment", "dent", null);
+    IssueReferencingObject ref = mapper.ref(repository, comment);
+    assertThat(ref.getLink()).isEqualTo("https://scm/repo/hitchhiker/HeartOfGold/pull-requests");
   }
 }

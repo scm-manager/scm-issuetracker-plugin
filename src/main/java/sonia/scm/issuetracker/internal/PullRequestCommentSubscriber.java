@@ -24,42 +24,35 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.cloudogu.scm.review.comment.service.Comment;
-import sonia.scm.api.v2.resources.Enrich;
-import sonia.scm.api.v2.resources.HalAppender;
-import sonia.scm.api.v2.resources.HalEnricher;
-import sonia.scm.api.v2.resources.HalEnricherContext;
+import com.cloudogu.scm.review.comment.service.CommentEvent;
+import com.github.legman.Subscribe;
+import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
-import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
 
 @Extension
-@Enrich(Comment.class)
+@EagerSingleton
 @Requires("scm-review-plugin")
-public class PullRequestCommentLinkEnricher implements HalEnricher {
+public class PullRequestCommentSubscriber {
 
   private final IssueTracker issueTracker;
-  private final PullRequestCommentMapper mapper;
+  private final PullRequestCommentMapper commentMapper;
 
   @Inject
-  public PullRequestCommentLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {
+  public PullRequestCommentSubscriber(IssueTracker issueTracker, PullRequestCommentMapper commentMapper) {
     this.issueTracker = issueTracker;
-    this.mapper = mapper;
+    this.commentMapper = commentMapper;
   }
 
-  @Override
-  public void enrich(HalEnricherContext context, HalAppender appender) {
-    Repository repository = context.oneRequireByType(Repository.class);
-    Comment comment = context.oneRequireByType(Comment.class);
-
-    HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issues");
-    IssueReferencingObject ref = mapper.ref(repository, comment);
-    issueTracker.findIssues(ref).forEach(builder::append);
-    builder.build();
+  @Subscribe
+  public void handle(CommentEvent event) {
+    if (PullRequestEvents.isSupported(event)) {
+      IssueReferencingObject ref = commentMapper.ref(event.getRepository(), event.getPullRequest(), event.getItem());
+      issueTracker.process(ref);
+    }
   }
-
 }
