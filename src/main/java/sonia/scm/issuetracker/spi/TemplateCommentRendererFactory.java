@@ -24,31 +24,28 @@
 
 package sonia.scm.issuetracker.spi;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import sonia.scm.template.TemplateEngineFactory;
 
 import javax.inject.Inject;
-import java.util.Set;
+import javax.inject.Singleton;
 
+@Singleton
 class TemplateCommentRendererFactory {
 
   private final TemplateEngineFactory engineFactory;
-  private final Set<TemplateModelProvider> modelProviders;
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Inject
-  public TemplateCommentRendererFactory(TemplateEngineFactory engineFactory, Set<TemplateModelProvider> modelProviders) {
+  public TemplateCommentRendererFactory(TemplateEngineFactory engineFactory) {
     this.engineFactory = engineFactory;
-    this.modelProviders = modelProviders;
   }
 
   public ReferenceCommentRenderer reference(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(
-      engineFactory, modelProviders, TemplateCommentRenderer.COMMENT_TYP_REFERENCE, resourcePathTemplate
-    );
+    return new TemplateCommentRenderer(engineFactory, mapper,  resourcePathTemplate);
   }
 
   public StateChangeCommentRenderer stateChange(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(
-      engineFactory, modelProviders, TemplateCommentRenderer.COMMENT_TYP_STATECHANGE, resourcePathTemplate
-    );
+    return new TemplateCommentRenderer(engineFactory, mapper,  resourcePathTemplate);
   }
 }

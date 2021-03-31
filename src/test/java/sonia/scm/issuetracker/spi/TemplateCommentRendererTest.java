@@ -35,7 +35,7 @@ import sonia.scm.template.TemplateEngineFactory;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collections;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,8 +58,8 @@ class TemplateCommentRendererTest {
 
   @Test
   void shouldRenderReferenceTemplate() throws IOException {
-    when(engineFactory.getEngineByExtension("/tpls/changeset_reference.mustache")).thenReturn(engine);
-    when(engine.getTemplate("/tpls/changeset_reference.mustache")).thenReturn(template);
+    when(engineFactory.getEngineByExtension("/tpls/changeset.mustache")).thenReturn(engine);
+    when(engine.getTemplate("/tpls/changeset.mustache")).thenReturn(template);
 
     IssueReferencingObject ref = ref("changeset", "4211");
     doAnswer(ic -> {
@@ -68,8 +68,8 @@ class TemplateCommentRendererTest {
       return null;
     }).when(template).execute(any(Writer.class), eq(ref));
 
-    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory, Collections.emptySet());
-    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}_{1}.mustache");
+    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory);
+    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}.mustache");
 
     String comment = renderer.render(ref);
     assertThat(comment).isEqualTo("Awesome");
@@ -77,56 +77,23 @@ class TemplateCommentRendererTest {
 
   @Test
   void shouldRenderChangeStateTemplate() throws IOException {
-    when(engineFactory.getEngineByExtension("/tpls/pr_statechange.mustache")).thenReturn(engine);
-    when(engine.getTemplate("/tpls/pr_statechange.mustache")).thenReturn(template);
+    when(engineFactory.getEngineByExtension("/tpls/pr.mustache")).thenReturn(engine);
+    when(engine.getTemplate("/tpls/pr.mustache")).thenReturn(template);
 
     IssueReferencingObject ref = ref("pr", "42");
     doAnswer(ic -> {
       Writer writer = ic.getArgument(0);
-      writer.write("Incredible");
+      Map<String, Object> model = ic.getArgument(1);
+      String msg = String.format("%s is %s", model.get("type"), model.get("keyWord"));
+      writer.write(msg);
       return null;
-    }).when(template).execute(any(Writer.class), eq(ref));
+    }).when(template).execute(any(Writer.class), any(Map.class));
 
-    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory, Collections.emptySet());
-    StateChangeCommentRenderer renderer = factory.stateChange("/tpls/{0}_{1}.mustache");
+    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory);
+    StateChangeCommentRenderer renderer = factory.stateChange("/tpls/{0}.mustache");
 
     String comment = renderer.render(ref, "resolved");
-    assertThat(comment).isEqualTo("Incredible");
-  }
-
-  @Test
-  void shouldRenderModelOfProvider() throws IOException {
-    when(engineFactory.getEngineByExtension("/tpls/changeset_reference.mustache")).thenReturn(engine);
-    when(engine.getTemplate("/tpls/changeset_reference.mustache")).thenReturn(template);
-
-    IssueReferencingObject ref = ref("changeset", "4211");
-    doAnswer(ic -> {
-      Writer writer = ic.getArgument(0);
-      String model = ic.getArgument(1);
-      writer.write("Hello " + model);
-      return null;
-    }).when(template).execute(any(Writer.class), any(String.class));
-
-    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(
-      engineFactory, Collections.singleton(new SampleProvider())
-    );
-    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}_{1}.mustache");
-
-    String comment = renderer.render(ref);
-    assertThat(comment).isEqualTo("Hello World");
-  }
-
-  private static class SampleProvider implements TemplateModelProvider {
-
-    @Override
-    public boolean isSupported(IssueReferencingObject object) {
-      return true;
-    }
-
-    @Override
-    public Object createModel(IssueReferencingObject object, String keyWord) {
-      return "World";
-    }
+    assertThat(comment).isEqualTo("pr is resolved");
   }
 
 }
