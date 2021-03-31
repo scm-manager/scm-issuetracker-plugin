@@ -24,6 +24,8 @@
 
 package sonia.scm.issuetracker.spi;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.api.IssueTracker;
@@ -59,6 +61,9 @@ public class IssueTrackerBuilder {
    * @return read stage
    */
   public ReadStage start(String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "name can not be null or empty");
+    Preconditions.checkNotNull(matcher, "matcher is required");
+    Preconditions.checkNotNull(linkFactory, "link factory is required");
     return new ReadStage(dataStoreFactory, templateCommentRendererFactory, name, matcher, linkFactory);
   }
 
@@ -96,6 +101,8 @@ public class IssueTrackerBuilder {
      * @return commenting stage
      */
     public CommentingStage commenting(Repository repository, Commentator commentator) {
+      Preconditions.checkNotNull(repository, "repository is required");
+      Preconditions.checkNotNull(commentator, "commentator is required");
       DataStore<ProcessedMarks> dataStore = createStore(repository);
       return new CommentingStage(this, new ProcessedStore(dataStore), commentator);
     }
@@ -125,6 +132,7 @@ public class IssueTrackerBuilder {
      * @return change state stage of builder
      */
     public ChangeStateStage renderer(ReferenceCommentRenderer renderer) {
+      Preconditions.checkNotNull(renderer, "renderer is required");
       return new ChangeStateStage(this, renderer);
     }
 
@@ -137,6 +145,7 @@ public class IssueTrackerBuilder {
      * @return change state stage of builder
      */
     public ChangeStateStage template(String resourcePathTemplate) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(resourcePathTemplate), "resourcePathTemplate is required");
       ReferenceCommentRenderer renderer = readStage.templateCommentRendererFactory.reference(resourcePathTemplate);
       return new ChangeStateStage(this, renderer);
     }
@@ -161,6 +170,7 @@ public class IssueTrackerBuilder {
      * @return commenting state of builder
      */
     public ChangeStateRenderStage stateChanging(StateChanger stateChanger) {
+      Preconditions.checkNotNull(stateChanger, "stateChanger is required");
       return new ChangeStateRenderStage(this, stateChanger);
     }
 
@@ -197,6 +207,7 @@ public class IssueTrackerBuilder {
      * @return change state stage of builder
      */
     public FinalStage renderer(StateChangeCommentRenderer renderer) {
+      Preconditions.checkNotNull(renderer, "renderer is required");
       return new FinalStage(this, renderer);
     }
 
@@ -209,6 +220,7 @@ public class IssueTrackerBuilder {
      * @return change state stage of builder
      */
     public FinalStage template(String resourcePathTemplate) {
+      Preconditions.checkArgument(!Strings.isNullOrEmpty(resourcePathTemplate), "resourcePathTemplate is required");
       StateChangeCommentRenderer renderer = changeStateStage.commentingStage.readStage.templateCommentRendererFactory.stateChange(resourcePathTemplate);
       return new FinalStage(this, renderer);
     }
