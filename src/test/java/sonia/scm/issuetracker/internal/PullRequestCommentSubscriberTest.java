@@ -26,6 +26,8 @@ package sonia.scm.issuetracker.internal;
 
 import com.cloudogu.scm.review.comment.service.Comment;
 import com.cloudogu.scm.review.comment.service.CommentEvent;
+import com.cloudogu.scm.review.comment.service.Reply;
+import com.cloudogu.scm.review.comment.service.ReplyEvent;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +55,6 @@ class PullRequestCommentSubscriberTest {
 
   private final Repository repository = RepositoryTestData.createHeartOfGold();
   private final PullRequest pullRequest = new PullRequest();
-  private final Comment comment = new Comment();
 
   private PullRequestCommentSubscriber subscriber;
 
@@ -63,11 +64,26 @@ class PullRequestCommentSubscriberTest {
   }
 
   @Test
-  void shouldProcessEvent() {
+  void shouldProcessCommentEvents() {
+    Comment comment = new Comment();
+
     IssueReferencingObject ref = IssueReferencingObjects.ref("comment", "42");
     when(mapper.ref(repository, pullRequest, comment)).thenReturn(ref);
 
-    CommentEvent event = new CommentEvent(repository,pullRequest, comment, null, HandlerEventType.CREATE);
+    CommentEvent event = new CommentEvent(repository, pullRequest, comment, null, HandlerEventType.CREATE);
+    subscriber.handle(event);
+
+    verify(issueTracker).process(ref);
+  }
+
+  @Test
+  void shouldProcessReplyEvents() {
+    Reply reply = new Reply();
+
+    IssueReferencingObject ref = IssueReferencingObjects.ref("reply", "21");
+    when(mapper.ref(repository, pullRequest, reply)).thenReturn(ref);
+
+    ReplyEvent event = new ReplyEvent(repository, pullRequest, reply, null, new Comment(), HandlerEventType.CREATE);
     subscriber.handle(event);
 
     verify(issueTracker).process(ref);
@@ -75,7 +91,7 @@ class PullRequestCommentSubscriberTest {
 
   @Test
   void shouldIgnoreUnsupportedEventTypes() {
-    CommentEvent event = new CommentEvent(repository,pullRequest, comment, null, HandlerEventType.BEFORE_CREATE);
+    CommentEvent event = new CommentEvent(repository, pullRequest, new Comment(), null, HandlerEventType.BEFORE_CREATE);
     subscriber.handle(event);
 
     verify(issueTracker, never()).process(any());

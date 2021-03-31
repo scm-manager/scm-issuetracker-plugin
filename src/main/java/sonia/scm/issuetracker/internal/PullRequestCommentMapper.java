@@ -24,7 +24,7 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.cloudogu.scm.review.comment.service.Comment;
+import com.cloudogu.scm.review.comment.service.BasicComment;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -54,11 +54,11 @@ public class PullRequestCommentMapper {
     this.personMapper = personMapper;
   }
 
-  public IssueReferencingObject ref(Repository repository, Comment comment) {
+  public IssueReferencingObject ref(Repository repository, BasicComment comment) {
     return ref(repository, null, comment);
   }
 
-  public IssueReferencingObject ref(Repository repository, PullRequest pullRequest, Comment comment) {
+  public IssueReferencingObject ref(Repository repository, PullRequest pullRequest, BasicComment comment) {
     return new IssueReferencingObject(
       repository,
       TYPE,
@@ -72,13 +72,13 @@ public class PullRequestCommentMapper {
   }
 
   @SuppressWarnings("java:S1192") // same content different meaning
-  private List<Content> content(Comment comment) {
+  private List<Content> content(BasicComment comment) {
     return ImmutableList.of(
       new Content("comment", comment.getComment())
     );
   }
 
-  private String link(Repository repository, @Nullable PullRequest pr, Comment comment) {
+  private String link(Repository repository, @Nullable PullRequest pr, BasicComment comment) {
     String repoUrl = HttpUtil.concatenate(
       configuration.getBaseUrl(), "repo", repository.getNamespace(), repository.getName()
     );

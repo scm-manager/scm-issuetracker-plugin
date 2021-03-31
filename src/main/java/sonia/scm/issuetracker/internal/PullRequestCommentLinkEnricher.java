@@ -26,40 +26,20 @@ package sonia.scm.issuetracker.internal;
 
 import com.cloudogu.scm.review.comment.service.Comment;
 import sonia.scm.api.v2.resources.Enrich;
-import sonia.scm.api.v2.resources.HalAppender;
-import sonia.scm.api.v2.resources.HalEnricher;
-import sonia.scm.api.v2.resources.HalEnricherContext;
-import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.plugin.Extension;
 import sonia.scm.plugin.Requires;
-import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
 
 @Extension
 @Enrich(Comment.class)
 @Requires("scm-review-plugin")
-public class PullRequestCommentLinkEnricher implements HalEnricher {
-
-  private final IssueTracker issueTracker;
-  private final PullRequestCommentMapper mapper;
+public class PullRequestCommentLinkEnricher extends PullRequestBaseCommentEnricher<Comment> {
 
   @Inject
   public PullRequestCommentLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {
-    this.issueTracker = issueTracker;
-    this.mapper = mapper;
-  }
-
-  @Override
-  public void enrich(HalEnricherContext context, HalAppender appender) {
-    Repository repository = context.oneRequireByType(Repository.class);
-    Comment comment = context.oneRequireByType(Comment.class);
-
-    HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issues");
-    IssueReferencingObject ref = mapper.ref(repository, comment);
-    issueTracker.findIssues(ref).forEach(builder::append);
-    builder.build();
+    super(Comment.class, issueTracker, mapper);
   }
 
 }

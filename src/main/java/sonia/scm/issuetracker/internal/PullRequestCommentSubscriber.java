@@ -24,7 +24,7 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.cloudogu.scm.review.comment.service.CommentEvent;
+import com.cloudogu.scm.review.comment.service.BasicCommentEvent;
 import com.github.legman.Subscribe;
 import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
@@ -49,7 +49,7 @@ public class PullRequestCommentSubscriber {
   }
 
   @Subscribe
-  public void handle(CommentEvent event) {
+  public void handle(BasicCommentEvent<?> event) {
     if (PullRequestEvents.isSupported(event)) {
       IssueReferencingObject ref = commentMapper.ref(event.getRepository(), event.getPullRequest(), event.getItem());
       issueTracker.process(ref);
