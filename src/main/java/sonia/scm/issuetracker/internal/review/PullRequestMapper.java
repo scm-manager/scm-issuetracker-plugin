@@ -26,6 +26,7 @@ package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
@@ -71,10 +72,14 @@ public class PullRequestMapper {
   }
 
   private List<Content> content(PullRequest pr) {
-    return ImmutableList.of(
-      new Content("title", pr.getTitle()),
-      new Content("description", pr.getDescription())
-    );
+    ImmutableList.Builder<Content> builder = ImmutableList.builder();
+    if (!Strings.isNullOrEmpty(pr.getTitle())) {
+      builder.add(new Content("title", pr.getTitle()));
+    }
+    if (!Strings.isNullOrEmpty(pr.getDescription())) {
+      builder.add(new Content("description", pr.getDescription()));
+    }
+    return builder.build();
   }
 
   @SuppressWarnings("java:S1192")

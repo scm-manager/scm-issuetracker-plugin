@@ -24,6 +24,10 @@
 
 package sonia.scm.issuetracker.spi;
 
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -39,7 +43,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static sonia.scm.issuetracker.IssueReferencingObjects.ref;
@@ -56,6 +59,19 @@ class TemplateCommentRendererTest {
   @Mock
   private Template template;
 
+  @Mock
+  private Subject subject;
+
+  @BeforeEach
+  void setUpSubject() {
+    ThreadContext.bind(subject);
+  }
+
+  @AfterEach
+  void tearDownSubject(){
+    ThreadContext.unbindSubject();
+  }
+
   @Test
   void shouldRenderReferenceTemplate() throws IOException {
     when(engineFactory.getEngineByExtension("/tpls/changeset.mustache")).thenReturn(engine);
@@ -66,7 +82,7 @@ class TemplateCommentRendererTest {
       Writer writer = ic.getArgument(0);
       writer.write("Awesome");
       return null;
-    }).when(template).execute(any(Writer.class), eq(ref));
+    }).when(template).execute(any(Writer.class), any(Map.class));
 
     TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory);
     ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}.mustache");

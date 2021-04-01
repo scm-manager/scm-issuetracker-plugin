@@ -27,6 +27,7 @@ package sonia.scm.issuetracker.internal.review;
 import com.cloudogu.scm.review.comment.service.BasicComment;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
@@ -38,6 +39,7 @@ import sonia.scm.util.HttpUtil;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.List;
 
 @Requires("scm-review-plugin")
@@ -74,6 +76,9 @@ public class PullRequestCommentMapper {
 
   @SuppressWarnings("java:S1192") // same content different meaning
   private List<Content> content(BasicComment comment) {
+    if (Strings.isNullOrEmpty(comment.getComment())){
+      return Collections.emptyList();
+    }
     return ImmutableList.of(
       new Content("comment", comment.getComment())
     );

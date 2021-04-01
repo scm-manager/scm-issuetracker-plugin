@@ -24,6 +24,7 @@
 
 package sonia.scm.issuetracker.internal;
 
+import com.google.common.base.Strings;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
@@ -69,6 +70,9 @@ public class ChangesetMapper {
   }
 
   private List<Content> content(Changeset changeset) {
+    if (Strings.isNullOrEmpty(changeset.getDescription())) {
+      return Collections.emptyList();
+    }
     return Collections.singletonList(
       new Content("description", changeset.getDescription())
     );
