@@ -62,6 +62,13 @@ class Issues {
     return Optional.ofNullable(detector.detect(object));
   }
 
+  private static final Pattern pattern = Pattern.compile("[^a-zA-Z0-9-_]");
+
+  static String normalize(String issueKey) {
+    Matcher matcher = pattern.matcher(issueKey);
+    return matcher.replaceAll("_");
+  }
+
   private static class StateChangeDetector {
 
     private final Locale locale;

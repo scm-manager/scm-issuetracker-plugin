@@ -148,4 +148,22 @@ class IssuesTest {
     }
   }
 
+  @Nested
+  class Normalize {
+
+    @Test
+    void shouldKeeAsIs() {
+      assertThat(Issues.normalize("JIRA-123")).isEqualTo("JIRA-123");
+      assertThat(Issues.normalize("42")).isEqualTo("42");
+    }
+
+    @Test
+    void shouldNormalize() {
+      assertThat(Issues.normalize("#42")).isEqualTo("_42");
+      assertThat(Issues.normalize("/42")).isEqualTo("_42");
+      assertThat(Issues.normalize("4/2")).isEqualTo("4_2");
+    }
+
+  }
+
 }

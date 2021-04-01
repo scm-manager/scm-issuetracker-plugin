@@ -54,17 +54,21 @@ class ProcessedStore {
   public void mark(String issueKey, IssueReferencingObject object) {
     ProcessedMarks marks = getMarks(issueKey);
     marks.add(mark(object));
-    store.put(issueKey, marks);
+    store(issueKey, marks);
+  }
+
+  private void store(String issueKey, ProcessedMarks marks) {
+    store.put(Issues.normalize(issueKey), marks);
   }
 
   public void mark(String issueKey, IssueReferencingObject object, String keyWord) {
     ProcessedMarks marks = getMarks(issueKey);
     marks.add(mark(object, keyWord));
-    store.put(issueKey, marks);
+    store(issueKey, marks);
   }
 
   private ProcessedMarks getMarks(String issueKey) {
-    ProcessedMarks marks = store.get(issueKey);
+    ProcessedMarks marks = store.get(Issues.normalize(issueKey));
     if (marks == null) {
       return new ProcessedMarks();
     }
