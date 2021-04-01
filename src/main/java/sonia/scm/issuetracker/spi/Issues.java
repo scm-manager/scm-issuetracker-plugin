@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 
 class Issues {
 
+  private static final Pattern NORMALIZE_PATTERN = Pattern.compile("[^\\w-]");
+
   private Issues() {
   }
 
@@ -62,10 +64,8 @@ class Issues {
     return Optional.ofNullable(detector.detect(object));
   }
 
-  private static final Pattern pattern = Pattern.compile("[^a-zA-Z0-9-_]");
-
   static String normalize(String issueKey) {
-    Matcher matcher = pattern.matcher(issueKey);
+    Matcher matcher = NORMALIZE_PATTERN.matcher(issueKey);
     return matcher.replaceAll("_");
   }
 
@@ -164,6 +164,6 @@ class Issues {
       }
       return items;
     }
-    
+
   }
 }
