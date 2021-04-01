@@ -24,7 +24,6 @@
 
 package sonia.scm.issuetracker.spi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import sonia.scm.template.TemplateEngineFactory;
 
 import javax.inject.Inject;
@@ -34,7 +33,6 @@ import javax.inject.Singleton;
 class TemplateCommentRendererFactory {
 
   private final TemplateEngineFactory engineFactory;
-  private final ObjectMapper mapper = new ObjectMapper();
 
   @Inject
   public TemplateCommentRendererFactory(TemplateEngineFactory engineFactory) {
@@ -42,10 +40,10 @@ class TemplateCommentRendererFactory {
   }
 
   public ReferenceCommentRenderer reference(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(engineFactory, mapper, resourcePathTemplate);
+    return new TemplateCommentRenderer(engineFactory, resourcePathTemplate);
   }
 
   public StateChangeCommentRenderer stateChange(String resourcePathTemplate) {
-    return new TemplateCommentRenderer(engineFactory, mapper, resourcePathTemplate);
+    return new TemplateCommentRenderer(engineFactory, resourcePathTemplate);
   }
 }

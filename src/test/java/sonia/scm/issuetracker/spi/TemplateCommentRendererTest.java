@@ -30,12 +30,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
+import sonia.scm.repository.Person;
 import sonia.scm.template.Template;
 import sonia.scm.template.TemplateEngine;
 import sonia.scm.template.TemplateEngineFactory;
+import sonia.scm.user.User;
+import sonia.scm.user.UserTestData;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -43,8 +48,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static sonia.scm.issuetracker.IssueReferencingObjects.content;
 import static sonia.scm.issuetracker.IssueReferencingObjects.ref;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,7 +64,7 @@ class TemplateCommentRendererTest {
   @Mock
   private Template template;
 
-  @Mock
+  @Mock(answer = Answers.RETURNS_DEEP_STUBS)
   private Subject subject;
 
   @BeforeEach
@@ -110,6 +115,41 @@ class TemplateCommentRendererTest {
 
     String comment = renderer.render(ref, "resolved");
     assertThat(comment).isEqualTo("pr is resolved");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void shouldCreateRichModel() throws IOException {
+    when(subject.getPrincipals().oneByType(User.class)).thenReturn(UserTestData.createTrillian());
+
+    when(engineFactory.getEngineByExtension("/tpls/unit-test.mustache")).thenReturn(engine);
+    when(engine.getTemplate("/tpls/unit-test.mustache")).thenReturn(template);
+
+    IssueReferencingObject ref = content("Awesome", "Incredible");
+
+    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory);
+    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}.mustache");
+    renderer.render(ref);
+
+    ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+    verify(template).execute(any(), captor.capture());
+
+    Map<String, Object> model = captor.getValue();
+    assertThat(model)
+      .containsEntry("type", "unit-test")
+      .containsEntry("id", "42")
+      .hasEntrySatisfying("content", object -> {
+        assertThat(object).isInstanceOfSatisfying(Map.class, map -> {
+          assertThat(map).containsEntry("c0", "Awesome");
+          assertThat(map).containsEntry("c1", "Incredible");
+        });
+      })
+      .hasEntrySatisfying("principal", object -> {
+        assertThat(object).isInstanceOfSatisfying(Person.class, person -> {
+          assertThat(person.getName()).isEqualTo("Tricia McMillan");
+          assertThat(person.getMail()).isEqualTo("tricia.mcmillan@hitchhiker.com");
+        });
+      });
   }
 
 }

@@ -24,57 +24,94 @@
 
 package sonia.scm.issuetracker.spi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.PrincipalCollection;
+import sonia.scm.issuetracker.api.Content;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
+import sonia.scm.repository.Person;
 import sonia.scm.template.Template;
 import sonia.scm.template.TemplateEngineFactory;
+import sonia.scm.user.User;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.MessageFormat;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 class TemplateCommentRenderer implements ReferenceCommentRenderer, StateChangeCommentRenderer {
 
   private final TemplateEngineFactory templateEngineFactory;
-  private final ObjectMapper mapper;
   private final String resourcePathTemplate;
 
-  TemplateCommentRenderer(TemplateEngineFactory templateEngineFactory, ObjectMapper mapper, String resourcePathTemplate) {
+  TemplateCommentRenderer(TemplateEngineFactory templateEngineFactory, String resourcePathTemplate) {
     this.templateEngineFactory = templateEngineFactory;
-    this.mapper = mapper;
     this.resourcePathTemplate = resourcePathTemplate;
   }
 
   @Override
   public String render(IssueReferencingObject object) throws IOException {
-    return render(object.getType(), object);
+    Map<String, Object> model = model(object).build();
+    return render(object.getType(), model);
   }
 
   @Override
   public String render(IssueReferencingObject object, String keyWord) throws IOException {
-    Object model = createModelWithKeyWord(object, keyWord);
+    Map<String, Object> model = model(object).put("keyWord", keyWord).build();
     return render(object.getType(), model);
   }
 
-  private String render(String type, Object model) throws IOException {
+  private String render(String type, Map<String, Object> model) throws IOException {
     Template template = findTemplate(type);
     return execute(template, model);
   }
 
-  private String execute(Template template, Object model) throws IOException {
+  private String execute(Template template, Map<String, Object> model) throws IOException {
     StringWriter writer = new StringWriter();
     template.execute(writer, model);
     return writer.toString();
   }
 
-  private Object createModelWithKeyWord(IssueReferencingObject object, String keyWord) {
-    Map<?,?> refMap = mapper.convertValue(object, Map.class);
-    return ImmutableMap.builder()
-      .putAll(refMap)
-      .put("keyWord", keyWord)
-      .build();
+  private ImmutableMap.Builder<String, Object> model(IssueReferencingObject object) {
+    ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+    put(builder, "type", object.getType());
+    put(builder, "id", object.getId());
+    put(builder, "author", object.getAuthor());
+    put(builder, "date", object.getDate());
+    put(builder, "content", object.getContent());
+    put(builder, "link", object.getLink());
+    put(builder, "origin", object.getOrigin());
+    put(builder, "principal", findPrincipal());
+    return builder;
+  }
+
+  private void put(ImmutableMap.Builder<String, Object> builder, String key, List<Content> content) {
+    Map<String,String> map = new LinkedHashMap<>();
+    content.forEach(c -> map.put(c.getType(), c.getValue()));
+    put(builder, key, map);
+  }
+
+  private void put(ImmutableMap.Builder<String, Object> builder, String key, Object value) {
+    if (value != null) {
+      builder.put(key, value);
+    }
+  }
+
+  private Person findPrincipal() {
+    PrincipalCollection principals = SecurityUtils.getSubject().getPrincipals();
+    if (principals != null) {
+      User user = principals.oneByType(User.class);
+      if (user != null) {
+        return new Person(
+          MoreObjects.firstNonNull(user.getDisplayName(), user.getName()),
+          user.getMail()
+        );
+      }
+    }
+    return null;
   }
 
   private Template findTemplate(String type) throws IOException {
