@@ -31,8 +31,8 @@ import sonia.scm.repository.Repository;
 import java.util.Optional;
 
 /**
- * Creates an issue tracker for an external issue tracker system such as jira or redmine.
- * This is the main entry point for plugin developers which would to connect a new issue tracker system.
+ * Creates issue trackers for an external issue tracker system such as jira or redmine.
+ * This is the main entry point for plugin developers that want to connect to a new issue tracker system.
  *
  * @since 3.0.0
  */
@@ -40,7 +40,8 @@ import java.util.Optional;
 public interface IssueTrackerProvider {
 
   /**
-   * Create a new issue tracker for the given repository of an empty optional if no issue tracker is configured.
+   * Create a new issue tracker for the given repository wrapped in an {@link Optional} or
+   * {@link Optional#empty()} if no issue tracker is configured or applicable.
    *
    * @param builder builder to create a default implementation of the issue tracker
    * @param repository target repository

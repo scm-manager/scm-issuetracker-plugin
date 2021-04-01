@@ -32,8 +32,8 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Abstract model for handling issue references a {@link IssueReferencingObject} can be changeset, pull request comment
- * or what ever fits into the model.
+ * Abstract model for handling issue references. An {@link IssueReferencingObject} can be build for a changeset,
+ * a pull request comment or what ever fits into the model. You can get this object with {@link #getOrigin()}.
  *
  * @since 3.0.0
  */

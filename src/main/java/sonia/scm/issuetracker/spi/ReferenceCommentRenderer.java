@@ -29,18 +29,18 @@ import sonia.scm.issuetracker.api.IssueReferencingObject;
 import java.io.IOException;
 
 /**
- * Renders comments which are referencing an object inside SCM-Manager.
+ * Renders comments for issues that are referenced by an object inside SCM-Manager.
  *
  * @since 3.0.0
  */
 public interface ReferenceCommentRenderer {
 
   /**
-   * Creates a reference comment.
+   * Creates a comment for a reference.
    *
-   * @param object issue reference object
-   * @return reference comment
-   * @throws IOException failed to render comment
+   * @param object object referencing the issue
+   * @return comment that will be added to the issue
+   * @throws IOException when the comment could not be rendered
    */
   String render(IssueReferencingObject object) throws IOException;
 }

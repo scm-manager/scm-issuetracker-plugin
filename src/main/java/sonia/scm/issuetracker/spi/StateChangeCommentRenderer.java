@@ -36,12 +36,12 @@ import java.io.IOException;
 public interface StateChangeCommentRenderer {
 
   /**
-   * Creates a state change comment.
+   * Creates a comment for a state change.
    *
-   * @param object issue reference object
-   * @param keyWord keyword which has triggered the state change
-   * @return reference comment
-   * @throws IOException failed to render comment
+   * @param object object triggering the state change of the issue
+   * @param keyWord keyword that has triggered the state change
+   * @return comment that will be added to the issue
+   * @throws IOException when the comment could not be rendered
    */
   String render(IssueReferencingObject object, String keyWord) throws IOException;
 }

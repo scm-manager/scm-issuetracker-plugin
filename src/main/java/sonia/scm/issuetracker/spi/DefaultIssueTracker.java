@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Default implementation of the {@link IssueTracker}.
+ * Default implementation of the {@link IssueTracker}. This will be build using a {@link IssueTrackerBuilder}.
  *
  * @since 3.0.0
  */

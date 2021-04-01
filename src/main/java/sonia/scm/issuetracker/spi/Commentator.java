@@ -39,7 +39,7 @@ public interface Commentator {
    * @param issueKey issue key
    * @param comment comment to add
    *
-   * @throws IOException if the comment could not be add
+   * @throws IOException if the comment could not be added
    */
   void comment(String issueKey, String comment) throws IOException;
 }

@@ -27,19 +27,22 @@ package sonia.scm.issuetracker.api;
 import lombok.Value;
 
 /**
- * Represents content of an {@link IssueReferencingObject}
- * e.g. changeset description, pull request title and pull request description.
+ * Represents single content of an {@link IssueReferencingObject},
+ * e.g. 'description' for changesets, 'title' or 'description' for pull requests.
+ * <br>
+ * The {@link #getType()} will give you the type (e.g. 'description'), {@link #getValue()}
+ * the actual value.
  *
  * @since 3.0.0
  */
 @Value
 public class Content {
   /**
-   * Type of content e.g.: title
+   * Type of content, e.g. 'title'.
    */
   String type;
   /**
-   * Value of content e.g.: The actual title of a pull request
+   * Value of content, e.g. the actual title of a pull request.
    */
   String value;
 }

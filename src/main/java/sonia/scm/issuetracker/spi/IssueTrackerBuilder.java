@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.repository.Repository;
 import sonia.scm.store.DataStore;
@@ -37,7 +38,9 @@ import javax.inject.Inject;
 import java.util.Locale;
 
 /**
- * Builder for the default implementation {@link IssueTracker}.
+ * Builder for the default {@link IssueTracker} implementation. Start by calling
+ * {@link #start(String, IssueMatcher, IssueLinkFactory)}, setting the least required
+ * fields.
  *
  * @since 3.0.0
  */
@@ -85,19 +88,18 @@ public class IssueTrackerBuilder {
     }
 
     /**
-     * Creates an {@link IssueTracker} which only enrich links of objects and does not comment or change state.
-     *
-     * @return read only issue tracker
+     * Creates an {@link IssueTracker} that will only enrich links of objects and does not create comments
+     * or trigger state changes.
      */
     public IssueTracker build() {
       return new DefaultIssueTracker(name, matcher, linkFactory);
     }
 
     /**
-     * Allow commenting of issues.
+     * Sets required fields for creating comments in issues.
      *
-     * @param repository repository which is target
-     * @param commentator commentator which is able to add comments to issues
+     * @param repository repository from the {@link sonia.scm.issuetracker.api.IssueReferencingObject}.
+     * @param commentator commentator that will be used to add comments to issues
      *
      * @return commenting stage
      */
@@ -130,6 +132,7 @@ public class IssueTrackerBuilder {
 
     /**
      * Specify the renderer for the issue comments.
+     *
      * @param renderer comment renderer
      * @return change state stage of builder
      */
@@ -139,11 +142,13 @@ public class IssueTrackerBuilder {
     }
 
     /**
-     * Render issue comments with templates.
-     * The template are read from the given resource path.
-     * The resource path can contain place holders for type of object and the type of comment-
-     * - {0} gets replaced with type of {@link sonia.scm.issuetracker.api.IssueReferencingObject}
-     * @param resourcePathTemplate resource path template on the classpath
+     * Render issue comments using templates that will be read from a path build using the given
+     * resource path template.
+     * This resource path template can contain place holders for the type of the comment:
+     * <code>{0}</code> will be replaced with {@link IssueReferencingObject#getType()}.
+     *
+     * @param resourcePathTemplate template for the resource path on the classpath
+     *
      * @return change state stage of builder
      */
     public ChangeStateStage template(String resourcePathTemplate) {
@@ -165,9 +170,10 @@ public class IssueTrackerBuilder {
     }
 
     /**
-     * Allow changing of an issue state by mention an key word in the same sentence as the issue key.
+     * Allow changing states of issues by key words in the same sentence as an issue key
+     * (e.g. "This closes #42").
      *
-     * @param stateChanger state changer which is able to change the state of an issue
+     * @param stateChanger state changer that will be used to change the state of an issue
      *
      * @return commenting state of builder
      */
@@ -177,7 +183,7 @@ public class IssueTrackerBuilder {
     }
 
     /**
-     * Creates {@link IssueTracker} which able to comment issues.
+     * Creates {@link IssueTracker} which is able to create comments for issues.
      *
      * @return new issue tracker
      */
@@ -205,6 +211,7 @@ public class IssueTrackerBuilder {
 
     /**
      * Specify the renderer for the issue comments.
+     *
      * @param renderer comment renderer
      * @return change state stage of builder
      */
@@ -214,12 +221,14 @@ public class IssueTrackerBuilder {
     }
 
     /**
-     * Render state change issue comments with templates.
-     * The template are read from the given resource path.
-     * The resource path can contain place holders for type of object and the type of comment-
-     * - {0} gets replaced with type of {@link sonia.scm.issuetracker.api.IssueReferencingObject}
-     * @param resourcePathTemplate resource path template on the classpath
-     * @return change state stage of builder
+     * Render issue comments for state changes using templates that will be read from a path
+     * build using the given resource path template.
+     * This resource path template can contain place holders for the type of the comment:
+     * <code>{0}</code> gets replaced with {@link IssueReferencingObject#getType()}.
+     *
+     * @param resourcePathTemplate template for the resource path on the classpath
+     *
+     * @return final stage of builder
      */
     public FinalStage template(String resourcePathTemplate) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(resourcePathTemplate), "resourcePathTemplate is required");
@@ -240,7 +249,7 @@ public class IssueTrackerBuilder {
     }
 
     /**
-     * Creates {@link IssueTracker} which able to comment and change the state of issues.
+     * Creates {@link IssueTracker} which is able to comment and change the state of issues.
      *
      * @return new issue tracker
      */

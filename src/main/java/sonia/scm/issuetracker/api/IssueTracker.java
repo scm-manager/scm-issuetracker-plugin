@@ -51,5 +51,5 @@ public interface IssueTracker {
    * @param object issue referencing object
    * @return map of issues, key is the issue id and value is a link to issue
    */
-  Map<String,String> findIssues(IssueReferencingObject object);
+  Map<String, String> findIssues(IssueReferencingObject object);
 }

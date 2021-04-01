@@ -27,7 +27,7 @@ package sonia.scm.issuetracker.spi;
 import java.io.IOException;
 
 /**
- * Change state of issues.
+ * Changes states of issues.
  *
  * @since 3.0.0
  */
@@ -37,14 +37,14 @@ public interface StateChanger {
    * Change the state of the issue with the given issue key to the one which matches the given key word.
    *
    * @param issueKey key of the issue
-   * @param keyWord matched key word
+   * @param keyWord matched key word that triggers the state change.
    *
    * @throws IOException if state could not be changed
    */
   void changeState(String issueKey, String keyWord) throws IOException;
 
   /**
-   * Returns a collection of key words which are representing possible state transitions in the issue tracker system.
+   * Returns a collection of key words representing possible state transitions in the issue tracker system.
    *
    * @param issueKey key of the issue
    *
