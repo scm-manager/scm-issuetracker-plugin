@@ -59,14 +59,14 @@ import static java.util.Optional.ofNullable;
 
 @Extension
 @EagerSingleton
-public class IssuePostReceiveRepositoryHook
+public class LegacyChangesetSubscriber
 {
 
   /**
    * the logger for IssuePostReceiveRepositoryHook
    */
   private static final Logger logger =
-    LoggerFactory.getLogger(IssuePostReceiveRepositoryHook.class);
+    LoggerFactory.getLogger(LegacyChangesetSubscriber.class);
 
   //~--- constructors ---------------------------------------------------------
 
@@ -77,7 +77,7 @@ public class IssuePostReceiveRepositoryHook
    * @param manager
    */
   @Inject
-  public IssuePostReceiveRepositoryHook(IssueTrackerManager manager)
+  public LegacyChangesetSubscriber(IssueTrackerManager manager)
   {
     this.manager = manager;
   }
