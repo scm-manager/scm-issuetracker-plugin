@@ -138,6 +138,7 @@ class TemplateCommentRendererTest {
     assertThat(model)
       .containsEntry("type", "unit-test")
       .containsEntry("id", "42")
+      .containsEntry("repository", ref.getRepository())
       .hasEntrySatisfying("content", object -> {
         assertThat(object).isInstanceOfSatisfying(Map.class, map -> {
           assertThat(map).containsEntry("c0", "Awesome");

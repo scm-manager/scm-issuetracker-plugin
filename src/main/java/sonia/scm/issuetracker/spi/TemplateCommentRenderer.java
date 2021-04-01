@@ -77,6 +77,7 @@ class TemplateCommentRenderer implements ReferenceCommentRenderer, StateChangeCo
 
   private ImmutableMap.Builder<String, Object> model(IssueReferencingObject object) {
     ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+    put(builder, "repository", object.getRepository());
     put(builder, "type", object.getType());
     put(builder, "id", object.getId());
     put(builder, "author", object.getAuthor());
