@@ -34,6 +34,7 @@ import sonia.scm.store.DataStore;
 import sonia.scm.store.DataStoreFactory;
 
 import javax.inject.Inject;
+import java.util.Locale;
 
 /**
  * Builder for the default implementation {@link IssueTracker}.
@@ -109,8 +110,9 @@ public class IssueTrackerBuilder {
 
     private DataStore<ProcessedMarks> createStore(Repository repository) {
       return dataStoreFactory.withType(ProcessedMarks.class)
-        .withName("issue-tracker-" + name)
-        .forRepository(repository).build();
+        .withName("issueTracker" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1))
+        .forRepository(repository)
+        .build();
     }
   }
 
