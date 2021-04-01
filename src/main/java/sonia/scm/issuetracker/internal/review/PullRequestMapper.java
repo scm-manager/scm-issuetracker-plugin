@@ -54,7 +54,7 @@ public class PullRequestMapper {
     this.personMapper = personMapper;
   }
 
-  public IssueReferencingObject ref(Repository repository, PullRequest pr) {
+  public IssueReferencingObject ref(Repository repository, PullRequest pr, boolean triggeringStateChange) {
     return new IssueReferencingObject(
       repository,
       TYPE,
@@ -63,6 +63,7 @@ public class PullRequestMapper {
       date(pr),
       content(pr),
       link(repository, pr),
+      triggeringStateChange,
       pr
     );
   }

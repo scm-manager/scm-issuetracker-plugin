@@ -71,7 +71,7 @@ class PullRequestLinkEnricherTest {
   @Test
   void shouldAppendLinkForSingleIssue() {
     IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "42");
-    when(mapper.ref(repository, pullRequest)).thenReturn(ref);
+    when(mapper.ref(repository, pullRequest, false)).thenReturn(ref);
     when(issueTracker.findIssues(ref)).thenReturn(ImmutableMap.of(
       "ABC-123", "https://jira.hitchhiker.com/issues/ABC-123"
     ));

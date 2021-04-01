@@ -68,6 +68,8 @@ class ChangesetMapperTest {
 
     assertThat(ref.getLink()).isEqualTo("https://hitchhiker.com/scm/repo/hitchhiker/HeartOfGold/code/changeset/42");
 
+    assertThat(ref.isTriggeringStateChange()).isTrue();
+
     assertThat(ref.getOrigin()).isSameAs(changeset);
   }
 

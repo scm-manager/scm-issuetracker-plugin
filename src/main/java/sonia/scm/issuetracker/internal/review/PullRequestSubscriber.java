@@ -25,6 +25,7 @@
 package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
+import com.cloudogu.scm.review.pullrequest.service.PullRequestMergedEvent;
 import com.github.legman.Subscribe;
 import sonia.scm.EagerSingleton;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
@@ -51,9 +52,14 @@ public class PullRequestSubscriber {
   @Subscribe
   public void handle(PullRequestEvent event) {
     if (PullRequestEvents.isSupported(event)) {
-      IssueReferencingObject ref = mapper.ref(event.getRepository(), event.getItem());
+      IssueReferencingObject ref = mapper.ref(event.getRepository(), event.getItem(), false);
       issueTracker.process(ref);
     }
   }
 
+  @Subscribe
+  public void handle(PullRequestMergedEvent event) {
+    IssueReferencingObject ref = mapper.ref(event.getRepository(), event.getPullRequest(), true);
+    issueTracker.process(ref);
+  }
 }

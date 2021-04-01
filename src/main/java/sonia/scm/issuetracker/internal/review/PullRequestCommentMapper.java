@@ -70,6 +70,7 @@ public class PullRequestCommentMapper {
       comment.getDate(),
       content(comment),
       link(repository, pullRequest, comment),
+      false,
       comment
     );
   }

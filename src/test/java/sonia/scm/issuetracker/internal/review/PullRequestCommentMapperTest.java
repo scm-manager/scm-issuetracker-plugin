@@ -71,6 +71,7 @@ class PullRequestCommentMapperTest {
       assertThat(c.getValue()).isEqualTo("Awesome Comment");
     });
     assertThat(ref.getLink()).isEqualTo("https://scm/repo/hitchhiker/HeartOfGold/pull-request/4211/comments#comment-3");
+    assertThat(ref.isTriggeringStateChange()).isFalse();
     assertThat(ref.getOrigin()).isSameAs(comment);
   }
 

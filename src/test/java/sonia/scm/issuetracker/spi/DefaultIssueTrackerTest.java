@@ -182,6 +182,15 @@ class DefaultIssueTrackerTest {
     }
 
     @Test
+    void shouldNotChangeStateForRefWhichDoesNotTriggerStateChanges() throws IOException {
+      IssueReferencingObject ref = content(false, "Fixes #21");
+      when(referenceCommentRenderer.render(ref)).thenReturn("Great");
+
+      tracker.process(ref);
+      verify(commentator).comment("#21", "Great");
+    }
+
+    @Test
     void shouldChangeStateOnlyOnce() throws IOException {
       IssueReferencingObject ref = content("Resolves #21");
       when(stateChanger.getKeyWords("#21")).thenReturn(Collections.singleton("resolves"));

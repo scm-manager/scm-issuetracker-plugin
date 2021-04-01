@@ -85,6 +85,7 @@ class ProcessedStoreTest {
       Instant.now(),
       Collections.emptyList(),
       "https://hitchhiker.com",
+      true,
       "KA"
     );
   }

@@ -117,7 +117,7 @@ class DefaultIssueTracker implements IssueTracker {
   }
 
   private void process(IssueReferencingObject object, String issueKey) {
-    if (stateChanger != null) {
+    if (stateChanger != null && object.isTriggeringStateChange()) {
       processWithStateChange(object, issueKey);
     } else if (commentator != null) {
       comment(object, issueKey);

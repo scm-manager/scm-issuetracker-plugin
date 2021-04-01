@@ -26,7 +26,9 @@ package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
 import com.cloudogu.scm.review.pullrequest.service.PullRequestEvent;
+import com.cloudogu.scm.review.pullrequest.service.PullRequestMergedEvent;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -59,23 +61,44 @@ class PullRequestSubscriberTest {
     subscriber = new PullRequestSubscriber(issueTracker, mapper);
   }
 
-  @Test
-  void shouldProcessEvent() {
-    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "21");
-    when(mapper.ref(repository, pullRequest)).thenReturn(ref);
+  @Nested
+  class CreateOrModify {
 
-    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.CREATE);
-    subscriber.handle(event);
+    @Test
+    void shouldProcessEvent() {
+      IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "21");
+      when(mapper.ref(repository, pullRequest, false)).thenReturn(ref);
 
-    verify(issueTracker).process(ref);
+      PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.CREATE);
+      subscriber.handle(event);
+
+      verify(issueTracker).process(ref);
+    }
+
+    @Test
+    void shouldIgnoreUnsupportedEventTypes() {
+      PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.DELETE);
+      subscriber.handle(event);
+
+      verify(issueTracker, never()).process(any());
+    }
+
   }
 
-  @Test
-  void shouldIgnoreUnsupportedEventTypes() {
-    PullRequestEvent event = new PullRequestEvent(repository, pullRequest, null, HandlerEventType.DELETE);
-    subscriber.handle(event);
+  @Nested
+  class Merge {
 
-    verify(issueTracker, never()).process(any());
+    @Test
+    void shouldProcessMergeEvent() {
+      IssueReferencingObject ref = IssueReferencingObjects.ref("pull-request", "42");
+      when(mapper.ref(repository, pullRequest, true)).thenReturn(ref);
+
+      PullRequestMergedEvent event = new PullRequestMergedEvent(repository, pullRequest);
+      subscriber.handle(event);
+
+      verify(issueTracker).process(ref);
+    }
+
   }
 
 }

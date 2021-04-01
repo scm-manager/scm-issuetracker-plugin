@@ -56,7 +56,7 @@ public class PullRequestLinkEnricher implements HalEnricher {
     Repository repository = context.oneRequireByType(Repository.class);
     PullRequest pullRequest = context.oneRequireByType(PullRequest.class);
 
-    IssueReferencingObject ref = mapper.ref(repository, pullRequest);
+    IssueReferencingObject ref = mapper.ref(repository, pullRequest, false);
 
     HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issues");
     issueTracker.findIssues(ref).forEach(builder::append);

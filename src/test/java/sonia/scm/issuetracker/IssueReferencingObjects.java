@@ -48,11 +48,16 @@ public class IssueReferencingObjects {
       Instant.now(),
       Collections.emptyList(),
       "https://hitchhiker.com/scm",
+      true,
       type + "/" + id
     );
   }
 
   public static IssueReferencingObject content(String... values) {
+    return content(true, values);
+  }
+
+  public static IssueReferencingObject content(boolean triggeringStateChange, String... values) {
     List<Content> content = new ArrayList<>();
     for (int i = 0; i < values.length; i++) {
       content.add(new Content("c" + i, values[i]));
@@ -65,6 +70,7 @@ public class IssueReferencingObjects {
       Instant.now(),
       content,
       "https://hitchhiker.com/scm",
+      triggeringStateChange,
       values
     );
   }

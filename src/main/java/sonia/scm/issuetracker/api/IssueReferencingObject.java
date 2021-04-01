@@ -47,6 +47,7 @@ public class IssueReferencingObject {
   Instant date;
   List<Content> content;
   String link;
+  boolean triggeringStateChange;
   Object origin;
 
 }

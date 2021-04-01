@@ -70,7 +70,7 @@ class PullRequestMapperTest {
       .lastModified(now)
       .build();
 
-    IssueReferencingObject ref = mapper.ref(repository, pr);
+    IssueReferencingObject ref = mapper.ref(repository, pr, false);
     assertThat(ref.getRepository()).isSameAs(repository);
     assertThat(ref.getType()).isEqualTo(PullRequestMapper.TYPE);
     assertThat(ref.getAuthor().getName()).isEqualTo("tricia");
@@ -95,7 +95,7 @@ class PullRequestMapperTest {
       .creationDate(creationDate)
       .build();
 
-    IssueReferencingObject ref = mapper.ref(repository, pr);
+    IssueReferencingObject ref = mapper.ref(repository, pr, false);
     assertThat(ref.getDate()).isSameAs(lastModified);
   }
 
@@ -110,8 +110,24 @@ class PullRequestMapperTest {
       .creationDate(creationDate)
       .build();
 
-    IssueReferencingObject ref = mapper.ref(repository, pr);
+    IssueReferencingObject ref = mapper.ref(repository, pr, false);
     assertThat(ref.getDate()).isSameAs(creationDate);
+  }
+
+  @Test
+  void shouldMapTriggeringStateChange() {
+    Instant creationDate = Instant.now();
+    PullRequest pr = PullRequest.builder()
+      .id("42")
+      .author("tricia")
+      .title("Awesome")
+      .description("This pr so awesome")
+      .creationDate(creationDate)
+      .build();
+
+    IssueReferencingObject ref = mapper.ref(repository, pr, true);
+    assertThat(ref.getDate()).isSameAs(creationDate);
+    assertThat(ref.isTriggeringStateChange()).isTrue();
   }
 
 }

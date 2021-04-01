@@ -57,6 +57,7 @@ public class ChangesetMapper {
       Instant.ofEpochMilli(changeset.getDate()),
       content(changeset),
       link(repository, changeset),
+      true,
       changeset
     );
   }
