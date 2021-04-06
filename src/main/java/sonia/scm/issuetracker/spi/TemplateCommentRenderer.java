@@ -32,6 +32,7 @@ import sonia.scm.issuetracker.api.Content;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.repository.Person;
 import sonia.scm.template.Template;
+import sonia.scm.template.TemplateEngine;
 import sonia.scm.template.TemplateEngineFactory;
 import sonia.scm.user.User;
 
@@ -117,7 +118,18 @@ class TemplateCommentRenderer implements ReferenceCommentRenderer, StateChangeCo
 
   private Template findTemplate(String type) throws IOException {
     String path = MessageFormat.format(resourcePathTemplate, type);
-    return templateEngineFactory.getEngineByExtension(path).getTemplate(path);
+
+    TemplateEngine engine = templateEngineFactory.getEngineByExtension(path);
+    if (engine == null) {
+      throw new TemplateEngineNotFoundException(path);
+    }
+
+    Template template = engine.getTemplate(path);
+    if (template == null) {
+      throw new TemplateNotFoundException(path);
+    }
+
+    return template;
   }
 
 }

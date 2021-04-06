@@ -47,6 +47,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static sonia.scm.issuetracker.IssueReferencingObjects.content;
@@ -116,6 +117,29 @@ class TemplateCommentRendererTest {
     String comment = renderer.render(ref, "resolved");
     assertThat(comment).isEqualTo("pr is resolved");
   }
+
+  @Test
+  void shouldThrowTemplateNotFoundException() {
+    when(engineFactory.getEngineByExtension("/tpls/pr.mustache")).thenReturn(engine);
+
+    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory);
+    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}.mustache");
+    IssueReferencingObject ref = ref("pr", "42");
+
+    TemplateNotFoundException exception = assertThrows(TemplateNotFoundException.class, () -> renderer.render(ref));
+    assertThat(exception.getTemplatePath()).isEqualTo("/tpls/pr.mustache");
+  }
+
+  @Test
+  void shouldThrowTemplateEngineNotFoundException() {
+    TemplateCommentRendererFactory factory = new TemplateCommentRendererFactory(engineFactory);
+    ReferenceCommentRenderer renderer = factory.reference("/tpls/{0}.mustache");
+    IssueReferencingObject ref = ref("pr", "42");
+
+    TemplateEngineNotFoundException exception = assertThrows(TemplateEngineNotFoundException.class, () -> renderer.render(ref));
+    assertThat(exception.getTemplatePath()).isEqualTo("/tpls/pr.mustache");
+  }
+
 
   @Test
   @SuppressWarnings("unchecked")
