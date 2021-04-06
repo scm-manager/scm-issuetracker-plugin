@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 import React from "react";
-import { Changeset } from "@scm-manager/ui-types";
+import { HalRepresentation } from "@scm-manager/ui-types";
 import { Replacement, ExternalLink } from "@scm-manager/ui-components";
 
 type Issue = {
@@ -30,11 +30,11 @@ type Issue = {
   href: string;
 };
 
-const ChangesetDescription: (changeset: Changeset, value: string) => Replacement[] = (
-  changeset: Changeset,
+const replaceIssueKeys: (object: HalRepresentation, value: string) => Replacement[] = (
+  object: HalRepresentation,
   value: string
 ) => {
-  const issues = changeset._links.issues as Issue[];
+  const issues = object._links.issues as Issue[];
   if (!value || !issues) {
     return [];
   }
@@ -52,4 +52,4 @@ const ChangesetDescription: (changeset: Changeset, value: string) => Replacement
   return replacements;
 };
 
-export default ChangesetDescription;
+export default replaceIssueKeys;

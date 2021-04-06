@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 import { binder } from "@scm-manager/ui-extensions";
-import ChangesetDescription from "./ChangesetDescription";
+import replaceIssueKeys from "./replaceIssueKeys";
 import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
 
-binder.bind("changeset.description.tokens", ChangesetDescription);
+binder.bind("changeset.description.tokens", replaceIssueKeys);
+binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
 binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
 binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
