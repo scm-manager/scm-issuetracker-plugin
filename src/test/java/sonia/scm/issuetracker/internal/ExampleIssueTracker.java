@@ -23,9 +23,7 @@
  */
 package sonia.scm.issuetracker.internal;
 
-import sonia.scm.issuetracker.IssueLinkFactory;
-import sonia.scm.issuetracker.IssueMatcher;
-import sonia.scm.issuetracker.IssueTracker;
+import sonia.scm.issuetracker.*;
 import sonia.scm.repository.Changeset;
 import sonia.scm.repository.Repository;
 

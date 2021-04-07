@@ -21,18 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+
+package sonia.scm.issuetracker.api;
+
+import com.google.inject.ImplementedBy;
+import sonia.scm.issuetracker.internal.CompositeIssueTracker;
+
+import java.util.Map;
 
 /**
- * Create links to issues in the external issue tracker.
+ * Main api to find and process issues.
+ *
+ * @since 3.0.0
  */
-public interface IssueLinkFactory {
+@ImplementedBy(CompositeIssueTracker.class)
+public interface IssueTracker {
 
   /**
-   * Create link to issue.
+   * Process the {@link IssueReferencingObject}.
+   * What exactly processing means is up the implementation of the issue tracker.
+   * This can be commenting or changing state of the issue.
    *
-   * @param key issue key
-   * @return link to issue
+   * @param object issue referencing object
    */
-  String createLink(String key);
+  void process(IssueReferencingObject object);
+
+  /**
+   * Find issues in the {@link IssueReferencingObject}.
+   * @param object issue referencing object
+   * @return map of issues, key is the issue id and value is a link to issue
+   */
+  Map<String, String> findIssues(IssueReferencingObject object);
 }

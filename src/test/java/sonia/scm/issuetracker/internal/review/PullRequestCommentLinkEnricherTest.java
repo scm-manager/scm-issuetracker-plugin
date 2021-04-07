@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.comment.service.Comment;
-import com.cloudogu.scm.review.comment.service.Location;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +32,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.api.v2.resources.HalAppender;
 import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.issuetracker.IssueReferencingObjects;
+import sonia.scm.issuetracker.api.IssueReferencingObject;
+import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 
 import static org.mockito.Mockito.verify;
@@ -40,60 +43,41 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PullRequestCommentLinkEnricherTest {
+
   @Mock
   private HalAppender.LinkArrayBuilder linkArrayBuilder;
 
   @Mock
   private HalAppender linkAppender;
 
+  @Mock
+  private IssueTracker issueTracker;
+
+  @Mock
+  private PullRequestCommentMapper mapper;
+
+  private final Repository repository = RepositoryTestData.createHeartOfGold();
+  private final Comment comment = new Comment();
   private PullRequestCommentLinkEnricher enricher;
 
   @BeforeEach
   void setup() {
     when(linkAppender.linkArrayBuilder("issues")).thenReturn(linkArrayBuilder);
-    IssueTrackerManager issueTrackerManager = new IssueTrackerManager(ImmutableSet.of(ExampleIssueTracker.getRedmine(), ExampleIssueTracker.getJira()));
-    enricher = new PullRequestCommentLinkEnricher(issueTrackerManager);
+    enricher = new PullRequestCommentLinkEnricher(issueTracker, mapper);
   }
 
   @Test
-  void shouldAppendLinkForSingleIssue() {
-    Comment pullRequestComment = Comment.createComment("foo", "ABC-123", "bar", new Location());
-    HalEnricherContext ctx = HalEnricherContext.of(RepositoryTestData.createHeartOfGold(), pullRequestComment);
+  void shouldAppendLinks() {
+    IssueReferencingObject ref = IssueReferencingObjects.ref("pr", "42");
+    when(mapper.ref(repository, comment)).thenReturn(ref);
+    when(issueTracker.findIssues(ref)).thenReturn(ImmutableMap.of(
+      "ABC-123", "https://jira.hitchhiker.com/issues/ABC-123"
+    ));
+
+    HalEnricherContext ctx = HalEnricherContext.of(repository, comment);
 
     enricher.enrich(ctx, linkAppender);
     verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
-    verify(linkArrayBuilder).build();
-  }
-
-  @Test
-  void shouldAppendLinksForMultipleIssues() {
-    Comment pullRequestComment = Comment.createComment("foo", "ABC-123 Blabla DEF-42", "bar", new Location());
-    HalEnricherContext ctx = HalEnricherContext.of(RepositoryTestData.createHeartOfGold(), pullRequestComment);
-
-    enricher.enrich(ctx, linkAppender);
-    verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
-    verify(linkArrayBuilder).append("DEF-42", "https://jira.hitchhiker.com/issues/DEF-42");
-    verify(linkArrayBuilder).build();
-  }
-
-  @Test
-  void shouldAppendSingleLinkForDuplicateKey() {
-    Comment pullRequestComment = Comment.createComment("foo", "ABC-123 Blabla ABC-123 ", "bar", new Location());
-    HalEnricherContext ctx = HalEnricherContext.of(RepositoryTestData.createHeartOfGold(), pullRequestComment);
-
-    enricher.enrich(ctx, linkAppender);
-    verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
-    verify(linkArrayBuilder).build();
-  }
-
-  @Test
-  void shouldAppendLinksForDifferentIssueTrackers() {
-    Comment pullRequestComment = Comment.createComment("foo", "ABC-123 Blabla #456 ", "bar", new Location());
-    HalEnricherContext ctx = HalEnricherContext.of(RepositoryTestData.createHeartOfGold(), pullRequestComment);
-
-    enricher.enrich(ctx, linkAppender);
-    verify(linkArrayBuilder).append("ABC-123", "https://jira.hitchhiker.com/issues/ABC-123");
-    verify(linkArrayBuilder).append("#456", "https://redmine.hitchhiker.com/issues/456");
     verify(linkArrayBuilder).build();
   }
 }

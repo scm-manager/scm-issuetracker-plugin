@@ -29,29 +29,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * The matcher is responsible for finding issue keys in texts.
  *
  * @author Sebastian Sdorra
  */
-public interface IssueMatcher
-{
+public interface IssueMatcher {
 
   /**
-   * Method description
+   * Return the pattern to match issues.
    *
-   *
-   * @param matcher
-   *
-   * @return
+   * @return pattern to match issues
    */
-  public String getKey(Matcher matcher);
+  Pattern getKeyPattern();
 
   /**
-   * Method description
+   * Returns the issue key for the given matcher.
    *
-   *
-   *
-   * @return
+   * @param matcher matcher create from the key pattern
+   * @return issue key
    */
-  public Pattern getKeyPattern();
+  String getKey(Matcher matcher);
 
 }

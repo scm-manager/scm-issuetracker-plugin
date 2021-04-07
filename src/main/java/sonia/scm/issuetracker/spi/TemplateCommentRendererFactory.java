@@ -21,18 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+package sonia.scm.issuetracker.spi;
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+import sonia.scm.template.TemplateEngineFactory;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+class TemplateCommentRendererFactory {
+
+  private final TemplateEngineFactory engineFactory;
+
+  @Inject
+  public TemplateCommentRendererFactory(TemplateEngineFactory engineFactory) {
+    this.engineFactory = engineFactory;
+  }
+
+  public ReferenceCommentRenderer reference(String resourcePathTemplate) {
+    return new TemplateCommentRenderer(engineFactory, resourcePathTemplate);
+  }
+
+  public StateChangeCommentRenderer stateChange(String resourcePathTemplate) {
+    return new TemplateCommentRenderer(engineFactory, resourcePathTemplate);
+  }
 }

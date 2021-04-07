@@ -21,18 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+
+package sonia.scm.issuetracker.api;
+
+import lombok.Value;
 
 /**
- * Create links to issues in the external issue tracker.
+ * Represents single content of an {@link IssueReferencingObject},
+ * e.g. 'description' for changesets, 'title' or 'description' for pull requests.
+ * <br>
+ * The {@link #getType()} will give you the type (e.g. 'description'), {@link #getValue()}
+ * the actual value.
+ *
+ * @since 3.0.0
  */
-public interface IssueLinkFactory {
-
+@Value
+public class Content {
   /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
+   * Type of content, e.g. 'title'.
    */
-  String createLink(String key);
+  String type;
+  /**
+   * Value of content, e.g. the actual title of a pull request.
+   */
+  String value;
 }

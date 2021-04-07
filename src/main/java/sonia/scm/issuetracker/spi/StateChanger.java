@@ -22,38 +22,36 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.spi;
 
-import com.cloudogu.scm.review.comment.service.Reply;
-import sonia.scm.api.v2.resources.Enrich;
-import sonia.scm.api.v2.resources.HalAppender;
-import sonia.scm.api.v2.resources.HalEnricher;
-import sonia.scm.api.v2.resources.HalEnricherContext;
-import sonia.scm.plugin.Extension;
-import sonia.scm.plugin.Requires;
-import sonia.scm.repository.Repository;
+import java.io.IOException;
 
-import javax.inject.Inject;
+/**
+ * Changes states of issues.
+ *
+ * @since 3.0.0
+ */
+public interface StateChanger {
 
-@Extension
-@Enrich(Reply.class)
-@Requires("scm-review-plugin")
-public class PullRequestReplyLinkEnricher implements HalEnricher {
+  /**
+   * Change the state of the issue with the given issue key to the one which matches the given key word.
+   *
+   * @param issueKey key of the issue
+   * @param keyWord matched key word that triggers the state change.
+   *
+   * @throws IOException if state could not be changed
+   */
+  void changeState(String issueKey, String keyWord) throws IOException;
 
-  private final IssueTrackerManager issueTrackerManager;
-
-  @Inject
-  public PullRequestReplyLinkEnricher(IssueTrackerManager issueTrackerManager) {
-    this.issueTrackerManager = issueTrackerManager;
-  }
-
-  @Override
-  public void enrich(HalEnricherContext context, HalAppender appender) {
-
-    Repository repository = context.oneRequireByType(Repository.class);
-    Reply reply = context.oneRequireByType(Reply.class);
-
-    IssueLinkEnricherUtils.enrich(issueTrackerManager, repository, appender, reply.getComment());
-  }
+  /**
+   * Returns a collection of key words representing possible state transitions in the issue tracker system.
+   *
+   * @param issueKey key of the issue
+   *
+   * @return collection of key words
+   *
+   * @throws IOException if the list of keywords could not be fetched
+   */
+  Iterable<String> getKeyWords(String issueKey) throws IOException;
 
 }

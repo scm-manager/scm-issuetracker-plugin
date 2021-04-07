@@ -21,52 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker.internal;
 
-//~--- non-JDK imports --------------------------------------------------------
+package sonia.scm.issuetracker.spi;
 
-import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.api.IssueReferencingObject;
 
-//~--- JDK imports ------------------------------------------------------------
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.IOException;
 
 /**
+ * Renders comments after a state of an issue was changed.
  *
- * @author Sebastian Sdorra
+ * @since 3.0.0
  */
-public class ExampleIssueMatcher implements IssueMatcher
-{
+public interface StateChangeCommentRenderer {
 
-  private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("\\b([A-Z]+-\\d+)");
-  private static final Pattern REDMINE_KEY_PATTERN = Pattern.compile("\\B(#\\d+)");
-
-  private Pattern pattern;
-
-
-  public ExampleIssueMatcher(Pattern pattern) {
-    this.pattern = pattern;
-  }
-
-  @Override
-  public String getKey(Matcher matcher)
-  {
-    return matcher.group();
-  }
-
-
-  @Override
-  public Pattern getKeyPattern()
-  {
-    return pattern;
-  }
-
-  public static ExampleIssueMatcher createJira() {
-    return new ExampleIssueMatcher(JIRA_KEY_PATTERN);
-  }
-
-  public static ExampleIssueMatcher createRedmine() {
-    return new ExampleIssueMatcher(REDMINE_KEY_PATTERN);
-  }
+  /**
+   * Creates a comment for a state change.
+   *
+   * @param object object triggering the state change of the issue
+   * @param keyWord keyword that has triggered the state change
+   * @return comment that will be added to the issue
+   * @throws IOException when the comment could not be rendered
+   */
+  String render(IssueReferencingObject object, String keyWord) throws IOException;
 }

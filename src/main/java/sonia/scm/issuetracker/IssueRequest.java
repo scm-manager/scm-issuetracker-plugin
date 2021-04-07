@@ -39,11 +39,13 @@ import java.util.Optional;
  * The detected issue keys related to a repository and a changeset
  *
  * @author Sebastian Sdorra
+ * @deprecated
  */
 @ToString
 @EqualsAndHashCode
 @Getter
 @AllArgsConstructor
+@Deprecated
 public final class IssueRequest {
     private Repository repository;
     private Changeset changeset;

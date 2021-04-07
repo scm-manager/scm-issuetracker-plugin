@@ -21,35 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import React from "react";
-import { Changeset } from "@scm-manager/ui-types";
-import { Replacement, ExternalLink } from "@scm-manager/ui-components";
 
-type Issue = {
-  name: string;
-  href: string;
-};
+package sonia.scm.issuetracker.internal.review;
 
-const ChangesetDescription: (changeset: Changeset, value: string) => Replacement[] = (
-  changeset: Changeset,
-  value: string
-) => {
-  const issues = changeset._links.issues as Issue[];
-  if (!value || !issues) {
-    return [];
+import com.cloudogu.scm.review.comment.service.BasicCommentEvent;
+import com.github.legman.Subscribe;
+import sonia.scm.EagerSingleton;
+import sonia.scm.issuetracker.api.IssueReferencingObject;
+import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.plugin.Extension;
+import sonia.scm.plugin.Requires;
+
+import javax.inject.Inject;
+
+@Extension
+@EagerSingleton
+@Requires("scm-review-plugin")
+public class PullRequestCommentSubscriber {
+
+  private final IssueTracker issueTracker;
+  private final PullRequestCommentMapper commentMapper;
+
+  @Inject
+  public PullRequestCommentSubscriber(IssueTracker issueTracker, PullRequestCommentMapper commentMapper) {
+    this.issueTracker = issueTracker;
+    this.commentMapper = commentMapper;
   }
-  const replacements: Replacement[] = [];
-  for (const issue of issues) {
-    replacements.push({
-      textToReplace: issue.name,
-      replacement: (
-        <ExternalLink key={issue.name} to={issue.href}>
-          {issue.name}
-        </ExternalLink>
-      )
-    });
-  }
-  return replacements;
-};
 
-export default ChangesetDescription;
+  @Subscribe
+  public void handle(BasicCommentEvent<?> event) {
+    if (PullRequestEvents.isSupported(event)) {
+      IssueReferencingObject ref = commentMapper.ref(event.getRepository(), event.getPullRequest(), event.getItem());
+      issueTracker.process(ref);
+    }
+  }
+}

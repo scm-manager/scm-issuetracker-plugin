@@ -33,6 +33,7 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
 import org.junit.Rule;
 import org.junit.Test;
+import sonia.scm.issuetracker.ExampleIssueMatcher;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.IssueRequest;
 import sonia.scm.issuetracker.IssueTracker;
@@ -62,7 +63,7 @@ import static org.mockito.Mockito.*;
   password = "secret",
   configuration = "classpath:sonia/scm/issuetracker/shiro.ini"
 )
-public class IssuePostReceiveRepositoryHookTest {
+public class LegacyChangesetSubscriberTest {
 
   @Rule
   public final ShiroRule shiroRule = new ShiroRule();
@@ -98,8 +99,8 @@ public class IssuePostReceiveRepositoryHookTest {
     c2.setDescription("description with issue key SCM-42");
 
 
-    IssuePostReceiveRepositoryHook issuePostReceiveRepositoryHook = new IssuePostReceiveRepositoryHook(manager);
-    issuePostReceiveRepositoryHook.handleEvent(mockEvent(repository, c1, c2));
+    LegacyChangesetSubscriber legacyChangesetSubscriber = new LegacyChangesetSubscriber(manager);
+    legacyChangesetSubscriber.handleEvent(mockEvent(repository, c1, c2));
 
     verify(jira, times(1)).isHandled(repository, c1);
     verify(jira, times(1)).isHandled(repository, c2);
@@ -122,8 +123,8 @@ public class IssuePostReceiveRepositoryHookTest {
     c1.setId("1");
     c1.setDescription("description without issue key");
 
-    IssuePostReceiveRepositoryHook issuePostReceiveRepositoryHook = new IssuePostReceiveRepositoryHook(manager);
-    issuePostReceiveRepositoryHook.handleEvent(mockEvent(repository, c1));
+    LegacyChangesetSubscriber legacyChangesetSubscriber = new LegacyChangesetSubscriber(manager);
+    legacyChangesetSubscriber.handleEvent(mockEvent(repository, c1));
 
     verify(jira, times(1)).isHandled(repository, c1);
   }

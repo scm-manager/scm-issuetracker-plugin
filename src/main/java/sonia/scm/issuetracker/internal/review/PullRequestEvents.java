@@ -21,18 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+package sonia.scm.issuetracker.internal.review;
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+import sonia.scm.HandlerEventType;
+import sonia.scm.event.HandlerEvent;
+
+class PullRequestEvents {
+
+  private PullRequestEvents() {
+  }
+
+  static boolean isSupported(HandlerEvent<?> event) {
+    HandlerEventType eventType = event.getEventType();
+    return eventType.isPost() && eventType != HandlerEventType.DELETE;
+  }
 }

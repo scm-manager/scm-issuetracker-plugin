@@ -21,18 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+
+package sonia.scm.issuetracker.api;
+
+import lombok.Value;
+import sonia.scm.repository.Person;
+import sonia.scm.repository.Repository;
+
+import java.time.Instant;
+import java.util.List;
 
 /**
- * Create links to issues in the external issue tracker.
+ * Abstract model for handling issue references. An {@link IssueReferencingObject} can be build for a changeset,
+ * a pull request comment or what ever fits into the model. You can get this object with {@link #getOrigin()}.
+ *
+ * @since 3.0.0
  */
-public interface IssueLinkFactory {
+@Value
+public class IssueReferencingObject {
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+  Repository repository;
+  String type;
+  String id;
+  Person author;
+  Instant date;
+  List<Content> content;
+  String link;
+  boolean triggeringStateChange;
+  Object origin;
+
 }

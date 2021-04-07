@@ -38,7 +38,9 @@ import java.util.Optional;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated use {@link sonia.scm.issuetracker.spi.IssueTrackerProvider} instead.
  */
+@Deprecated
 @ExtensionPoint(multi = true)
 public abstract class IssueTracker
 {

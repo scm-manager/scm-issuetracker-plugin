@@ -30,9 +30,10 @@ import java.io.Closeable;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated use {@link sonia.scm.issuetracker.spi.StateChanger} instead.
  */
-public interface ChangeStateHandler extends Closeable
-{
+@Deprecated
+public interface ChangeStateHandler extends Closeable {
 
   /**
    * Method description
@@ -40,7 +41,7 @@ public interface ChangeStateHandler extends Closeable
    * @param keyword
    * @param issue
    */
-  public void changeState(String issue, String keyword);
+  void changeState(String issue, String keyword);
 
   //~--- get methods ----------------------------------------------------------
 
@@ -50,5 +51,5 @@ public interface ChangeStateHandler extends Closeable
    *
    * @return
    */
-  public Iterable<String> getKeywords();
+  Iterable<String> getKeywords();
 }

@@ -21,18 +21,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+package sonia.scm.issuetracker.spi;
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+import lombok.Data;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.HashSet;
+import java.util.Set;
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+class ProcessedMarks {
+
+  private Set<Mark> marks = new HashSet<>();
+
+  ProcessedMarks() {
+  }
+
+  public boolean contains(Mark mark) {
+    return marks.contains(mark);
+  }
+
+  public void add(Mark mark) {
+    marks.add(mark);
+  }
+
+  @Data
+  @XmlAccessorType(XmlAccessType.FIELD)
+  static class Mark {
+
+    private String type;
+    private String id;
+    private String keyword;
+
+    Mark() {
+    }
+
+    Mark(String type, String id) {
+      this.type = type;
+      this.id = id;
+    }
+
+    Mark(String type, String id, String keyword) {
+      this.type = type;
+      this.id = id;
+      this.keyword = keyword;
+    }
+
+  }
 }

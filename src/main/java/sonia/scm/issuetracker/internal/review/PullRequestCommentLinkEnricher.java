@@ -21,18 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+package sonia.scm.issuetracker.internal.review;
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+import com.cloudogu.scm.review.comment.service.Comment;
+import sonia.scm.api.v2.resources.Enrich;
+import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.plugin.Extension;
+import sonia.scm.plugin.Requires;
+
+import javax.inject.Inject;
+
+@Extension
+@Enrich(Comment.class)
+@Requires("scm-review-plugin")
+public class PullRequestCommentLinkEnricher extends PullRequestBasicCommentEnricher<Comment> {
+
+  @Inject
+  public PullRequestCommentLinkEnricher(IssueTracker issueTracker, PullRequestCommentMapper mapper) {
+    super(Comment.class, issueTracker, mapper);
+  }
+
 }

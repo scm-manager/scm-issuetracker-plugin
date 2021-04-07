@@ -21,18 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+import React from "react";
+import { HalRepresentation } from "@scm-manager/ui-types";
+import { Replacement, ExternalLink } from "@scm-manager/ui-components";
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+type Issue = {
+  name: string;
+  href: string;
+};
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
-}
+const replaceIssueKeys: (object: HalRepresentation, value: string) => Replacement[] = (
+  object: HalRepresentation,
+  value: string
+) => {
+  const issues = object._links.issues as Issue[];
+  if (!value || !issues) {
+    return [];
+  }
+  const replacements: Replacement[] = [];
+  for (const issue of issues) {
+    replacements.push({
+      textToReplace: issue.name,
+      replacement: (
+        <ExternalLink key={issue.name} to={issue.href}>
+          {issue.name}
+        </ExternalLink>
+      )
+    });
+  }
+  return replacements;
+};
+
+export default replaceIssueKeys;

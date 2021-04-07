@@ -21,34 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker.internal;
 
-import sonia.scm.issuetracker.IssueLinkFactory;
+package sonia.scm.issuetracker.spi;
 
-public class ExampleIssueLinkFactory implements IssueLinkFactory {
+import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.plugin.ExtensionPoint;
+import sonia.scm.repository.Repository;
 
-  private static final String JIRA_URL = "https://jira.hitchhiker.com/issues/";
-  private static final String REDMINE_URL = "https://redmine.hitchhiker.com/issues/";
+import java.util.Optional;
 
-  private String trackerUrl;
+/**
+ * Creates issue trackers for an external issue tracker system such as jira or redmine.
+ * This is the main entry point for plugin developers that want to connect to a new issue tracker system.
+ *
+ * @since 3.0.0
+ */
+@ExtensionPoint
+public interface IssueTrackerProvider {
 
-  public ExampleIssueLinkFactory(String trackerUrl) {
-    this.trackerUrl = trackerUrl;
-  }
+  /**
+   * Create a new issue tracker for the given repository wrapped in an {@link Optional} or
+   * {@link Optional#empty()} if no issue tracker is configured or applicable.
+   *
+   * @param builder builder to create a default implementation of the issue tracker
+   * @param repository target repository
+   *
+   * @return optional issue tracker
+   */
+  Optional<IssueTracker> create(IssueTrackerBuilder builder, Repository repository);
 
-  @Override
-  public String createLink(String key) {
-    if (key.startsWith("#")) {
-      return trackerUrl + key.substring(1);
-    }
-    return trackerUrl + key;
-  }
-
-  public static ExampleIssueLinkFactory createJira() {
-    return new ExampleIssueLinkFactory(JIRA_URL);
-  }
-
-  public static ExampleIssueLinkFactory createRedmine() {
-    return new ExampleIssueLinkFactory(REDMINE_URL);
-  }
 }

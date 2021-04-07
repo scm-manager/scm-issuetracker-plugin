@@ -30,7 +30,9 @@ import java.io.Closeable;
 /**
  *
  * @author Sebastian Sdorra
+ * @deprecated use {@link sonia.scm.issuetracker.spi.Commentator} instead.
  */
+@Deprecated
 public interface CommentHandler extends Closeable
 {
 

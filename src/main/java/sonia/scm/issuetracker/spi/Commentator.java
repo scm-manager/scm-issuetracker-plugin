@@ -21,18 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+
+package sonia.scm.issuetracker.spi;
+
+import java.io.IOException;
 
 /**
- * Create links to issues in the external issue tracker.
+ * Add comments to an external issue tracker.
+ *
+ * @since 3.0.0
  */
-public interface IssueLinkFactory {
+public interface Commentator {
 
   /**
-   * Create link to issue.
+   * Adds the comment to the issue with the given issue key.
    *
-   * @param key issue key
-   * @return link to issue
+   * @param issueKey issue key
+   * @param comment comment to add
+   *
+   * @throws IOException if the comment could not be added
    */
-  String createLink(String key);
+  void comment(String issueKey, String comment) throws IOException;
 }

@@ -21,18 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+package sonia.scm.issuetracker.spi;
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+import java.io.IOException;
+
+public class TemplateEngineNotFoundException extends IOException {
+
+  private final String templatePath;
+
+  public TemplateEngineNotFoundException(String templatePath) {
+    super("Could not find template engine for path " + templatePath);
+    this.templatePath = templatePath;
+  }
+
+  public String getTemplatePath() {
+    return templatePath;
+  }
 }

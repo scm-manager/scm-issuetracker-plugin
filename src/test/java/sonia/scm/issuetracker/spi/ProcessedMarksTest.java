@@ -21,18 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+package sonia.scm.issuetracker.spi;
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+import org.junit.jupiter.api.Test;
+
+import javax.xml.bind.JAXB;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ProcessedMarksTest {
+
+  @Test
+  void shouldMarshalAndUnmarshal() {
+    ProcessedMarks marks = new ProcessedMarks();
+    ProcessedMarks.Mark changeset = new ProcessedMarks.Mark("changeset", "abc");
+    marks.add(changeset);
+    ProcessedMarks.Mark pr = new ProcessedMarks.Mark("pr", "42", "merged");
+    marks.add(pr);
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    JAXB.marshal(marks, baos);
+    ProcessedMarks unmarshalled = JAXB.unmarshal(new ByteArrayInputStream(baos.toByteArray()), ProcessedMarks.class);
+
+    assertThat(unmarshalled.contains(changeset)).isTrue();
+    assertThat(unmarshalled.contains(pr)).isTrue();
+  }
+
 }

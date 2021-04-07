@@ -23,16 +23,48 @@
  */
 package sonia.scm.issuetracker;
 
-/**
- * Create links to issues in the external issue tracker.
- */
-public interface IssueLinkFactory {
+//~--- non-JDK imports --------------------------------------------------------
 
-  /**
-   * Create link to issue.
-   *
-   * @param key issue key
-   * @return link to issue
-   */
-  String createLink(String key);
+//~--- JDK imports ------------------------------------------------------------
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ *
+ * @author Sebastian Sdorra
+ */
+public class ExampleIssueMatcher implements IssueMatcher
+{
+
+  private static final Pattern JIRA_KEY_PATTERN = Pattern.compile("\\b([A-Z]+-\\d+)");
+  private static final Pattern REDMINE_KEY_PATTERN = Pattern.compile("\\B(#\\d+)");
+
+  private Pattern pattern;
+
+
+  public ExampleIssueMatcher(Pattern pattern) {
+    this.pattern = pattern;
+  }
+
+  @Override
+  public String getKey(Matcher matcher)
+  {
+    return matcher.group();
+  }
+
+
+  @Override
+  public Pattern getKeyPattern()
+  {
+    return pattern;
+  }
+
+  public static ExampleIssueMatcher createJira() {
+    return new ExampleIssueMatcher(JIRA_KEY_PATTERN);
+  }
+
+  public static ExampleIssueMatcher createRedmine() {
+    return new ExampleIssueMatcher(REDMINE_KEY_PATTERN);
+  }
 }

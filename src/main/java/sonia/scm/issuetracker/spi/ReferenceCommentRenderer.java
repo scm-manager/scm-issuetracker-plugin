@@ -21,18 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package sonia.scm.issuetracker;
+
+package sonia.scm.issuetracker.spi;
+
+import sonia.scm.issuetracker.api.IssueReferencingObject;
+
+import java.io.IOException;
 
 /**
- * Create links to issues in the external issue tracker.
+ * Renders comments for issues that are referenced by an object inside SCM-Manager.
+ *
+ * @since 3.0.0
  */
-public interface IssueLinkFactory {
+public interface ReferenceCommentRenderer {
 
   /**
-   * Create link to issue.
+   * Creates a comment for a reference.
    *
-   * @param key issue key
-   * @return link to issue
+   * @param object object referencing the issue
+   * @return comment that will be added to the issue
+   * @throws IOException when the comment could not be rendered
    */
-  String createLink(String key);
+  String render(IssueReferencingObject object) throws IOException;
 }
