@@ -9,7 +9,11 @@
 
 This plugin adds helper classes for issuetracker plugins.
 
-# Build and testing
+## Usage
+
+Find out how this plugin can be used on the [user documentation page](https://scm-manager.org/plugins/scm-issuetracker-plugin/docs).
+
+## Build and testing
 
 The plugin can be compiled and packaged with the normal maven lifecycle:
 
@@ -54,7 +58,7 @@ A quick look at the files and directories you'll see in a SCM-Manager project.
     ├── CHANGELOG.md
     ├── gradle.properties
     ├── gradlew
-    ├── LICENSE
+    ├── LICENSE.txt
     ├── package.json
     ├── README.md
     ├── settings.gradle
@@ -85,7 +89,7 @@ A quick look at the files and directories you'll see in a SCM-Manager project.
 
 8.  **`gradlew`**: Bundled gradle wrapper if you don`t have gradle installed.
 
-9.  **`LICENSE`**: This project is licensed under the MIT license.
+9.  **`LICENSE.txt`**: This project is licensed under the MIT license.
 
 10.  **`package.json`**: Here you can find the dependency/build configuration and dependencies for the frontend.
 
