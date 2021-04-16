@@ -115,6 +115,6 @@ class ResubmitDispatcherTest {
   }
 
   private QueuedComment comment(String issueTracker) {
-    return new QueuedComment("21", issueTracker, "#42", "Incredible", 0);
+    return new QueuedComment("21", issueTracker, "#42", "Incredible");
   }
 }

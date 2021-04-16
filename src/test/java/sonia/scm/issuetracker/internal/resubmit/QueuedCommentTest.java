@@ -32,17 +32,18 @@ class QueuedCommentTest {
 
   @Test
   void shouldIgnoreRetryCountForEquals() {
-    QueuedComment one = new QueuedComment("42", "redmine", "#42", "Jo", 0);
-    QueuedComment two = new QueuedComment("42", "redmine", "#42", "Jo", 0);
+    QueuedComment one = new QueuedComment("42", "redmine", "#42", "Jo");
+    QueuedComment two = new QueuedComment("42", "redmine", "#42", "Jo");
     assertThat(one).isEqualTo(two);
 
-    QueuedComment three = new QueuedComment("42", "redmine", "#42", "Jo", 1);
+    QueuedComment three = new QueuedComment("42", "redmine", "#42", "Jo");
+    three.retried();
     assertThat(one).isEqualTo(three);
   }
 
   @Test
   void shouldIncreaseReties() {
-    QueuedComment comment = new QueuedComment("21", "jira", "ISD-4", "No", 0);
+    QueuedComment comment = new QueuedComment("21", "jira", "ISD-4", "No");
     assertThat(comment.getRetries()).isZero();
     comment.retried();
     assertThat(comment.getRetries()).isOne();

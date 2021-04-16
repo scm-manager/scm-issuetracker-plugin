@@ -135,7 +135,7 @@ class ResubmitResourceTest {
   }
 
   private QueuedComment comment(String issueTracker) {
-    return new QueuedComment("hog", issueTracker, "#" + counter.incrementAndGet(), "Super", 0);
+    return new QueuedComment("hog", issueTracker, "#" + counter.incrementAndGet(), "Super");
   }
 
 }

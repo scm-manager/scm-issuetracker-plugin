@@ -24,14 +24,19 @@
 
 package sonia.scm.issuetracker.internal.resubmit;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import sonia.scm.xml.XmlInstantAdapter;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@XmlAccessorType(XmlAccessType.FIELD)
 public class QueuedComment {
 
   private String repository;
@@ -41,6 +46,19 @@ public class QueuedComment {
 
   @EqualsAndHashCode.Exclude
   private int retries = 0;
+
+  @EqualsAndHashCode.Exclude
+  @XmlJavaTypeAdapter(XmlInstantAdapter.class)
+  private Instant date;
+
+  public QueuedComment(String repository, String issueTracker, String issueKey, String comment) {
+    this.repository = repository;
+    this.issueTracker = issueTracker;
+    this.issueKey = issueKey;
+    this.comment = comment;
+    this.retries = 0;
+    this.date = Instant.now();
+  }
 
   void retried() {
     retries = retries + 1;

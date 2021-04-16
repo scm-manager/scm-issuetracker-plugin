@@ -179,11 +179,13 @@ class ResubmitQueueTest {
       assertThat(comments.values()).containsOnly(jira);
     }
 
+    @Test
     @SubjectAware("ford")
     void shouldFailIfNotAuthorizedToClear() {
       assertThrows(UnauthorizedException.class, () -> queue.clear("redmine"));
     }
 
+    @Test
     @SubjectAware("ford")
     void shouldFailIfNotAuthorizedToSync() {
       Set<QueuedComment> empty = Collections.emptySet();
@@ -194,6 +196,6 @@ class ResubmitQueueTest {
 
   private QueuedComment comment(String issueTracker) {
     String issueKey = "#" + counter.incrementAndGet();
-    return new QueuedComment("4211", issueTracker, issueKey, "Content of" + issueKey, 0);
+    return new QueuedComment("4211", issueTracker, issueKey, "Content of" + issueKey);
   }
 }

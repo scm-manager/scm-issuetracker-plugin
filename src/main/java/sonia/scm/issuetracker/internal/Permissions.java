@@ -32,7 +32,7 @@ public class Permissions {
   private static final String RESOURCE = "issuetracker";
   private static final String ACTION_RESUBMIT = "resubmit";
 
-  private static final String PERMISSION_RESUBMIT = RESOURCE + ":" + ACTION_RESUBMIT + ":";
+  private static final String PERMISSION_RESUBMIT = RESOURCE + ":" + ACTION_RESUBMIT;
 
   private Permissions() {
   }

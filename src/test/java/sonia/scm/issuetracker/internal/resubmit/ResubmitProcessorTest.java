@@ -159,6 +159,6 @@ class ResubmitProcessorTest {
   }
 
   private QueuedComment comment(String repository, String issueTracker) {
-    return new QueuedComment(repository, issueTracker, "#" + counter.incrementAndGet(), "Awesome", 0);
+    return new QueuedComment(repository, issueTracker, "#" + counter.incrementAndGet(), "Awesome");
   }
 }

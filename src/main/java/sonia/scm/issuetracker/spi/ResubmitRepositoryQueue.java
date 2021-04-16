@@ -40,7 +40,7 @@ class ResubmitRepositoryQueue {
   }
 
   public void append(String issueKey, String comment) {
-    queue.append(new QueuedComment(repository, issueTracker, issueKey, comment, 0));
+    queue.append(new QueuedComment(repository, issueTracker, issueKey, comment));
   }
 
 }
