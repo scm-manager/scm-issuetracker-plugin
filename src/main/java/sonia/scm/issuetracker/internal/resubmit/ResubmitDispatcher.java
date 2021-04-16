@@ -24,6 +24,8 @@
 
 package sonia.scm.issuetracker.internal.resubmit;
 
+import sonia.scm.issuetracker.internal.Permissions;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.Closeable;

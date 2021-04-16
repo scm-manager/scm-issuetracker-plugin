@@ -21,44 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package sonia.scm.issuetracker.internal;
 
-package sonia.scm.issuetracker.internal.resubmit;
+import sonia.scm.api.v2.resources.Enrich;
+import sonia.scm.api.v2.resources.HalAppender;
+import sonia.scm.api.v2.resources.HalEnricher;
+import sonia.scm.api.v2.resources.HalEnricherContext;
+import sonia.scm.api.v2.resources.Index;
+import sonia.scm.api.v2.resources.LinkBuilder;
+import sonia.scm.api.v2.resources.ScmPathInfoStore;
+import sonia.scm.plugin.Extension;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
+import javax.inject.Inject;
+import javax.inject.Provider;
 
-class Permissions {
+@Extension
+@Enrich(Index.class)
+public class IndexLinkEnricher implements HalEnricher {
 
-  private static final String RESOURCE = "issuetracker";
-  private static final String ACTION_RESUBMIT = "resubmit";
+  private final Provider<ScmPathInfoStore> scmPathInfoStore;
 
-  private static final String PERMISSION_RESUBMIT = RESOURCE + ":" + ACTION_RESUBMIT + ":";
-
-  private Permissions() {
+  @Inject
+  public IndexLinkEnricher(Provider<ScmPathInfoStore> scmPathInfoStore) {
+    this.scmPathInfoStore = scmPathInfoStore;
   }
 
-  static void checkResubmit(String issueTrackerName) {
-    SecurityUtils.getSubject().checkPermission(PERMISSION_RESUBMIT + issueTrackerName);
-  }
+  @Override
+  public void enrich(HalEnricherContext context, HalAppender appender) {
+    if (Permissions.isResubmitPermitted()) {
+      String resubmitLink = new LinkBuilder(scmPathInfoStore.get().get(), IssueTrackerResource.class)
+        .method("resubmits")
+        .parameters()
+        .href();
 
-  static Checker checkResubmit() {
-    return new Checker(SecurityUtils.getSubject(), PERMISSION_RESUBMIT);
-  }
-
-  static class Checker {
-
-
-    private final Subject subject;
-    private final String basePermission;
-
-    private Checker(Subject subject, String basePermission) {
-      this.subject = subject;
-      this.basePermission = basePermission;
-    }
-
-    public boolean isPermitted(String id) {
-      return subject.isPermitted(basePermission + id);
+      appender.appendLink("issueTrackerResubmit", resubmitLink);
     }
   }
-
 }

@@ -68,7 +68,7 @@ class ResubmitDispatcherTest {
   }
 
   @Nested
-  @SubjectAware(value = "trillian", permissions = "issuetracker:resubmit:*")
+  @SubjectAware(value = "trillian", permissions = "issuetracker:resubmit")
   class Permitted {
 
     @Test

@@ -29,6 +29,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import lombok.NoArgsConstructor;
+import sonia.scm.issuetracker.internal.Permissions;
 import sonia.scm.store.DataStore;
 import sonia.scm.store.DataStoreFactory;
 

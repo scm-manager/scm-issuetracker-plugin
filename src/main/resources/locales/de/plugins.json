@@ -2,10 +2,8 @@
   "permissions": {
     "issuetracker": {
       "resubmit": {
-        "*":{
-          "displayName": "Kommentare erneut senden",
-          "description": "Erneutes senden ausstehender Issue Tracker Kommentare veranlassen und konfigurieren"
-        }
+        "displayName": "Kommentare erneut senden",
+        "description": "Erneutes senden ausstehender Issue Tracker Kommentare veranlassen und konfigurieren"
       }
     }
   }

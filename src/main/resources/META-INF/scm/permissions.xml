@@ -25,6 +25,6 @@
 -->
 <permissions>
   <permission>
-    <value>issuetracker:resubmit:*</value>
+    <value>issuetracker:resubmit</value>
   </permission>
 </permissions>
