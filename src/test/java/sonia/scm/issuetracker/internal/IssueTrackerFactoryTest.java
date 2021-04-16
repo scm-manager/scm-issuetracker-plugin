@@ -24,32 +24,27 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.google.common.collect.ImmutableMap;
+
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.issuetracker.spi.IssueTrackerBuilder;
 import sonia.scm.issuetracker.spi.IssueTrackerProvider;
+import sonia.scm.repository.RepositoryTestData;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static sonia.scm.issuetracker.IssueReferencingObjects.content;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CompositeIssueTrackerTest {
-
-  @Mock
-  private IssueTrackerBuilder builder;
+class IssueTrackerFactoryTest {
 
   @Mock
   private IssueTracker redmine;
@@ -57,44 +52,53 @@ class CompositeIssueTrackerTest {
   @Mock
   private IssueTracker jira;
 
-  @Test
-  void shouldReturnName() {
-    CompositeIssueTracker tracker = tracker();
-    assertThat(tracker.getName()).isEqualTo(CompositeIssueTracker.NAME);
-  }
+  @Mock
+  private IssueTrackerBuilder builder;
 
   @Test
-  void shouldDelegateProcessToPresentIssueTrackers() {
-    CompositeIssueTracker tracker = tracker(redmine, null, jira);
-
-    IssueReferencingObject ref = content();
-    tracker.process(ref);
-    verify(redmine).process(ref);
-    verify(jira).process(ref);
+  void shouldReturnEmptyIterableWithoutIssueTrackers() {
+    IssueTrackerFactory factory = factory();
+    Iterable<IssueTracker> trackers = factory.trackers(RepositoryTestData.createHeartOfGold());
+    assertThat(trackers).isEmpty();
   }
 
   @Test
-  void shouldMergeIssues() {
-    IssueReferencingObject ref = content();
-    when(redmine.findIssues(ref)).thenReturn(ImmutableMap.of("#42", "https://redmine/42"));
-    when(jira.findIssues(ref)).thenReturn(ImmutableMap.of("ABC-21", "https://jira/ABC-21"));
-
-    CompositeIssueTracker tracker = tracker(redmine, null, jira);
-    Map<String, String> issues = tracker.findIssues(ref);
-
-    assertThat(issues)
-      .containsEntry("#42", "https://redmine/42")
-      .containsEntry("ABC-21", "https://jira/ABC-21");
+  void shouldReturnIssueTrackers() {
+    IssueTrackerFactory factory = factory(redmine, jira);
+    Iterable<IssueTracker> trackers = factory.trackers(RepositoryTestData.createHeartOfGold());
+    assertThat(trackers).hasSize(2);
   }
 
-  private CompositeIssueTracker tracker(IssueTracker... trackers) {
-    Set<IssueTrackerProvider> providers = Arrays.stream(trackers).map(this::provider).collect(Collectors.toSet());
-    IssueTrackerFactory factory = new IssueTrackerFactory(builder, ImmutableSet.copyOf(providers));
-    return new CompositeIssueTracker(factory);
+  @Test
+  void shouldReturnEmptyOptionalWithIssueTrackers() {
+    IssueTrackerFactory factory = factory();
+    Optional<IssueTracker> tracker = factory.tracker(RepositoryTestData.create42Puzzle(), "redmine");
+    assertThat(tracker).isEmpty();
   }
 
-  private IssueTrackerProvider provider(IssueTracker two) {
-    return (b, r) -> Optional.ofNullable(two);
+  @Test
+  void shouldReturnEmptyOptionalWithoutMatchingTrackers() {
+    IssueTrackerFactory factory = factory(redmine, jira);
+    Optional<IssueTracker> tracker = factory.tracker(RepositoryTestData.create42Puzzle(), "track");
+    assertThat(tracker).isEmpty();
   }
 
+  @Test
+  void shouldReturnIssueTracker() {
+    when(redmine.getName()).thenReturn("redmine");
+    IssueTrackerFactory factory = factory(redmine, jira);
+    Optional<IssueTracker> tracker = factory.tracker(RepositoryTestData.create42Puzzle(), "redmine");
+    assertThat(tracker).contains(redmine);
+  }
+
+  private IssueTrackerFactory factory(IssueTracker... trackers) {
+    Set<IssueTrackerProvider> providers = Arrays.stream(trackers)
+      .map(this::provider)
+      .collect(Collectors.toSet());
+    return new IssueTrackerFactory(builder, ImmutableSet.copyOf(providers));
+  }
+
+  private IssueTrackerProvider provider(IssueTracker tracker) {
+    return (b, r) -> Optional.ofNullable(tracker);
+  }
 }

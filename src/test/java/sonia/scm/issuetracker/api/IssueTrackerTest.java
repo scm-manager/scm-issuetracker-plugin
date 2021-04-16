@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020-present Cloudogu GmbH and Contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,22 +22,39 @@
  * SOFTWARE.
  */
 
+package sonia.scm.issuetracker.api;
 
-plugins {
-  id 'org.scm-manager.smp' version '0.8.0'
-}
+import org.junit.jupiter.api.Test;
 
-dependencies {
-  optionalPlugin "sonia.scm.plugins:scm-review-plugin:2.7.0"
-  optionalPlugin "sonia.scm.plugins:scm-mail-plugin:2.1.0"
-  testImplementation "com.github.sdorra:shiro-unit:1.0.1"
-  testImplementation 'org.awaitility:awaitility:4.0.3'
-}
+import java.util.Map;
 
-scmPlugin {
-  scmVersion = "2.15.0"
-  displayName = "Issue Tracker"
-  description = "Helper classes for issuetracker plugins"
-  author = "Cloudogu GmbH"
-  category = "Library"
+import static org.assertj.core.api.Assertions.assertThat;
+
+class IssueTrackerTest {
+
+  private final SampleIssueTracker issueTracker = new SampleIssueTracker();
+
+  @Test
+  void shouldReturnClassName() {
+    assertThat(issueTracker.getName()).isEqualTo(SampleIssueTracker.class.getName());
+  }
+
+  @Test
+  void shouldReturnEmptyOptionalForResubmitter() {
+    assertThat(issueTracker.getResubmitter()).isEmpty();
+  }
+
+  private static class SampleIssueTracker implements IssueTracker {
+
+    @Override
+    public void process(IssueReferencingObject object) {
+
+    }
+
+    @Override
+    public Map<String, String> findIssues(IssueReferencingObject object) {
+      return null;
+    }
+  }
+
 }

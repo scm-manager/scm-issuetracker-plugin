@@ -30,6 +30,7 @@ import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.issuetracker.api.Resubmitter;
 
 import java.io.IOException;
 import java.util.*;
@@ -51,7 +52,7 @@ class DefaultIssueTracker implements IssueTracker {
   // may - if write
   private final ProcessedStore store;
   private final ReferenceCommentRenderer referenceCommentRenderer;
-  private final Commentator commentator;
+  private final ResubmittingCommentator commentator;
 
   // may
   private final StateChangeCommentRenderer stateChangeCommentRenderer;
@@ -66,7 +67,7 @@ class DefaultIssueTracker implements IssueTracker {
                       IssueLinkFactory linkFactory,
                       ProcessedStore store,
                       ReferenceCommentRenderer referenceCommentRenderer,
-                      Commentator commentator) {
+                      ResubmittingCommentator commentator) {
     this(name, matcher, linkFactory, store, referenceCommentRenderer, commentator, null, null);
   }
 
@@ -76,7 +77,7 @@ class DefaultIssueTracker implements IssueTracker {
                       IssueLinkFactory linkFactory,
                       ProcessedStore store,
                       ReferenceCommentRenderer referenceCommentRenderer,
-                      Commentator commentator,
+                      ResubmittingCommentator commentator,
                       StateChangeCommentRenderer stateChangeCommentRenderer,
                       StateChanger stateChanger) {
     this.name = name;
@@ -87,6 +88,11 @@ class DefaultIssueTracker implements IssueTracker {
     this.commentator = commentator;
     this.stateChangeCommentRenderer = stateChangeCommentRenderer;
     this.stateChanger = stateChanger;
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   @Override
@@ -172,4 +178,8 @@ class DefaultIssueTracker implements IssueTracker {
     }
   }
 
+  @Override
+  public Optional<Resubmitter> getResubmitter() {
+    return Optional.ofNullable(commentator);
+  }
 }

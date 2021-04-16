@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
+import sonia.scm.issuetracker.internal.resubmit.ResubmitQueue;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.store.InMemoryDataStoreFactory;
@@ -40,6 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class IssueTrackerBuilderTest {
+
+  @Mock
+  private ResubmitQueue resubmitQueue;
 
   @Mock
   private TemplateCommentRendererFactory templateCommentRendererFactory;
@@ -65,7 +69,7 @@ class IssueTrackerBuilderTest {
 
   @BeforeEach
   void setUpBuilder() {
-    builder = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), templateCommentRendererFactory);
+    builder = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), resubmitQueue, templateCommentRendererFactory);
   }
 
   @Test

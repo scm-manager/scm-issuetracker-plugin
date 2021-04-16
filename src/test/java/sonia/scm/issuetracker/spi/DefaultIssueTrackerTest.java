@@ -35,6 +35,7 @@ import sonia.scm.issuetracker.ExampleIssueLinkFactory;
 import sonia.scm.issuetracker.ExampleIssueMatcher;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.issuetracker.internal.resubmit.ResubmitQueue;
 import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.store.InMemoryDataStoreFactory;
 
@@ -54,13 +55,26 @@ class DefaultIssueTrackerTest {
   class Reading {
 
     private IssueTracker tracker;
+    @Mock
+    private ResubmitQueue resubmitQueue;
+    @Mock
     private TemplateCommentRendererFactory rendererFactory;
 
     @BeforeEach
     void setUpIssueTracker() {
-      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
+      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), resubmitQueue, rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
         .build();
+    }
+
+    @Test
+    void shouldReturnName() {
+      assertThat(tracker.getName()).isEqualTo("testing");
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalForResubmitter() {
+      assertThat(tracker.getResubmitter()).isEmpty();
     }
 
     @Test
@@ -85,6 +99,9 @@ class DefaultIssueTrackerTest {
   class Commenting {
 
     @Mock
+    private ResubmitQueue resubmitQueue;
+
+    @Mock
     private TemplateCommentRendererFactory rendererFactory;
 
     @Mock
@@ -97,11 +114,16 @@ class DefaultIssueTrackerTest {
 
     @BeforeEach
     void setUpIssueTracker() {
-      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
+      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), resubmitQueue, rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
         .commenting(RepositoryTestData.createHeartOfGold(), commentator)
         .renderer(renderer)
         .build();
+    }
+
+    @Test
+    void shouldReturnResubmitter() {
+      assertThat(tracker.getResubmitter()).isPresent();
     }
 
     @Test
@@ -143,6 +165,9 @@ class DefaultIssueTrackerTest {
   class StateChange {
 
     @Mock
+    private ResubmitQueue resubmitQueue;
+
+    @Mock
     private TemplateCommentRendererFactory rendererFactory;
 
     @Mock
@@ -161,7 +186,7 @@ class DefaultIssueTrackerTest {
 
     @BeforeEach
     void setUpIssueTracker() {
-      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), rendererFactory)
+      tracker = new IssueTrackerBuilder(new InMemoryDataStoreFactory(), resubmitQueue, rendererFactory)
         .start("testing", ExampleIssueMatcher.createRedmine(), ExampleIssueLinkFactory.createRedmine())
         .commenting(RepositoryTestData.createHeartOfGold(), commentator)
         .renderer(referenceCommentRenderer)

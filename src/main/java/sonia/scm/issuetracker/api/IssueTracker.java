@@ -28,6 +28,7 @@ import com.google.inject.ImplementedBy;
 import sonia.scm.issuetracker.internal.CompositeIssueTracker;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Main api to find and process issues.
@@ -52,4 +53,24 @@ public interface IssueTracker {
    * @return map of issues, key is the issue id and value is a link to issue
    */
   Map<String, String> findIssues(IssueReferencingObject object);
+
+  /**
+   * Returns the name of the issue tracker.
+   * @return name of issue tracker
+   * @since 3.1.0
+   */
+  default String getName() {
+    return getClass().getName();
+  }
+
+  /**
+   * Returns a {@link Resubmitter} if the issue tracker supports resubmitting of comments.
+   * If the tracker does not support resubmitting the method returns an empty optional.
+   *
+   * @return optional with {@link Resubmitter} or empty if resubmitting is not supported
+   * @since 3.1.0
+   */
+  default Optional<Resubmitter> getResubmitter() {
+    return Optional.empty();
+  }
 }
