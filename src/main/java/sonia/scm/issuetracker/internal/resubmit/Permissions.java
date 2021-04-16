@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020-present Cloudogu GmbH and Contributors
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,24 +22,43 @@
  * SOFTWARE.
  */
 
+package sonia.scm.issuetracker.internal.resubmit;
 
-plugins {
-  id 'org.scm-manager.smp' version '0.8.0'
-}
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
-dependencies {
-  optionalPlugin "sonia.scm.plugins:scm-review-plugin:2.7.0"
-  optionalPlugin "sonia.scm.plugins:scm-mail-plugin:2.1.0"
+class Permissions {
 
-  testImplementation 'com.github.sdorra:junit-shiro-extension:1.0.1'
-  testImplementation "com.github.sdorra:shiro-unit:1.0.1"
-  testImplementation 'org.awaitility:awaitility:4.0.3'
-}
+  private static final String RESOURCE = "issuetracker";
+  private static final String ACTION_RESUBMIT = "resubmit";
 
-scmPlugin {
-  scmVersion = "2.15.0"
-  displayName = "Issue Tracker"
-  description = "Helper classes for issuetracker plugins"
-  author = "Cloudogu GmbH"
-  category = "Library"
+  private static final String PERMISSION_RESUBMIT = RESOURCE + ":" + ACTION_RESUBMIT + ":";
+
+  private Permissions() {
+  }
+
+  static void checkResubmit(String issueTrackerName) {
+    SecurityUtils.getSubject().checkPermission(PERMISSION_RESUBMIT + issueTrackerName);
+  }
+
+  static Checker checkResubmit() {
+    return new Checker(SecurityUtils.getSubject(), PERMISSION_RESUBMIT);
+  }
+
+  static class Checker {
+
+
+    private final Subject subject;
+    private final String basePermission;
+
+    private Checker(Subject subject, String basePermission) {
+      this.subject = subject;
+      this.basePermission = basePermission;
+    }
+
+    public boolean isPermitted(String id) {
+      return subject.isPermitted(basePermission + id);
+    }
+  }
+
 }

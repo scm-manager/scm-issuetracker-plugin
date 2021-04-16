@@ -25,17 +25,24 @@
 package sonia.scm.issuetracker.internal.resubmit;
 
 import com.google.common.collect.Multimap;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.github.sdorra.jse.ShiroExtension;
+import org.github.sdorra.jse.SubjectAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import sonia.scm.store.InMemoryDataStoreFactory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@ExtendWith(ShiroExtension.class)
 class ResubmitQueueTest {
 
   private AtomicInteger counter;
@@ -46,6 +53,7 @@ class ResubmitQueueTest {
   }
 
   @Nested
+  @SubjectAware(value = "trillian", permissions = "issuetracker:resubmit:*")
   class Default {
 
     private ResubmitQueue queue;
@@ -127,6 +135,7 @@ class ResubmitQueueTest {
   }
 
   @Nested
+  @SubjectAware(value = "marvin", permissions = "issuetracker:resubmit:*")
   class Limited {
 
     @Test
@@ -143,6 +152,42 @@ class ResubmitQueueTest {
       queue.append(two);
 
       assertThat(queue.getComments("redmine")).containsOnly(one, two);
+    }
+
+  }
+
+  @Nested
+  class Unauthorized {
+
+    private ResubmitQueue queue;
+
+    @BeforeEach
+    void setUp() {
+      queue = new ResubmitQueue(new InMemoryDataStoreFactory());
+    }
+
+    @Test
+    @SubjectAware(value = "dent", permissions = "issuetracker:resubmit:jira")
+    void shouldReturnOnlyAuthorizedComments() {
+      queue.append(comment("redmine"));
+
+      QueuedComment jira = comment("jira");
+      queue.append(jira);
+
+      Multimap<String, QueuedComment> comments = queue.getComments();
+      assertThat(comments.size()).isEqualTo(1);
+      assertThat(comments.values()).containsOnly(jira);
+    }
+
+    @SubjectAware("ford")
+    void shouldFailIfNotAuthorizedToClear() {
+      assertThrows(UnauthorizedException.class, () -> queue.clear("redmine"));
+    }
+
+    @SubjectAware("ford")
+    void shouldFailIfNotAuthorizedToSync() {
+      Set<QueuedComment> empty = Collections.emptySet();
+      assertThrows(UnauthorizedException.class, () -> queue.sync("redmine", empty, empty));
     }
 
   }

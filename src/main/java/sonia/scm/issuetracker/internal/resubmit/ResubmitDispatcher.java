@@ -47,10 +47,12 @@ public class ResubmitDispatcher implements Closeable {
   }
 
   synchronized void resubmitAsync(String issueTrackerName) {
+    Permissions.checkResubmit(issueTrackerName);
     executorService.execute(() -> resubmit(issueTrackerName));
   }
 
   synchronized void resubmit(String issueTrackerName) {
+    Permissions.checkResubmit(issueTrackerName);
     inProgress = true;
     try {
       ResubmitProcessor processor = processorFactory.create();

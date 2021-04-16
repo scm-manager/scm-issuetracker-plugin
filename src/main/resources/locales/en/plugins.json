@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "issuetracker": {
+      "resubmit": {
+        "*":{
+          "displayName": "Perform resubmits",
+          "description": "Perform and configure resubmits of pending issue tracker comments"
+        }
+      }
+    }
+  }
+}

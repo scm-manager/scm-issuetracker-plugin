@@ -24,7 +24,11 @@
 
 package sonia.scm.issuetracker.internal.resubmit;
 
+import org.apache.shiro.authz.UnauthorizedException;
+import org.github.sdorra.jse.ShiroExtension;
+import org.github.sdorra.jse.SubjectAware;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,10 +41,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, ShiroExtension.class})
 class ResubmitDispatcherTest {
 
   @Mock
@@ -56,39 +61,52 @@ class ResubmitDispatcherTest {
   private ResubmitDispatcher dispatcher;
 
   @Test
-  void shouldResubmitAndSync() {
-    when(processorFactory.create()).thenReturn(processor);
-
-    Set<QueuedComment> remove = Collections.singleton(comment("redmine"));
-    when(processor.getRemove()).thenReturn(remove);
-    Set<QueuedComment> requeue = Collections.singleton(comment("redmine"));
-    when(processor.getRequeue()).thenReturn(requeue);
-
-    dispatcher.resubmit("redmine");
-
-    verify(processor).resubmit("redmine");
-    verify(queue).sync("redmine", remove, requeue);
+  @SubjectAware("dent")
+  void shouldFailWithoutPermission() {
+    assertThrows(UnauthorizedException.class, () -> dispatcher.resubmit("test"));
+    assertThrows(UnauthorizedException.class, () -> dispatcher.resubmitAsync("test"));
   }
 
-  @Test
-  void shouldSetInProgressFlag() {
-    CountDownLatch countDownLatch = new CountDownLatch(1);
-    when(processorFactory.create()).thenAnswer(ic -> {
-      countDownLatch.await(1, TimeUnit.SECONDS);
-      return processor;
-    });
+  @Nested
+  @SubjectAware(value = "trillian", permissions = "issuetracker:resubmit:*")
+  class Permitted {
 
-    dispatcher.resubmitAsync("jira");
+    @Test
+    void shouldResubmitAndSync() {
+      when(processorFactory.create()).thenReturn(processor);
 
-    await()
-      .atMost(500, TimeUnit.MILLISECONDS)
-      .until(dispatcher::isInProgress);
+      Set<QueuedComment> remove = Collections.singleton(comment("redmine"));
+      when(processor.getRemove()).thenReturn(remove);
+      Set<QueuedComment> requeue = Collections.singleton(comment("redmine"));
+      when(processor.getRequeue()).thenReturn(requeue);
 
-    countDownLatch.countDown();
+      dispatcher.resubmit("redmine");
 
-    await()
-      .atMost(500, TimeUnit.MILLISECONDS)
-      .until(() -> !dispatcher.isInProgress());
+      verify(processor).resubmit("redmine");
+      verify(queue).sync("redmine", remove, requeue);
+    }
+
+    @Test
+    void shouldSetInProgressFlag() {
+      CountDownLatch countDownLatch = new CountDownLatch(1);
+      when(processorFactory.create()).thenAnswer(ic -> {
+        countDownLatch.await(1, TimeUnit.SECONDS);
+        return processor;
+      });
+
+      dispatcher.resubmitAsync("jira");
+
+      await()
+        .atMost(500, TimeUnit.MILLISECONDS)
+        .until(dispatcher::isInProgress);
+
+      countDownLatch.countDown();
+
+      await()
+        .atMost(500, TimeUnit.MILLISECONDS)
+        .until(() -> !dispatcher.isInProgress());
+    }
+
   }
 
   @AfterEach
@@ -97,6 +115,6 @@ class ResubmitDispatcherTest {
   }
 
   private QueuedComment comment(String issueTracker) {
-    return new QueuedComment("21", issueTracker,"#42", "Incredible", 0);
+    return new QueuedComment("21", issueTracker, "#42", "Incredible", 0);
   }
 }

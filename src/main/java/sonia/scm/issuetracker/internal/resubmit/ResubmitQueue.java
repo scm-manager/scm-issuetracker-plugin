@@ -71,24 +71,31 @@ public class ResubmitQueue {
   }
 
   public Multimap<String, QueuedComment> getComments() {
+    Permissions.Checker checker = Permissions.checkResubmit();
     Multimap<String, QueuedComment> comments = HashMultimap.create();
     for (Map.Entry<String, StoreEntry> entry : store.getAll().entrySet()) {
-      comments.putAll(entry.getKey(), ImmutableList.copyOf(entry.getValue().getComments()));
+      String issueTrackerName = entry.getKey();
+      if (checker.isPermitted(issueTrackerName)) {
+        comments.putAll(issueTrackerName, ImmutableList.copyOf(entry.getValue().getComments()));
+      }
     }
     return comments;
   }
 
   public List<QueuedComment> getComments(String issueTracker) {
+    Permissions.checkResubmit(issueTracker);
     return ImmutableList.copyOf(entry(issueTracker).getComments());
   }
 
   public synchronized void clear(String issueTracker) {
+    Permissions.checkResubmit(issueTracker);
     StoreEntry entry = entry(issueTracker);
     entry.getComments().clear();
     store.put(issueTracker, entry);
   }
 
   public synchronized void sync(String issueTracker, Set<QueuedComment> remove, Set<QueuedComment> requeue) {
+    Permissions.checkResubmit(issueTracker);
     StoreEntry entry = entry(issueTracker);
     entry.getComments().removeAll(remove);
     for (QueuedComment comment : entry.getComments()) {
