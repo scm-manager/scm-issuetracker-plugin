@@ -26,12 +26,16 @@ package sonia.scm.issuetracker.internal.resubmit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.io.Closeable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Singleton
-public class ResubmitDispatcher {
+public class ResubmitDispatcher implements Closeable {
 
   private final ResubmitProcessorFactory processorFactory;
   private final ResubmitQueue queue;
+  private final ExecutorService executorService;
 
   private boolean inProgress = false;
 
@@ -39,6 +43,11 @@ public class ResubmitDispatcher {
   public ResubmitDispatcher(ResubmitProcessorFactory processorFactory, ResubmitQueue queue) {
     this.processorFactory = processorFactory;
     this.queue = queue;
+    this.executorService = Executors.newSingleThreadExecutor();
+  }
+
+  synchronized void resubmitAsync(String issueTrackerName) {
+    executorService.execute(() -> resubmit(issueTrackerName));
   }
 
   synchronized void resubmit(String issueTrackerName) {
@@ -54,5 +63,10 @@ public class ResubmitDispatcher {
 
   public boolean isInProgress() {
     return inProgress;
+  }
+
+  @Override
+  public void close() {
+    executorService.shutdown();
   }
 }

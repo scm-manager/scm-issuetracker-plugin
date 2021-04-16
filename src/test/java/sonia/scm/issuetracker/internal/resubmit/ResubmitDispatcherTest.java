@@ -24,6 +24,7 @@
 
 package sonia.scm.issuetracker.internal.resubmit;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -77,7 +78,7 @@ class ResubmitDispatcherTest {
       return processor;
     });
 
-    new Thread(() -> dispatcher.resubmit("jira")).start();
+    dispatcher.resubmitAsync("jira");
 
     await()
       .atMost(500, TimeUnit.MILLISECONDS)
@@ -88,6 +89,11 @@ class ResubmitDispatcherTest {
     await()
       .atMost(500, TimeUnit.MILLISECONDS)
       .until(() -> !dispatcher.isInProgress());
+  }
+
+  @AfterEach
+  void tearDown() {
+    dispatcher.close();
   }
 
   private QueuedComment comment(String issueTracker) {
