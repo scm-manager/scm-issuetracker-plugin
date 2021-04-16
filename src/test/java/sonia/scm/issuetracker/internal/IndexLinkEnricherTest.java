@@ -37,8 +37,7 @@ import sonia.scm.api.v2.resources.ScmPathInfoStore;
 
 import java.net.URI;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({MockitoExtension.class, ShiroExtension.class})
 class IndexLinkEnricherTest {
@@ -51,6 +50,9 @@ class IndexLinkEnricherTest {
   @Mock
   private HalAppender appender;
 
+  @Mock
+  private HalAppender.LinkArrayBuilder arrayBuilder;
+
   @BeforeEach
   void setUp() {
     ScmPathInfoStore store = new ScmPathInfoStore();
@@ -61,9 +63,12 @@ class IndexLinkEnricherTest {
   @Test
   @SubjectAware(value = "trillian", permissions = "issuetracker:resubmit")
   void shouldAppendResubmitLink() {
+    when(appender.linkArrayBuilder("issueTracker")).thenReturn(arrayBuilder);
+
     enricher.enrich(context, appender);
 
-    verify(appender).appendLink("issueTrackerResubmit", "/v2/issue-tracker/resubmits");
+    verify(arrayBuilder).append("resubmit", "/v2/issue-tracker/resubmits");
+    verify(arrayBuilder).build();
   }
 
   @Test

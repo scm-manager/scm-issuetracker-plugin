@@ -34,6 +34,8 @@ import sonia.scm.plugin.Extension;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.HashMap;
+import java.util.Map;
 
 @Extension
 @Enrich(Index.class)
@@ -48,13 +50,28 @@ public class IndexLinkEnricher implements HalEnricher {
 
   @Override
   public void enrich(HalEnricherContext context, HalAppender appender) {
+    Map<String, String> links = new HashMap<>();
+
     if (Permissions.isResubmitPermitted()) {
       String resubmitLink = new LinkBuilder(scmPathInfoStore.get().get(), IssueTrackerResource.class)
         .method("resubmits")
         .parameters()
         .href();
 
-      appender.appendLink("issueTrackerResubmit", resubmitLink);
+      links.put("resubmit", resubmitLink);
+    }
+
+    if (!links.isEmpty()) {
+      append(appender, links);
     }
   }
+
+  private void append(HalAppender appender, Map<String, String> links) {
+    HalAppender.LinkArrayBuilder builder = appender.linkArrayBuilder("issueTracker");
+    for (Map.Entry<String, String> e : links.entrySet()) {
+      builder.append(e.getKey(), e.getValue());
+    }
+    builder.build();
+  }
+
 }
