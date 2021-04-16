@@ -21,25 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./IssueTrackerRoute";
-import {Links} from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./IssueTrackerNavLink";
+import React, { FC } from "react";
+import { Link, Links } from "@scm-manager/ui-types";
+import { Route } from "react-router-dom";
+import AdminPage from "./AdminPage";
 
-type PredicateProps = {
+type Props = {
   links: Links;
 };
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+const IssueTrackerRoute: FC<Props> = ({ links }) => (
+  <Route path="/admin/issue-tracker">
+    <AdminPage links={links["issueTracker"] as Link[]} />
+  </Route>
+);
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
-
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+export default IssueTrackerRoute;

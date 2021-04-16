@@ -1,4 +1,18 @@
 {
+  "scm-issuetracker-plugin": {
+    "title": "Issue Tracker",
+    "subtitle": "Allgemeine Issue Tracker Konfiguration",
+    "navLink": "Issue Tracker",
+    "resubmit": {
+      "title": "Kommentare erneut senden",
+      "description": "Ausstehende Kommentare erneut senden",
+      "empty": "Keine ausstehenden Kommentare gefunden",
+      "issueTracker": "Issue Tracker",
+      "queueCount": "Anzahl ausstehender Kommentare",
+      "resubmit": "Erneute senden",
+      "clear": "Kommentare entfernen"
+    }
+  },
   "permissions": {
     "issuetracker": {
       "resubmit": {

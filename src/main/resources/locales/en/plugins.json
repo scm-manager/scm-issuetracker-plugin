@@ -1,4 +1,18 @@
 {
+  "scm-issuetracker-plugin": {
+    "title": "Issue Tracker",
+    "subtitle": "General Issue Tracker configuration",
+    "navLink": "Issue Tracker",
+    "resubmit": {
+      "title": "Resubmit",
+      "description": "Resubmit or clear pending comments",
+      "empty": "No pending comments queued",
+      "issueTracker": "Issue Tracker",
+      "queueCount": "Queue Count",
+      "resubmit": "Resubmit",
+      "clear": "Clear"
+    }
+  },
   "permissions": {
     "issuetracker": {
       "resubmit": {

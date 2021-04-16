@@ -103,7 +103,11 @@ public class ResubmitResource {
   }
 
   private ResubmitDto createDto(UriInfo uriInfo, String issueTracker, Collection<QueuedComment> comments) {
-    return new ResubmitDto(createLinks(uriInfo, issueTracker), issueTracker, comments.size(), action.isInProgress());
+    return createDto(uriInfo, issueTracker, comments.size());
+  }
+
+  private ResubmitDto createDto(UriInfo uriInfo, String issueTracker, int size) {
+    return new ResubmitDto(createLinks(uriInfo, issueTracker), issueTracker, size, action.isInProgress());
   }
 
   private Links createLinks(UriInfo uriInfo, String issueTracker) {

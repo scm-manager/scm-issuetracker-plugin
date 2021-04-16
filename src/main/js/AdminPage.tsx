@@ -21,25 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./IssueTrackerRoute";
-import {Links} from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./IssueTrackerNavLink";
+import React, { FC } from "react";
+import { useTranslation } from "react-i18next";
+import { Subtitle, Title } from "@scm-manager/ui-components";
+import { Link } from "@scm-manager/ui-types";
+import ResubmitSection from "./ResubmitSection";
 
-type PredicateProps = {
-  links: Links;
+type Props = {
+  links: Link[];
 };
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
+const AdminPage: FC<Props> = ({ links }) => {
+  const [t] = useTranslation("plugins");
+  const resubmitLink = links.find(l => l.name === "resubmit");
+  return (
+    <>
+      <Title title={t("scm-issuetracker-plugin.title")} />
+      <Subtitle subtitle={t("scm-issuetracker-plugin.subtitle")} />
+      {resubmitLink ? <ResubmitSection link={resubmitLink} /> : null}
+    </>
+  );
 };
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
-
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+export default AdminPage;

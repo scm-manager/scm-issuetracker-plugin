@@ -21,25 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./IssueTrackerRoute";
-import {Links} from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./IssueTrackerNavLink";
+import React, { FC } from "react";
+import { useTranslation } from "react-i18next";
+import { SecondaryNavigationItem } from "@scm-manager/ui-components";
 
-type PredicateProps = {
-  links: Links;
+const IssueTrackerNavLink: FC = () => {
+  const [t] = useTranslation("plugins");
+  return (
+    <SecondaryNavigationItem
+      to={`/admin/issue-tracker`}
+      icon="fas fa-bug"
+      label={t("scm-issuetracker-plugin.navLink")}
+      title={t("scm-issuetracker-plugin.navLink")}
+    />
+  );
 };
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
-
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
-
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+export default IssueTrackerNavLink;
