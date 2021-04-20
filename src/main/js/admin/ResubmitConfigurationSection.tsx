@@ -21,29 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 import React, { FC } from "react";
 import { useTranslation } from "react-i18next";
-import { Subtitle, Title } from "@scm-manager/ui-components";
 import { Link } from "@scm-manager/ui-types";
-import ResubmitSection from "./ResubmitSection";
-import ResubmitConfigurationSection from "./ResubmitConfigurationSection";
+import { useResubmitConfiguration } from "./hooks";
+import { ErrorNotification, Loading } from "@scm-manager/ui-components";
+import ResubmitConfigurationForm from "./ResubmitConfigurationForm";
 
 type Props = {
-  links: Link[];
+  link: Link;
 };
 
-const AdminPage: FC<Props> = ({ links }) => {
+const ResubmitConfigurationSection: FC<Props> = ({ link }) => {
   const [t] = useTranslation("plugins");
-  const resubmitConfigurationLink = links.find(l => l.name === "resubmitConfiguration");
-  const resubmitLink = links.find(l => l.name === "resubmit");
+  const { configuration, isLoading, error } = useResubmitConfiguration(link.href);
+
   return (
     <>
-      <Title title={t("scm-issuetracker-plugin.title")} />
-      <Subtitle subtitle={t("scm-issuetracker-plugin.subtitle")} />
-      {resubmitConfigurationLink ? <ResubmitConfigurationSection link={resubmitConfigurationLink} /> : null}
-      {resubmitLink ? <ResubmitSection link={resubmitLink} /> : null}
+      <div className="content">
+        <h2>{t("scm-issuetracker-plugin.resubmit.config.title")}</h2>
+        <p>{t("scm-issuetracker-plugin.resubmit.config.description")}</p>
+      </div>
+      <ErrorNotification error={error} />
+      {isLoading ? <Loading /> : null}
+      {configuration ? <ResubmitConfigurationForm configuration={configuration} /> : null}
     </>
   );
 };
 
-export default AdminPage;
+export default ResubmitConfigurationSection;

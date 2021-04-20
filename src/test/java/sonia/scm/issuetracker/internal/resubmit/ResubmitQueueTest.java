@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import sonia.scm.store.InMemoryDataStoreFactory;
 
 import java.util.Collections;
@@ -41,11 +43,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 
-@ExtendWith(ShiroExtension.class)
+@ExtendWith({ShiroExtension.class, MockitoExtension.class})
 class ResubmitQueueTest {
 
   private AtomicInteger counter;
+
+  @Mock
+  private NotificationService notificationService;
 
   @BeforeEach
   void setUp() {
@@ -61,7 +67,7 @@ class ResubmitQueueTest {
 
     @BeforeEach
     void setUp() {
-      queue = new ResubmitQueue(new InMemoryDataStoreFactory());
+      queue = new ResubmitQueue(new InMemoryDataStoreFactory(), notificationService);
     }
 
 
@@ -70,6 +76,14 @@ class ResubmitQueueTest {
       QueuedComment comment = comment("redmine");
       queue.append(comment);
       assertThat(queue.getComments("redmine")).containsOnly(comment);
+    }
+
+    @Test
+    void shouldSendCommentNotification() {
+      QueuedComment comment = comment("redmine");
+      queue.append(comment);
+
+      verify(notificationService).notifyComment(comment);
     }
 
     @Test
@@ -132,6 +146,15 @@ class ResubmitQueueTest {
       }
     }
 
+    @Test
+    void shouldSendResubmitNotication() {
+      Set<QueuedComment> one = Collections.singleton(comment("redmine"));
+      Set<QueuedComment> two = Collections.singleton(comment("redmine"));
+      queue.sync("redmine",one, two);
+
+      verify(notificationService).notifyResubmit("redmine", one, two);
+    }
+
   }
 
   @Nested
@@ -140,7 +163,7 @@ class ResubmitQueueTest {
 
     @Test
     void shouldKeepOnlyTheLastTwoComments() {
-      ResubmitQueue queue = new ResubmitQueue(new InMemoryDataStoreFactory(), 2);
+      ResubmitQueue queue = new ResubmitQueue(new InMemoryDataStoreFactory(), notificationService, 2);
 
       queue.append(comment("redmine"));
       queue.append(comment("redmine"));
@@ -163,7 +186,7 @@ class ResubmitQueueTest {
 
     @BeforeEach
     void setUp() {
-      queue = new ResubmitQueue(new InMemoryDataStoreFactory());
+      queue = new ResubmitQueue(new InMemoryDataStoreFactory(), notificationService);
     }
 
     @Test

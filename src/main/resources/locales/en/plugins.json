@@ -10,7 +10,17 @@
       "issueTracker": "Issue Tracker",
       "queueCount": "Queue Count",
       "resubmit": "Resubmit",
-      "clear": "Clear"
+      "clear": "Clear",
+      "config": {
+        "title": "Resubmit configuration",
+        "description": "Configuration related to the resubmit function",
+        "address": "Email Address",
+        "addAddress": "Add address",
+        "removeAddress": "Remove address",
+        "invalidMail": "Invalid email address format",
+        "updated": "Successfully updated resubmit configuration",
+        "submit": "Update configuration"
+      }
     }
   },
   "permissions": {

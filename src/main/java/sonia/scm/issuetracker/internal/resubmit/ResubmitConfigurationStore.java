@@ -21,29 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import React, { FC } from "react";
-import { useTranslation } from "react-i18next";
-import { Subtitle, Title } from "@scm-manager/ui-components";
-import { Link } from "@scm-manager/ui-types";
-import ResubmitSection from "./ResubmitSection";
-import ResubmitConfigurationSection from "./ResubmitConfigurationSection";
 
-type Props = {
-  links: Link[];
-};
+package sonia.scm.issuetracker.internal.resubmit;
 
-const AdminPage: FC<Props> = ({ links }) => {
-  const [t] = useTranslation("plugins");
-  const resubmitConfigurationLink = links.find(l => l.name === "resubmitConfiguration");
-  const resubmitLink = links.find(l => l.name === "resubmit");
-  return (
-    <>
-      <Title title={t("scm-issuetracker-plugin.title")} />
-      <Subtitle subtitle={t("scm-issuetracker-plugin.subtitle")} />
-      {resubmitConfigurationLink ? <ResubmitConfigurationSection link={resubmitConfigurationLink} /> : null}
-      {resubmitLink ? <ResubmitSection link={resubmitLink} /> : null}
-    </>
-  );
-};
+import sonia.scm.issuetracker.internal.Permissions;
+import sonia.scm.store.ConfigurationStore;
+import sonia.scm.store.ConfigurationStoreFactory;
 
-export default AdminPage;
+import javax.inject.Inject;
+
+public class ResubmitConfigurationStore {
+
+  private static final String STORE_NAME = "issue-tracker-resubmit-notification";
+
+  private final ConfigurationStore<ResubmitConfiguration> store;
+
+  @Inject
+  public ResubmitConfigurationStore(ConfigurationStoreFactory storeFactory) {
+    this.store = storeFactory.withType(ResubmitConfiguration.class).withName(STORE_NAME).build();
+  }
+
+  public ResubmitConfiguration get() {
+    return store.getOptional().orElse(new ResubmitConfiguration());
+  }
+
+  public void set(ResubmitConfiguration configuration) {
+    Permissions.checkResubmit();
+    store.set(configuration);
+  }
+
+}

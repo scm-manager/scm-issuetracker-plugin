@@ -50,18 +50,20 @@ public class ResubmitQueue {
   private static final int DEFAULT_QUEUE_SIZE = 1000;
 
   private final DataStore<StoreEntry> store;
+  private final NotificationService notificationService;
   private final int queueSize;
 
   @Inject
-  public ResubmitQueue(DataStoreFactory dataStoreFactory) {
-    this(dataStoreFactory, DEFAULT_QUEUE_SIZE);
+  public ResubmitQueue(DataStoreFactory dataStoreFactory, NotificationService notificationService) {
+    this(dataStoreFactory, notificationService, DEFAULT_QUEUE_SIZE);
   }
 
   @VisibleForTesting
-  ResubmitQueue(DataStoreFactory dataStoreFactory, int queueSize) {
+  ResubmitQueue(DataStoreFactory dataStoreFactory, NotificationService notificationService, int queueSize) {
     this.store = dataStoreFactory.withType(StoreEntry.class)
       .withName(STORE_NAME)
       .build();
+    this.notificationService = notificationService;
     this.queueSize = queueSize;
   }
 
@@ -69,10 +71,11 @@ public class ResubmitQueue {
     StoreEntry entry = entry(comment.getIssueTracker());
     entry.getComments().add(comment);
     store.put(comment.getIssueTracker(), entry);
+    notificationService.notifyComment(comment);
   }
 
   public Multimap<String, QueuedComment> getComments() {
-    Permissions.Checker checker = Permissions.checkResubmit();
+    Permissions.Checker checker = Permissions.resubmitChecker();
     Multimap<String, QueuedComment> comments = HashMultimap.create();
     for (Map.Entry<String, StoreEntry> entry : store.getAll().entrySet()) {
       String issueTrackerName = entry.getKey();
@@ -105,6 +108,7 @@ public class ResubmitQueue {
       }
     }
     store.put(issueTracker, entry);
+    notificationService.notifyResubmit(issueTracker, remove, requeue);
   }
 
   private StoreEntry entry(String issueTracker) {

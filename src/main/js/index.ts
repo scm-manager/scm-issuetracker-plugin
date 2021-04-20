@@ -25,7 +25,7 @@ import { binder } from "@scm-manager/ui-extensions";
 import replaceIssueKeys from "./replaceIssueKeys";
 import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
 import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import {Links} from "@scm-manager/ui-types";
+import { Links } from "@scm-manager/ui-types";
 import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
 type PredicateProps = {

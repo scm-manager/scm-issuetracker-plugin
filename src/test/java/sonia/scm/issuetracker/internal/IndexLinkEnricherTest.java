@@ -72,6 +72,17 @@ class IndexLinkEnricherTest {
   }
 
   @Test
+  @SubjectAware(value = "trillian", permissions = "issuetracker:resubmit")
+  void shouldAppendResubmitConfigurationLink() {
+    when(appender.linkArrayBuilder("issueTracker")).thenReturn(arrayBuilder);
+
+    enricher.enrich(context, appender);
+
+    verify(arrayBuilder).append("resubmitConfiguration", "/v2/issue-tracker/resubmits/config");
+    verify(arrayBuilder).build();
+  }
+
+  @Test
   @SubjectAware(value = "trillian")
   void shouldNotAppendResubmitLinkWithoutPermission() {
     enricher.enrich(context, appender);

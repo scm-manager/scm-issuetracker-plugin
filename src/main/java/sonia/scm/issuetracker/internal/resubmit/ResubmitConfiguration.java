@@ -21,29 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import React, { FC } from "react";
-import { useTranslation } from "react-i18next";
-import { Subtitle, Title } from "@scm-manager/ui-components";
-import { Link } from "@scm-manager/ui-types";
-import ResubmitSection from "./ResubmitSection";
-import ResubmitConfigurationSection from "./ResubmitConfigurationSection";
 
-type Props = {
-  links: Link[];
-};
+package sonia.scm.issuetracker.internal.resubmit;
 
-const AdminPage: FC<Props> = ({ links }) => {
-  const [t] = useTranslation("plugins");
-  const resubmitConfigurationLink = links.find(l => l.name === "resubmitConfiguration");
-  const resubmitLink = links.find(l => l.name === "resubmit");
-  return (
-    <>
-      <Title title={t("scm-issuetracker-plugin.title")} />
-      <Subtitle subtitle={t("scm-issuetracker-plugin.subtitle")} />
-      {resubmitConfigurationLink ? <ResubmitConfigurationSection link={resubmitConfigurationLink} /> : null}
-      {resubmitLink ? <ResubmitSection link={resubmitLink} /> : null}
-    </>
-  );
-};
+import lombok.Data;
 
-export default AdminPage;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+@Data
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class ResubmitConfiguration {
+
+  @XmlElement(name = "address")
+  @XmlElementWrapper(name = "addresses")
+  private List<String> addresses = new ArrayList<>();
+
+  public List<String> getAddresses() {
+    if (addresses == null) {
+      return Collections.emptyList();
+    }
+    return Collections.unmodifiableList(addresses);
+  }
+}

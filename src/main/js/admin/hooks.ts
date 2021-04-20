@@ -81,3 +81,64 @@ export const useResubmits = (link: string) => {
   };
 };
 
+export type ResubmitConfiguration = HalRepresentation & {
+  addresses: string[];
+};
+
+export const useResubmitConfiguration = (link: string) => {
+  const [configuration, setConfiguration] = useState<ResubmitConfiguration>();
+  const [isLoading, setLoading] = useState(true);
+  const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    setLoading(true);
+    apiClient
+      .get(link)
+      .then(response => response.json())
+      .then(cfg => {
+        setConfiguration(cfg);
+        setError(undefined);
+      })
+      .catch(e => {
+        setConfiguration(undefined);
+        setError(e);
+      })
+      .finally(() => setLoading(false));
+  }, [link]);
+
+  return {
+    configuration,
+    isLoading,
+    error
+  };
+};
+
+const MEDIA_TYPE_CONFIG = "application/vnd.scmm-issueTrackerResubmitConfig+json;v=2";
+
+export const useResubmitConfigurationMutation = (link?: string) => {
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState<Error>();
+  const [updated, setUpdated] = useState(false);
+
+  const mutate = link
+    ? (config: ResubmitConfiguration) => {
+        setLoading(true);
+        setUpdated(false);
+        apiClient
+          .put(link, config, MEDIA_TYPE_CONFIG)
+          .then(() => {
+            setUpdated(true);
+            setError(undefined);
+          })
+          .catch(setError)
+          .finally(() => setLoading(false));
+      }
+    : undefined;
+
+  return {
+    isLoading,
+    error,
+    mutate,
+    updated
+  };
+};

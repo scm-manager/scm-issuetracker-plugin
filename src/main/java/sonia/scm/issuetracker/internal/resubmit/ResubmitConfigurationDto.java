@@ -21,29 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import React, { FC } from "react";
-import { useTranslation } from "react-i18next";
-import { Subtitle, Title } from "@scm-manager/ui-components";
-import { Link } from "@scm-manager/ui-types";
-import ResubmitSection from "./ResubmitSection";
-import ResubmitConfigurationSection from "./ResubmitConfigurationSection";
 
-type Props = {
-  links: Link[];
-};
+package sonia.scm.issuetracker.internal.resubmit;
 
-const AdminPage: FC<Props> = ({ links }) => {
-  const [t] = useTranslation("plugins");
-  const resubmitConfigurationLink = links.find(l => l.name === "resubmitConfiguration");
-  const resubmitLink = links.find(l => l.name === "resubmit");
-  return (
-    <>
-      <Title title={t("scm-issuetracker-plugin.title")} />
-      <Subtitle subtitle={t("scm-issuetracker-plugin.subtitle")} />
-      {resubmitConfigurationLink ? <ResubmitConfigurationSection link={resubmitConfigurationLink} /> : null}
-      {resubmitLink ? <ResubmitSection link={resubmitLink} /> : null}
-    </>
-  );
-};
+import de.otto.edison.hal.HalRepresentation;
+import de.otto.edison.hal.Links;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import javax.validation.constraints.Email;
+import java.util.List;
 
-export default AdminPage;
+@Getter
+@Setter
+@NoArgsConstructor
+@SuppressWarnings("java:S2160")
+public class ResubmitConfigurationDto extends HalRepresentation {
+
+  private List<@Email String> addresses;
+
+  ResubmitConfigurationDto(Links links, List<String> addresses) {
+    super(links);
+    this.addresses = addresses;
+  }
+}

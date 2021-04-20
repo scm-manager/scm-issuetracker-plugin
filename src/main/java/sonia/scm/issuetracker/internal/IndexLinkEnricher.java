@@ -30,6 +30,7 @@ import sonia.scm.api.v2.resources.HalEnricherContext;
 import sonia.scm.api.v2.resources.Index;
 import sonia.scm.api.v2.resources.LinkBuilder;
 import sonia.scm.api.v2.resources.ScmPathInfoStore;
+import sonia.scm.issuetracker.internal.resubmit.ResubmitResource;
 import sonia.scm.plugin.Extension;
 
 import javax.inject.Inject;
@@ -53,17 +54,33 @@ public class IndexLinkEnricher implements HalEnricher {
     Map<String, String> links = new HashMap<>();
 
     if (Permissions.isResubmitPermitted()) {
-      String resubmitLink = new LinkBuilder(scmPathInfoStore.get().get(), IssueTrackerResource.class)
-        .method("resubmits")
-        .parameters()
-        .href();
-
-      links.put("resubmit", resubmitLink);
+      appendResubmitLink(links);
+      appendResubmitConfigurationLink(links);
     }
 
     if (!links.isEmpty()) {
       append(appender, links);
     }
+  }
+
+  private void appendResubmitConfigurationLink(Map<String, String> links) {
+    String resubmitConfigurationLink = new LinkBuilder(scmPathInfoStore.get().get(), IssueTrackerResource.class, ResubmitResource.class)
+      .method("resubmits")
+      .parameters()
+      .method("getConfiguration")
+      .parameters()
+      .href();
+
+    links.put("resubmitConfiguration", resubmitConfigurationLink);
+  }
+
+  private void appendResubmitLink(Map<String, String> links) {
+    String resubmitLink = new LinkBuilder(scmPathInfoStore.get().get(), IssueTrackerResource.class)
+      .method("resubmits")
+      .parameters()
+      .href();
+
+    links.put("resubmit", resubmitLink);
   }
 
   private void append(HalAppender appender, Map<String, String> links) {

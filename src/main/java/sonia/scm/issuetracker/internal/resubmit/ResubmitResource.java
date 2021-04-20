@@ -35,11 +35,14 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import sonia.scm.api.v2.resources.ErrorDto;
+import sonia.scm.issuetracker.internal.Permissions;
 import sonia.scm.web.VndMediaType;
 
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -54,20 +57,90 @@ import java.util.List;
 public class ResubmitResource {
 
   @VisibleForTesting
-  static final String MEDIA_TYPE = VndMediaType.PREFIX + "issueTrackerResubmit" + VndMediaType.SUFFIX;
+  static final String MEDIA_TYPE_RESUBMIT = VndMediaType.PREFIX + "issueTrackerResubmit" + VndMediaType.SUFFIX;
+  @VisibleForTesting
+  static final String MEDIA_TYPE_RESUBMIT_CONFIG = VndMediaType.PREFIX + "issueTrackerResubmitConfig" + VndMediaType.SUFFIX;
 
   private final ResubmitQueue queue;
   private final ResubmitDispatcher action;
+  private final ResubmitConfigurationStore resubmitConfigurationStore;
 
   @Inject
-  public ResubmitResource(ResubmitQueue queue, ResubmitDispatcher action) {
+  public ResubmitResource(ResubmitQueue queue, ResubmitDispatcher action, ResubmitConfigurationStore resubmitConfigurationStore) {
     this.queue = queue;
     this.action = action;
+    this.resubmitConfigurationStore = resubmitConfigurationStore;
+  }
+
+  @GET
+  @Path("config")
+  @Produces(MEDIA_TYPE_RESUBMIT_CONFIG)
+  @Operation(
+    summary = "Get configuration",
+    description = "Returns issue tracker resubmit configuration.",
+    tags = "Issue Tracker",
+    operationId = "issue_tracker_resubmit_configuration"
+  )
+  @ApiResponse(
+    responseCode = "200",
+    description = "success",
+    content = @Content(
+      mediaType = MEDIA_TYPE_RESUBMIT,
+      schema = @Schema(implementation = ResubmitDto.class)
+    )
+  )
+  @ApiResponse(responseCode = "401", description = "not authenticated / invalid credentials")
+  @ApiResponse(responseCode = "403", description = "not authorized, the current user does not have the \"resubmit\" privilege")
+  @ApiResponse(
+    responseCode = "500",
+    description = "internal server error",
+    content = @Content(
+      mediaType = VndMediaType.ERROR_TYPE,
+      schema = @Schema(implementation = ErrorDto.class)
+    )
+  )
+  public ResubmitConfigurationDto getConfiguration(@Context UriInfo info) {
+    Permissions.checkResubmit();
+
+    ResubmitConfiguration resubmitConfiguration = resubmitConfigurationStore.get();
+    String requestedUri = info.getRequestUriBuilder().build().toASCIIString();
+    Links links = Links.linkingTo().self(requestedUri)
+      .single(Link.link("update", requestedUri))
+      .build();
+
+    return new ResubmitConfigurationDto(links, resubmitConfiguration.getAddresses());
+  }
+
+  @PUT
+  @Path("config")
+  @Produces(MEDIA_TYPE_RESUBMIT_CONFIG)
+  @Operation(
+    summary = "Update resubmit configuration",
+    description = "Update issue tracker resubmit configuration.",
+    tags = "Issue Tracker",
+    operationId = "update_issue_tracker_resubmit_configuration"
+  )
+  @ApiResponse(responseCode = "202", description = "accepted")
+  @ApiResponse(responseCode = "401", description = "not authenticated / invalid credentials")
+  @ApiResponse(responseCode = "403", description = "not authorized, the current user does not have the \"resubmit\" privilege")
+  @ApiResponse(
+    responseCode = "500",
+    description = "internal server error",
+    content = @Content(
+      mediaType = VndMediaType.ERROR_TYPE,
+      schema = @Schema(implementation = ErrorDto.class)
+    )
+  )
+  public Response setConfiguration(@Valid ResubmitConfigurationDto dto) {
+    ResubmitConfiguration resubmitConfiguration = new ResubmitConfiguration();
+    resubmitConfiguration.setAddresses(dto.getAddresses());
+    resubmitConfigurationStore.set(resubmitConfiguration);
+    return Response.noContent().build();
   }
 
   @GET
   @Path("")
-  @Produces(MEDIA_TYPE)
+  @Produces(MEDIA_TYPE_RESUBMIT)
   @Operation(
     summary = "Get issue tracker resubmits",
     description = "Returns a collection of issue trackers which have queued comments.",
@@ -78,7 +151,7 @@ public class ResubmitResource {
     responseCode = "200",
     description = "success",
     content = @Content(
-      mediaType = MEDIA_TYPE,
+      mediaType = MEDIA_TYPE_RESUBMIT,
       schema = @Schema(implementation = ResubmitDto.class)
     )
   )
@@ -127,7 +200,7 @@ public class ResubmitResource {
   @Operation(
     summary = "Resubmit pending comments",
     description = "Resubmit all pending comments for the given issue tracker.",
-    tags = "Pull Request",
+    tags = "Issue Tracker",
     operationId = "issue_tracker_resubmits_resubmit"
   )
   @ApiResponse(responseCode = "202", description = "accepted")
@@ -151,13 +224,12 @@ public class ResubmitResource {
   @Operation(
     summary = "Clear pending comments",
     description = "Clear all pending comments for the given issue tracker.",
-    tags = "Pull Request",
+    tags = "Issue Tracker",
     operationId = "issue_tracker_resubmits_clear"
   )
   @ApiResponse(responseCode = "204", description = "no content")
   @ApiResponse(responseCode = "401", description = "not authenticated / invalid credentials")
   @ApiResponse(responseCode = "403", description = "not authorized, the current user does not have the \"resubmit\" privilege")
-  @ApiResponse(responseCode = "404", description = "not found, no pull request with the specified id is available")
   @ApiResponse(
     responseCode = "500",
     description = "internal server error",

@@ -41,11 +41,15 @@ public class Permissions {
     SecurityUtils.getSubject().checkPermission(PERMISSION_RESUBMIT + ":" + issueTrackerName);
   }
 
+  public static void checkResubmit() {
+    SecurityUtils.getSubject().checkPermission(PERMISSION_RESUBMIT);
+  }
+
   public static boolean isResubmitPermitted() {
     return SecurityUtils.getSubject().isPermitted(PERMISSION_RESUBMIT);
   }
 
-  public static Checker checkResubmit() {
+  public static Checker resubmitChecker() {
     return new Checker(SecurityUtils.getSubject(), PERMISSION_RESUBMIT + ":");
   }
 

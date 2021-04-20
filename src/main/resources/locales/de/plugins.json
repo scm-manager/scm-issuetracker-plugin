@@ -10,7 +10,17 @@
       "issueTracker": "Issue Tracker",
       "queueCount": "Anzahl ausstehender Kommentare",
       "resubmit": "Erneute senden",
-      "clear": "Kommentare entfernen"
+      "clear": "Kommentare entfernen",
+      "config": {
+        "title": "Erneut Senden Konfiguration",
+        "description": "Konfiguration für die Erneute Senden Funktion",
+        "address": "Email Adresse",
+        "addAddress": "Adresse hinzufügen",
+        "removeAddress": "Adresse entfernen",
+        "invalidMail": "Falsches Email Adressformat",
+        "updated": "Die Konfiguration wurde erfolgreich aktualisiert",
+        "submit": "Konfiguration aktualisieren"
+      }
     }
   },
   "permissions": {
