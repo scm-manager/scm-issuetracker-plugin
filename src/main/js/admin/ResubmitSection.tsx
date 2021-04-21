@@ -27,6 +27,7 @@ import { Link } from "@scm-manager/ui-types";
 import { useTranslation } from "react-i18next";
 import { Resubmit, ResubmitCollection, useResubmits } from "./hooks";
 import { Button, Notification, ErrorNotification, Loading } from "@scm-manager/ui-components";
+import styled from "styled-components";
 
 type ActionProps = {
   label: string;
@@ -53,6 +54,10 @@ type ResubmitTableProps = {
   actionDispatcher: (link: string) => void;
 };
 
+const ActionTd = styled.td`
+  width: 5rem;
+`;
+
 const ResubmitTable: FC<ResubmitTableProps> = ({ data, actionDispatcher }) => {
   const [t] = useTranslation("plugins");
   if ((data?._embedded?.resubmit || []).length === 0) {
@@ -73,7 +78,7 @@ const ResubmitTable: FC<ResubmitTableProps> = ({ data, actionDispatcher }) => {
           <tr className="border-is-green">
             <td>{resubmit.issueTracker}</td>
             <td>{resubmit.queueSize}</td>
-            <td>
+            <ActionTd>
               <Action
                 label={t("scm-issuetracker-plugin.resubmit.resubmit")}
                 linkName={"resubmit"}
@@ -81,8 +86,8 @@ const ResubmitTable: FC<ResubmitTableProps> = ({ data, actionDispatcher }) => {
                 color="warning"
                 actionDispatcher={actionDispatcher}
               />
-            </td>
-            <td>
+            </ActionTd>
+            <ActionTd>
               <Action
                 label={t("scm-issuetracker-plugin.resubmit.clear")}
                 linkName={"clear"}
@@ -90,7 +95,7 @@ const ResubmitTable: FC<ResubmitTableProps> = ({ data, actionDispatcher }) => {
                 color="danger"
                 actionDispatcher={actionDispatcher}
               />
-            </td>
+            </ActionTd>
           </tr>
         ))}
       </tbody>
