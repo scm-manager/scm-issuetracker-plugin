@@ -38,6 +38,7 @@ import sonia.scm.mail.api.MailService;
 import sonia.scm.mail.api.MailTemplateType;
 
 import java.util.Collections;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -116,6 +117,18 @@ class NotificationServiceTest {
     verify(envelopeBuilder).toAddress("dent@hitchhiker.com");
     assertSubject(envelopeBuilder, "jira", "comments", "0", "1");
     verify(mailBuilder).send();
+  }
+
+  @Test
+  void shouldSendNotificationsInEnglishAndGerman() {
+    configuration(true, "dent@hitchhiker.com");
+
+    mockMailBuilder(NotificationService.TEMPLATE_COMMENT);
+
+    service.notifyComment(commentOne);
+
+    verify(subjectBuilder).withSubject(eq(Locale.ENGLISH), anyString());
+    verify(subjectBuilder).withSubject(eq(Locale.GERMAN), anyString());
   }
 
   @Test

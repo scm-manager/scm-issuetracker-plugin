@@ -26,6 +26,8 @@
 package sonia.scm.issuetracker.internal.resubmit;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import lombok.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,35 +38,50 @@ import sonia.scm.mail.api.MailTemplateType;
 import sonia.scm.util.HttpUtil;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.function.Function;
 
+@Singleton
 public class NotificationService {
 
-  private static final String SUBJECT_COMMENT = "Failed to create comment on %s for issue %s";
-  @VisibleForTesting
-  static final String TEMPLATE_COMMENT = "/sonia/scm/issuetracker/internal/resubmit/comment-mail.md.mustache";
+  private static final String SUBJECT_BUNDLE = "sonia.scm.issuetracker.internal.resubmit.subjects";
+  private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
+  private static final Set<Locale> LOCALES = ImmutableSet.of(DEFAULT_LOCALE, Locale.GERMAN);
 
-  private static final String SUBJECT_RESUBMIT = "%d comments are successfully resubmitted and %d are requeued for %s";
   @VisibleForTesting
-  static final String TEMPLATE_RESUBMIT = "/sonia/scm/issuetracker/internal/resubmit/resubmit-mail.md.mustache";
+  static final String TEMPLATE_COMMENT = "/sonia/scm/issuetracker/internal/resubmit/comment-mail.mustache";
+
+  @VisibleForTesting
+  static final String TEMPLATE_RESUBMIT = "/sonia/scm/issuetracker/internal/resubmit/resubmit-mail.mustache";
 
   private static final Logger LOG = LoggerFactory.getLogger(NotificationService.class);
 
   private final ResubmitConfigurationStore store;
   private final ScmConfiguration configuration;
   private final MailService mailService;
+  private final Map<Locale, ResourceBundle> subjects;
 
   @Inject
   public NotificationService(ResubmitConfigurationStore store, ScmConfiguration configuration, MailService mailService) {
     this.store = store;
     this.configuration = configuration;
     this.mailService = mailService;
+
+    subjects = Maps.asMap(LOCALES, locale -> ResourceBundle.getBundle(SUBJECT_BUNDLE, locale));
   }
 
   public void notifyComment(QueuedComment comment) {
-    String subject = String.format(SUBJECT_COMMENT, comment.getIssueTracker(), comment.getIssueKey());
-    notify(subject, TEMPLATE_COMMENT, new CommentModel(comment, createResubmitUrl()));
+    notify(TEMPLATE_COMMENT, new CommentModel(comment, createResubmitUrl()), bundle -> {
+      String subject = bundle.getString("comment");
+      return MessageFormat.format(subject, comment.getIssueTracker(), comment.getIssueKey());
+    });
   }
 
   private String createResubmitUrl() {
@@ -72,11 +89,13 @@ public class NotificationService {
   }
 
   public void notifyResubmit(String issueTracker, Collection<QueuedComment> remove, Collection<QueuedComment> requeue) {
-    String subject = String.format(SUBJECT_RESUBMIT, remove.size(), requeue.size(), issueTracker);
-    notify(subject, TEMPLATE_RESUBMIT, new ResubmitModel(issueTracker, remove.size(), requeue.size(), createResubmitUrl()));
+    notify(TEMPLATE_RESUBMIT, new ResubmitModel(issueTracker, remove.size(), requeue.size(), createResubmitUrl()), bundle -> {
+      String subject = bundle.getString("resubmit");
+      return MessageFormat.format(subject, issueTracker, remove.size(), requeue.size());
+    });
   }
 
-  private void notify(String subject, String template, Object model) {
+  private void notify(String template, Object model, Function<ResourceBundle, String> subjectSupplier) {
     List<String> addresses = store.get().getAddresses();
     if (shouldSendNotification(addresses)) {
 
@@ -85,8 +104,15 @@ public class NotificationService {
         envelopeBuilder.toAddress(address);
       }
 
-      MailService.MailBuilder mailBuilder = envelopeBuilder.withSubject(subject)
-        .withTemplate(template, MailTemplateType.MARKDOWN_HTML)
+      ResourceBundle resourceBundle = subjects.get(DEFAULT_LOCALE);
+      String subject = subjectSupplier.apply(resourceBundle);
+
+      MailService.SubjectBuilder subjectBuilder = envelopeBuilder.withSubject(subject);
+      for (Map.Entry<Locale, ResourceBundle> e : subjects.entrySet()) {
+        subjectBuilder.withSubject(e.getKey(), subjectSupplier.apply(e.getValue()));
+      }
+
+      MailService.MailBuilder mailBuilder = subjectBuilder.withTemplate(template, MailTemplateType.MARKDOWN_HTML)
         .andModel(model);
 
       send(mailBuilder);
