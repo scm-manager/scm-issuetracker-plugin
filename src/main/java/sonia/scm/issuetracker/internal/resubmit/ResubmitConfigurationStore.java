@@ -29,7 +29,9 @@ import sonia.scm.store.ConfigurationStore;
 import sonia.scm.store.ConfigurationStoreFactory;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class ResubmitConfigurationStore {
 
   private static final String STORE_NAME = "issue-tracker-resubmit-notification";
