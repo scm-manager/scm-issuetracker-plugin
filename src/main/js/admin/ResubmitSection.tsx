@@ -54,6 +54,10 @@ type ResubmitTableProps = {
   actionDispatcher: (link: string) => void;
 };
 
+const TextTd = styled.td`
+  vertical-align: middle !important;
+`;
+
 const ActionTd = styled.td`
   width: 5rem;
 `;
@@ -76,8 +80,8 @@ const ResubmitTable: FC<ResubmitTableProps> = ({ data, actionDispatcher }) => {
       <tbody>
         {data?._embedded.resubmit?.map(resubmit => (
           <tr className="border-is-green">
-            <td>{resubmit.issueTracker}</td>
-            <td>{resubmit.queueSize}</td>
+            <TextTd>{resubmit.issueTracker}</TextTd>
+            <TextTd>{resubmit.queueSize}</TextTd>
             <ActionTd>
               <Action
                 label={t("scm-issuetracker-plugin.resubmit.resubmit")}

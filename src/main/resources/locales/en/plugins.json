@@ -19,7 +19,7 @@
         "removeAddress": "Remove address",
         "invalidMail": "Invalid email address format",
         "updated": "Successfully updated resubmit configuration",
-        "submit": "Update configuration"
+        "submit": "Submit"
       }
     }
   },

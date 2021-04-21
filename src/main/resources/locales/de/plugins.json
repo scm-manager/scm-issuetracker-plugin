@@ -19,7 +19,7 @@
         "removeAddress": "Adresse entfernen",
         "invalidMail": "Falsches Email Adressformat",
         "updated": "Die Konfiguration wurde erfolgreich aktualisiert",
-        "submit": "Konfiguration aktualisieren"
+        "submit": "Speichern"
       }
     }
   },
