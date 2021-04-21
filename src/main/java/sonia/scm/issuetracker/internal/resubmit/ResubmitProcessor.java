@@ -36,17 +36,17 @@ import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryManager;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 class ResubmitProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(ResubmitProcessor.class);
 
-  private final Set<QueuedComment> remove = new HashSet<>();
-  private final Set<QueuedComment> requeue = new HashSet<>();
+  private final List<QueuedComment> remove = new ArrayList<>();
+  private final List<QueuedComment> requeue = new ArrayList<>();
 
   private final RepositoryManager repositoryManager;
   private final IssueTrackerFactory issueTrackerFactory;
@@ -66,11 +66,11 @@ class ResubmitProcessor {
     }
   }
 
-  public Set<QueuedComment> getRemove() {
+  public Collection<QueuedComment> getRemove() {
     return remove;
   }
 
-  public Set<QueuedComment> getRequeue() {
+  public Collection<QueuedComment> getRequeue() {
     return requeue;
   }
 

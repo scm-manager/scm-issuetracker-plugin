@@ -39,9 +39,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Singleton
 public class ResubmitQueue {
@@ -98,7 +98,7 @@ public class ResubmitQueue {
     store.put(issueTracker, entry);
   }
 
-  public synchronized void sync(String issueTracker, Set<QueuedComment> remove, Set<QueuedComment> requeue) {
+  public synchronized void sync(String issueTracker, Collection<QueuedComment> remove, Collection<QueuedComment> requeue) {
     Permissions.checkResubmit(issueTracker);
     StoreEntry entry = entry(issueTracker);
     entry.getComments().removeAll(remove);

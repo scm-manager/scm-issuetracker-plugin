@@ -9,11 +9,11 @@
       "empty": "Keine ausstehenden Kommentare gefunden",
       "issueTracker": "Issue Tracker",
       "queueCount": "Anzahl ausstehender Kommentare",
-      "resubmit": "Erneute senden",
+      "resubmit": "Erneut senden",
       "clear": "Kommentare entfernen",
       "config": {
-        "title": "Erneut Senden Konfiguration",
-        "description": "Konfiguration für die Erneute Senden Funktion",
+        "title": "Konfiguration für erneutes Senden",
+        "description": "Konfiguration für die \"Erneut Senden\" Funktion",
         "address": "Email Adresse",
         "addAddress": "Adresse hinzufügen",
         "removeAddress": "Adresse entfernen",
@@ -27,7 +27,7 @@
     "issuetracker": {
       "resubmit": {
         "displayName": "Kommentare erneut senden",
-        "description": "Erneutes senden ausstehender Issue Tracker Kommentare veranlassen und konfigurieren"
+        "description": "Erneutes Senden ausstehender Issue Tracker Kommentare veranlassen und konfigurieren"
       }
     }
   }

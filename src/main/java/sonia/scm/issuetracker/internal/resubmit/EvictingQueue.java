@@ -66,7 +66,7 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> {
     if (this.maxSize == 0) {
       return false;
     } else {
-      if (this.size() == this.maxSize) {
+      while (this.size() >= this.maxSize) {
         this.delegate.remove();
       }
       this.delegate.add(e);
