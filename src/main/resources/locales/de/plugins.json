@@ -1,0 +1,34 @@
+{
+  "scm-issuetracker-plugin": {
+    "title": "Issue Tracker",
+    "subtitle": "Allgemeine Issue Tracker Konfiguration",
+    "navLink": "Issue Tracker",
+    "resubmit": {
+      "title": "Kommentare erneut senden",
+      "description": "Ausstehende Kommentare erneut senden",
+      "empty": "Keine ausstehenden Kommentare gefunden",
+      "issueTracker": "Issue Tracker",
+      "queueCount": "Anzahl ausstehender Kommentare",
+      "resubmit": "Erneut senden",
+      "clear": "Kommentare entfernen",
+      "config": {
+        "title": "Konfiguration für erneutes Senden",
+        "description": "Konfiguration für die \"Erneut Senden\" Funktion",
+        "address": "Email Adresse",
+        "addAddress": "Adresse hinzufügen",
+        "removeAddress": "Adresse entfernen",
+        "invalidMail": "Falsches Email Adressformat",
+        "updated": "Die Konfiguration wurde erfolgreich aktualisiert",
+        "submit": "Speichern"
+      }
+    }
+  },
+  "permissions": {
+    "issuetracker": {
+      "resubmit": {
+        "displayName": "Kommentare erneut senden",
+        "description": "Erneutes Senden ausstehender Issue Tracker Kommentare veranlassen und konfigurieren"
+      }
+    }
+  }
+}

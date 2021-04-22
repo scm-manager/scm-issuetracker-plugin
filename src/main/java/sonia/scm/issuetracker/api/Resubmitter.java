@@ -21,25 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.api;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import java.io.IOException;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+/**
+ * Resend comments which could be added to issue in the past.
+ *
+ * @since 3.1.0
+ */
+public interface Resubmitter {
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+  /**
+   * Adds the resubmit comment to the issue with the given issue key.
+   *
+   * @param issueKey issue key
+   * @param comment comment to add
+   *
+   * @throws IOException if the comment could not be added
+   */
+  void resubmit(String issueKey, String comment) throws IOException;
+}

@@ -21,25 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.internal.resubmit;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import sonia.scm.issuetracker.internal.Permissions;
+import sonia.scm.store.ConfigurationStore;
+import sonia.scm.store.ConfigurationStoreFactory;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+@Singleton
+public class ResubmitConfigurationStore {
+
+  private static final String STORE_NAME = "issue-tracker-resubmit-notification";
+
+  private final ConfigurationStore<ResubmitConfiguration> store;
+
+  @Inject
+  public ResubmitConfigurationStore(ConfigurationStoreFactory storeFactory) {
+    this.store = storeFactory.withType(ResubmitConfiguration.class).withName(STORE_NAME).build();
+  }
+
+  public ResubmitConfiguration get() {
+    return store.getOptional().orElse(new ResubmitConfiguration());
+  }
+
+  public void set(ResubmitConfiguration configuration) {
+    Permissions.checkResubmit();
+    store.set(configuration);
+  }
+
+}

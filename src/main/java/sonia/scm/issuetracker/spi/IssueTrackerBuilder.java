@@ -30,6 +30,7 @@ import sonia.scm.issuetracker.IssueLinkFactory;
 import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.issuetracker.internal.resubmit.ResubmitQueue;
 import sonia.scm.repository.Repository;
 import sonia.scm.store.DataStore;
 import sonia.scm.store.DataStoreFactory;
@@ -47,11 +48,13 @@ import java.util.Locale;
 public class IssueTrackerBuilder {
 
   private final DataStoreFactory dataStoreFactory;
+  private final ResubmitQueue resubmitQueue;
   private final TemplateCommentRendererFactory templateCommentRendererFactory;
 
   @Inject
-  public IssueTrackerBuilder(DataStoreFactory dataStoreFactory, TemplateCommentRendererFactory templateCommentRendererFactory) {
+  public IssueTrackerBuilder(DataStoreFactory dataStoreFactory, ResubmitQueue resubmitQueue, TemplateCommentRendererFactory templateCommentRendererFactory) {
     this.dataStoreFactory = dataStoreFactory;
+    this.resubmitQueue = resubmitQueue;
     this.templateCommentRendererFactory = templateCommentRendererFactory;
   }
 
@@ -68,20 +71,18 @@ public class IssueTrackerBuilder {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(name), "name can not be null or empty");
     Preconditions.checkNotNull(matcher, "matcher is required");
     Preconditions.checkNotNull(linkFactory, "link factory is required");
-    return new ReadStage(dataStoreFactory, templateCommentRendererFactory, name, matcher, linkFactory);
+    return new ReadStage(this, name, matcher, linkFactory);
   }
 
   public static class ReadStage {
 
-    private final DataStoreFactory dataStoreFactory;
-    private final TemplateCommentRendererFactory templateCommentRendererFactory;
+    private final IssueTrackerBuilder builder;
     private final String name;
     private final IssueMatcher matcher;
     private final IssueLinkFactory linkFactory;
 
-    private ReadStage(DataStoreFactory dataStoreFactory, TemplateCommentRendererFactory templateCommentRendererFactory, String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
-      this.dataStoreFactory = dataStoreFactory;
-      this.templateCommentRendererFactory = templateCommentRendererFactory;
+    private ReadStage(IssueTrackerBuilder builder, String name, IssueMatcher matcher, IssueLinkFactory linkFactory) {
+      this.builder = builder;
       this.name = name;
       this.matcher = matcher;
       this.linkFactory = linkFactory;
@@ -107,11 +108,11 @@ public class IssueTrackerBuilder {
       Preconditions.checkNotNull(repository, "repository is required");
       Preconditions.checkNotNull(commentator, "commentator is required");
       DataStore<ProcessedMarks> dataStore = createStore(repository);
-      return new CommentingStage(this, new ProcessedStore(dataStore), commentator);
+      return new CommentingStage(this, repository, new ProcessedStore(dataStore), commentator);
     }
 
     private DataStore<ProcessedMarks> createStore(Repository repository) {
-      return dataStoreFactory.withType(ProcessedMarks.class)
+      return builder.dataStoreFactory.withType(ProcessedMarks.class)
         .withName("issueTracker" + name.substring(0, 1).toUpperCase(Locale.ENGLISH) + name.substring(1))
         .forRepository(repository)
         .build();
@@ -121,13 +122,19 @@ public class IssueTrackerBuilder {
   public static class CommentingStage {
 
     private final ReadStage readStage;
+    private final Repository repository;
     private final ProcessedStore store;
-    private final Commentator commentator;
+    private final ResubmittingCommentator commentator;
 
-    public CommentingStage(ReadStage readStage, ProcessedStore store, Commentator commentator) {
+    public CommentingStage(ReadStage readStage, Repository repository, ProcessedStore store, Commentator commentator) {
       this.readStage = readStage;
+      this.repository = repository;
       this.store = store;
-      this.commentator = commentator;
+      this.commentator = new ResubmittingCommentator(queue(), commentator);
+    }
+
+    private ResubmitRepositoryQueue queue() {
+      return new ResubmitRepositoryQueue(readStage.builder.resubmitQueue, repository.getId(), readStage.name);
     }
 
     /**
@@ -153,7 +160,7 @@ public class IssueTrackerBuilder {
      */
     public ChangeStateStage template(String resourcePathTemplate) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(resourcePathTemplate), "resourcePathTemplate is required");
-      ReferenceCommentRenderer renderer = readStage.templateCommentRendererFactory.reference(resourcePathTemplate);
+      ReferenceCommentRenderer renderer = readStage.builder.templateCommentRendererFactory.reference(resourcePathTemplate);
       return new ChangeStateStage(this, renderer);
     }
 
@@ -232,7 +239,7 @@ public class IssueTrackerBuilder {
      */
     public FinalStage template(String resourcePathTemplate) {
       Preconditions.checkArgument(!Strings.isNullOrEmpty(resourcePathTemplate), "resourcePathTemplate is required");
-      StateChangeCommentRenderer renderer = changeStateStage.commentingStage.readStage.templateCommentRendererFactory.stateChange(resourcePathTemplate);
+      StateChangeCommentRenderer renderer = changeStateStage.commentingStage.readStage.builder.templateCommentRendererFactory.stateChange(resourcePathTemplate);
       return new FinalStage(this, renderer);
     }
 

@@ -21,25 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.internal;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import sonia.scm.issuetracker.internal.resubmit.ResubmitResource;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.ws.rs.Path;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+@Path("v2/issue-tracker")
+public class IssueTrackerResource {
+
+  private final Provider<ResubmitResource> resubmitResource;
+
+  @Inject
+  public IssueTrackerResource(Provider<ResubmitResource> resubmitResource) {
+    this.resubmitResource = resubmitResource;
+  }
+
+  @Path("resubmits")
+  public ResubmitResource resubmits() {
+    return resubmitResource.get();
+  }
+
+}

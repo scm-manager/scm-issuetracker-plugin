@@ -21,25 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.spi;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sonia.scm.issuetracker.api.Resubmitter;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import java.io.IOException;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+class ResubmittingCommentator implements Commentator, Resubmitter {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ResubmittingCommentator.class);
+
+  private final Commentator commentator;
+  private final ResubmitRepositoryQueue queue;
+
+  ResubmittingCommentator(ResubmitRepositoryQueue queue, Commentator commentator) {
+    this.queue = queue;
+    this.commentator = commentator;
+  }
+
+  @Override
+  public void comment(String issueKey, String comment) throws IOException {
+    try {
+      commentator.comment(issueKey, comment);
+    } catch (IOException ex) {
+      LOG.warn("failed to append comment for issue {}, queue for resubmit", issueKey, ex);
+      queue.append(issueKey, comment);
+    }
+  }
+
+  @Override
+  public void resubmit(String issueKey, String comment) throws IOException {
+    commentator.comment(issueKey, comment);
+  }
+}

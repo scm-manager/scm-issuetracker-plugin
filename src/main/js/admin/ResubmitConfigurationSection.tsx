@@ -21,25 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
+import React, { FC } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "@scm-manager/ui-types";
+import { useResubmitConfiguration } from "./hooks";
+import { ErrorNotification, Loading } from "@scm-manager/ui-components";
+import ResubmitConfigurationForm from "./ResubmitConfigurationForm";
+
+type Props = {
+  link: Link;
 };
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
+const ResubmitConfigurationSection: FC<Props> = ({ link }) => {
+  const [t] = useTranslation("plugins");
+  const { configuration, isLoading, error } = useResubmitConfiguration(link.href);
+
+  return (
+    <>
+      <div className="content">
+        <h2>{t("scm-issuetracker-plugin.resubmit.config.title")}</h2>
+        <p>{t("scm-issuetracker-plugin.resubmit.config.description")}</p>
+      </div>
+      <ErrorNotification error={error} />
+      {isLoading ? <Loading /> : null}
+      {configuration ? <ResubmitConfigurationForm configuration={configuration} /> : null}
+    </>
+  );
 };
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
-
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+export default ResubmitConfigurationSection;

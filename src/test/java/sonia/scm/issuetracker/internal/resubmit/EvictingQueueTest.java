@@ -21,25 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
+package sonia.scm.issuetracker.internal.resubmit;
 
-type PredicateProps = {
-  links: Links;
-};
+import org.junit.jupiter.api.Test;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import java.util.Queue;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import static org.assertj.core.api.Assertions.assertThat;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+class EvictingQueueTest {
+
+  @Test
+  void shouldReturnFalseIfMaxSizeIsZero() {
+    Queue<String> queue = EvictingQueue.create(0);
+    assertThat(queue.add("a")).isFalse();
+  }
+
+  @Test
+  void shouldEvictFirstAddedEntry() {
+    Queue<String> queue = EvictingQueue.create(2);
+    assertThat(queue.add("a")).isTrue();
+    assertThat(queue.add("b")).isTrue();
+    assertThat(queue.add("c")).isTrue();
+    assertThat(queue).containsOnly("b", "c");
+  }
+
+}

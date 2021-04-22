@@ -24,56 +24,44 @@
 
 package sonia.scm.issuetracker.internal;
 
-import com.google.common.annotations.VisibleForTesting;
-import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.issuetracker.spi.IssueTrackerBuilder;
+import sonia.scm.issuetracker.spi.IssueTrackerProvider;
+import sonia.scm.repository.Repository;
 
 import javax.inject.Inject;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-/**
- * Delegates and merges results of multiple {@link IssueTracker}.
- *
- * @since 3.0.0
- */
-public final class CompositeIssueTracker implements IssueTracker {
+public class IssueTrackerFactory {
 
-  @VisibleForTesting
-  static final String NAME = "composite";
-
-  private final IssueTrackerFactory issueTrackerFactory;
+  private final IssueTrackerBuilder builder;
+  private final Set<IssueTrackerProvider> providers;
 
   @Inject
-  public CompositeIssueTracker(IssueTrackerFactory issueTrackerFactory) {
-    this.issueTrackerFactory = issueTrackerFactory;
+  public IssueTrackerFactory(IssueTrackerBuilder builder, Set<IssueTrackerProvider> providers) {
+    this.builder = builder;
+    this.providers = providers;
   }
 
-  @Override
-  public String getName() {
-    return NAME;
+  public Iterable<IssueTracker> trackers(Repository repository) {
+    return stream(repository)
+      .collect(Collectors.toList());
   }
 
-  @Override
-  public void process(IssueReferencingObject object) {
-    for (IssueTracker tracker : trackers(object)) {
-      tracker.process(object);
-    }
+  public Optional<IssueTracker> tracker(Repository repository, String name) {
+    return stream(repository)
+      .filter(tracker -> name.equals(tracker.getName()))
+      .findAny();
   }
 
-  @Override
-  public Map<String,String> findIssues(IssueReferencingObject object) {
-    Map<String,String> issues = new LinkedHashMap<>();
-    for (IssueTracker tracker : trackers(object)) {
-      Map<String, String> trackerMap = tracker.findIssues(object);
-      if (trackerMap != null) {
-        issues.putAll(trackerMap);
-      }
-    }
-    return issues;
+  private Stream<IssueTracker> stream(Repository repository) {
+    return providers.stream()
+      .map(provider -> provider.create(builder, repository))
+      .filter(Optional::isPresent)
+      .map(Optional::get);
   }
 
-  private Iterable<IssueTracker> trackers(IssueReferencingObject object) {
-    return issueTrackerFactory.trackers(object.getRepository());
-  }
 }

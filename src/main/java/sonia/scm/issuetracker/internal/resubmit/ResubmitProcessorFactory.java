@@ -22,58 +22,27 @@
  * SOFTWARE.
  */
 
-package sonia.scm.issuetracker.internal;
+package sonia.scm.issuetracker.internal.resubmit;
 
-import com.google.common.annotations.VisibleForTesting;
-import sonia.scm.issuetracker.api.IssueReferencingObject;
-import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.issuetracker.internal.IssueTrackerFactory;
+import sonia.scm.repository.RepositoryManager;
 
 import javax.inject.Inject;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-/**
- * Delegates and merges results of multiple {@link IssueTracker}.
- *
- * @since 3.0.0
- */
-public final class CompositeIssueTracker implements IssueTracker {
+public class ResubmitProcessorFactory {
 
-  @VisibleForTesting
-  static final String NAME = "composite";
-
+  private final RepositoryManager repositoryManager;
   private final IssueTrackerFactory issueTrackerFactory;
+  private final ResubmitQueue queue;
 
   @Inject
-  public CompositeIssueTracker(IssueTrackerFactory issueTrackerFactory) {
+  public ResubmitProcessorFactory(RepositoryManager repositoryManager, IssueTrackerFactory issueTrackerFactory, ResubmitQueue queue) {
+    this.repositoryManager = repositoryManager;
+    this.queue = queue;
     this.issueTrackerFactory = issueTrackerFactory;
   }
 
-  @Override
-  public String getName() {
-    return NAME;
-  }
-
-  @Override
-  public void process(IssueReferencingObject object) {
-    for (IssueTracker tracker : trackers(object)) {
-      tracker.process(object);
-    }
-  }
-
-  @Override
-  public Map<String,String> findIssues(IssueReferencingObject object) {
-    Map<String,String> issues = new LinkedHashMap<>();
-    for (IssueTracker tracker : trackers(object)) {
-      Map<String, String> trackerMap = tracker.findIssues(object);
-      if (trackerMap != null) {
-        issues.putAll(trackerMap);
-      }
-    }
-    return issues;
-  }
-
-  private Iterable<IssueTracker> trackers(IssueReferencingObject object) {
-    return issueTrackerFactory.trackers(object.getRepository());
+  public ResubmitProcessor create() {
+    return new ResubmitProcessor(repositoryManager, issueTrackerFactory, queue);
   }
 }

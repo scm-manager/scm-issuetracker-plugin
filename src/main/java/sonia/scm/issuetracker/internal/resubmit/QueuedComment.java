@@ -21,25 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.internal.resubmit;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import sonia.scm.xml.XmlInstantAdapter;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.time.Instant;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+@Data
+@NoArgsConstructor
+@XmlAccessorType(XmlAccessType.FIELD)
+public class QueuedComment {
+
+  private String repository;
+  private String issueTracker;
+  private String issueKey;
+  private String comment;
+
+  @EqualsAndHashCode.Exclude
+  private int retries = 0;
+
+  @EqualsAndHashCode.Exclude
+  @XmlJavaTypeAdapter(XmlInstantAdapter.class)
+  private Instant date;
+
+  public QueuedComment(String repository, String issueTracker, String issueKey, String comment) {
+    this.repository = repository;
+    this.issueTracker = issueTracker;
+    this.issueKey = issueKey;
+    this.comment = comment;
+    this.retries = 0;
+    this.date = Instant.now();
+  }
+
+  void retried() {
+    retries = retries + 1;
+  }
+}

@@ -21,25 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.api;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import org.junit.jupiter.api.Test;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import java.util.Map;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+import static org.assertj.core.api.Assertions.assertThat;
+
+class IssueTrackerTest {
+
+  private final SampleIssueTracker issueTracker = new SampleIssueTracker();
+
+  @Test
+  void shouldReturnClassName() {
+    assertThat(issueTracker.getName()).isEqualTo(SampleIssueTracker.class.getName());
+  }
+
+  @Test
+  void shouldReturnEmptyOptionalForResubmitter() {
+    assertThat(issueTracker.getResubmitter()).isEmpty();
+  }
+
+  private static class SampleIssueTracker implements IssueTracker {
+
+    @Override
+    public void process(IssueReferencingObject object) {
+
+    }
+
+    @Override
+    public Map<String, String> findIssues(IssueReferencingObject object) {
+      return null;
+    }
+  }
+
+}

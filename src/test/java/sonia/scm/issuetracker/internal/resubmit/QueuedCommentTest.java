@@ -21,25 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import { binder } from "@scm-manager/ui-extensions";
-import replaceIssueKeys from "./replaceIssueKeys";
-import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
-import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
-import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
 
-type PredicateProps = {
-  links: Links;
-};
+package sonia.scm.issuetracker.internal.resubmit;
 
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
-};
+import org.junit.jupiter.api.Test;
 
-binder.bind("changeset.description.tokens", replaceIssueKeys);
-binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
-binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
-binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
+import static org.assertj.core.api.Assertions.assertThat;
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
-binder.bind("admin.navigation", IssueTrackerNavLink, predicate);
+class QueuedCommentTest {
+
+  @Test
+  void shouldIgnoreRetryCountForEquals() {
+    QueuedComment one = new QueuedComment("42", "redmine", "#42", "Jo");
+    QueuedComment two = new QueuedComment("42", "redmine", "#42", "Jo");
+    assertThat(one).isEqualTo(two);
+
+    QueuedComment three = new QueuedComment("42", "redmine", "#42", "Jo");
+    three.retried();
+    assertThat(one).isEqualTo(three);
+  }
+
+  @Test
+  void shouldIncreaseReties() {
+    QueuedComment comment = new QueuedComment("21", "jira", "ISD-4", "No");
+    assertThat(comment.getRetries()).isZero();
+    comment.retried();
+    assertThat(comment.getRetries()).isOne();
+    comment.retried();
+    assertThat(comment.getRetries()).isEqualTo(2);
+  }
+
+}
