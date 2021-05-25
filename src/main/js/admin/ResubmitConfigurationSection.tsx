@@ -40,7 +40,7 @@ const ResubmitConfigurationSection: FC<Props> = ({ link }) => {
   return (
     <>
       <div className="content">
-        <h2>{t("scm-issuetracker-plugin.resubmit.config.title")}</h2>
+        <h3>{t("scm-issuetracker-plugin.resubmit.config.title")}</h3>
         <p>{t("scm-issuetracker-plugin.resubmit.config.description")}</p>
       </div>
       <ErrorNotification error={error} />

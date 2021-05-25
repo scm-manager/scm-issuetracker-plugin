@@ -116,7 +116,7 @@ const ResubmitSection: FC<Props> = ({ link }) => {
   const { data, isLoading, error, actionDispatcher } = useResubmits(link.href);
   return (
     <div className="content">
-      <h2>{t("scm-issuetracker-plugin.resubmit.title")}</h2>
+      <h3>{t("scm-issuetracker-plugin.resubmit.title")}</h3>
       <p>{t("scm-issuetracker-plugin.resubmit.description")}</p>
       <ErrorNotification error={error} />
       {isLoading ? <Loading /> : <ResubmitTable data={data} actionDispatcher={actionDispatcher} />}

@@ -12,10 +12,10 @@
       "resubmit": "Resubmit",
       "clear": "Clear",
       "config": {
-        "title": "Resubmit configuration",
+        "title": "Resubmit Configuration",
         "description": "Configuration related to the resubmit function",
         "address": "Email Address",
-        "addAddress": "Add address",
+        "addAddress": "Add Address",
         "removeAddress": "Remove address",
         "invalidMail": "Invalid email address format",
         "updated": "Successfully updated resubmit configuration",
