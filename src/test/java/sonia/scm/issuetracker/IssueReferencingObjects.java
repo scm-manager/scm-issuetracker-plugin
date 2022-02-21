@@ -58,13 +58,17 @@ public class IssueReferencingObjects {
   }
 
   public static IssueReferencingObject content(boolean triggeringStateChange, String... values) {
+    return content("unit-test", triggeringStateChange, values);
+  }
+
+  public static IssueReferencingObject content(String type, boolean triggeringStateChange, String... values) {
     List<Content> content = new ArrayList<>();
     for (int i = 0; i < values.length; i++) {
       content.add(new Content("c" + i, values[i]));
     }
     return new IssueReferencingObject(
       RepositoryTestData.createHeartOfGold(),
-      "unit-test",
+      type,
       "42",
       Person.toPerson("Trillian"),
       Instant.now(),

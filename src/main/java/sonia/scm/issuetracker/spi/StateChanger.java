@@ -54,4 +54,12 @@ public interface StateChanger {
    */
   Iterable<String> getKeyWords(String issueKey) throws IOException;
 
+  /**
+   * If this returns <code>true</code>, state changes will not be performed for commits. The default implementation
+   * returns <code>false</code>.
+   * @return <code>false</code> by default.
+   */
+  default boolean isStateChangeForCommitsDisabled() {
+    return false;
+  }
 }

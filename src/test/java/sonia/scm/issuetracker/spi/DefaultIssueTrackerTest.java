@@ -35,6 +35,7 @@ import sonia.scm.issuetracker.ExampleIssueLinkFactory;
 import sonia.scm.issuetracker.ExampleIssueMatcher;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
+import sonia.scm.issuetracker.internal.ChangesetMapper;
 import sonia.scm.issuetracker.internal.resubmit.ResubmitQueue;
 import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.store.InMemoryDataStoreFactory;
@@ -203,6 +204,18 @@ class DefaultIssueTrackerTest {
 
       tracker.process(ref);
       verify(stateChanger).changeState("#42", "fixes");
+      verify(commentator).comment("#42", "Incredible");
+    }
+
+    @Test
+    void shouldNotChangeStateForCommitIfDisabled() throws IOException {
+      IssueReferencingObject ref = content(ChangesetMapper.TYPE, true, "Fixes #42");
+      when(stateChanger.isStateChangeForCommitsDisabled()).thenReturn(true);
+      when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
+      when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
+
+      tracker.process(ref);
+      verify(stateChanger, never()).changeState("#42", "fixes");
       verify(commentator).comment("#42", "Incredible");
     }
 
