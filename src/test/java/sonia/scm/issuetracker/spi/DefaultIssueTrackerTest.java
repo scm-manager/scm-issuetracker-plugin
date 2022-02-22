@@ -35,7 +35,6 @@ import sonia.scm.issuetracker.ExampleIssueLinkFactory;
 import sonia.scm.issuetracker.ExampleIssueMatcher;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
-import sonia.scm.issuetracker.internal.ChangesetMapper;
 import sonia.scm.issuetracker.internal.resubmit.ResubmitQueue;
 import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.store.InMemoryDataStoreFactory;
@@ -46,7 +45,11 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static sonia.scm.issuetracker.IssueReferencingObjects.content;
 
 class DefaultIssueTrackerTest {
@@ -196,21 +199,62 @@ class DefaultIssueTrackerTest {
         .build();
     }
 
-    @Test
-    void shouldChangeState() throws IOException {
-      IssueReferencingObject ref = content("Fixes #42");
-      when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
-      when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
+    @Nested
+    class WithActivatedStateChange {
 
-      tracker.process(ref);
-      verify(stateChanger).changeState("#42", "fixes");
-      verify(commentator).comment("#42", "Incredible");
+      @BeforeEach
+      void activateStateChange() {
+        when(stateChanger.isStateChangeActivatedFor("unit-test")).thenReturn(true);
+      }
+
+      @Test
+      void shouldChangeState() throws IOException {
+        IssueReferencingObject ref = content("Fixes #42");
+        when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
+        when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
+
+        tracker.process(ref);
+        verify(stateChanger).changeState("#42", "fixes");
+        verify(commentator).comment("#42", "Incredible");
+      }
+
+      @Test
+      void shouldChangeStateOnlyOnce() throws IOException {
+        IssueReferencingObject ref = content("Resolves #21");
+        when(stateChanger.getKeyWords("#21")).thenReturn(Collections.singleton("resolves"));
+        when(stateChangeCommentRenderer.render(ref, "resolves")).thenReturn("Awesome");
+
+        tracker.process(ref);
+        verify(stateChanger).changeState("#21", "resolves");
+        verify(commentator).comment("#21", "Awesome");
+
+        tracker.process(ref);
+        verifyNoMoreInteractions(stateChanger, commentator);
+      }
+
+      @Test
+      void shouldChangeStateOfMultipleIssues() throws IOException {
+        IssueReferencingObject ref = content("Resolves #21 and #12", "Fixes #42 too");
+        Set<String> keywords = ImmutableSet.of("resolves", "fixes");
+        when(stateChanger.getKeyWords("#21")).thenReturn(keywords);
+        when(stateChanger.getKeyWords("#12")).thenReturn(keywords);
+        when(stateChanger.getKeyWords("#42")).thenReturn(keywords);
+        when(stateChangeCommentRenderer.render(ref, "resolves")).thenReturn("Awesome");
+        when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
+
+        tracker.process(ref);
+        verify(stateChanger).changeState("#21", "resolves");
+        verify(commentator).comment("#21", "Awesome");
+        verify(stateChanger).changeState("#12", "resolves");
+        verify(commentator).comment("#12", "Awesome");
+        verify(stateChanger).changeState("#42", "fixes");
+        verify(commentator).comment("#42", "Incredible");
+      }
     }
 
     @Test
     void shouldNotChangeStateForCommitIfDisabled() throws IOException {
-      IssueReferencingObject ref = content(ChangesetMapper.TYPE, true, "Fixes #42");
-      when(stateChanger.isStateChangeForCommitsDisabled()).thenReturn(true);
+      IssueReferencingObject ref = content("Fixes #42");
       when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
       when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
 
@@ -226,39 +270,7 @@ class DefaultIssueTrackerTest {
 
       tracker.process(ref);
       verify(commentator).comment("#21", "Great");
-    }
-
-    @Test
-    void shouldChangeStateOnlyOnce() throws IOException {
-      IssueReferencingObject ref = content("Resolves #21");
-      when(stateChanger.getKeyWords("#21")).thenReturn(Collections.singleton("resolves"));
-      when(stateChangeCommentRenderer.render(ref, "resolves")).thenReturn("Awesome");
-
-      tracker.process(ref);
-      verify(stateChanger).changeState("#21", "resolves");
-      verify(commentator).comment("#21", "Awesome");
-
-      tracker.process(ref);
-      verifyNoMoreInteractions(stateChanger, commentator);
-    }
-
-    @Test
-    void shouldChangeStateOfMultipleIssues() throws IOException {
-      IssueReferencingObject ref = content("Resolves #21 and #12", "Fixes #42 too");
-      Set<String> keywords = ImmutableSet.of("resolves", "fixes");
-      when(stateChanger.getKeyWords("#21")).thenReturn(keywords);
-      when(stateChanger.getKeyWords("#12")).thenReturn(keywords);
-      when(stateChanger.getKeyWords("#42")).thenReturn(keywords);
-      when(stateChangeCommentRenderer.render(ref, "resolves")).thenReturn("Awesome");
-      when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
-
-      tracker.process(ref);
-      verify(stateChanger).changeState("#21", "resolves");
-      verify(commentator).comment("#21", "Awesome");
-      verify(stateChanger).changeState("#12", "resolves");
-      verify(commentator).comment("#12", "Awesome");
-      verify(stateChanger).changeState("#42", "fixes");
-      verify(commentator).comment("#42", "Incredible");
+      verify(stateChanger, never()).isStateChangeActivatedFor(anyString());
     }
 
     @Test
@@ -269,8 +281,7 @@ class DefaultIssueTrackerTest {
 
       tracker.process(ref);
       verify(commentator).comment("#42", "Great");
+      verify(stateChanger, never()).isStateChangeActivatedFor(anyString());
     }
-
   }
-
 }

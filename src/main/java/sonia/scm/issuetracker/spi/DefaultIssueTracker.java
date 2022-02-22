@@ -31,7 +31,6 @@ import sonia.scm.issuetracker.IssueMatcher;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.issuetracker.api.IssueTracker;
 import sonia.scm.issuetracker.api.Resubmitter;
-import sonia.scm.issuetracker.internal.ChangesetMapper;
 
 import java.io.IOException;
 import java.util.*;
@@ -162,10 +161,10 @@ class DefaultIssueTracker implements IssueTracker {
     }
     try {
       String comment = stateChangeCommentRenderer.render(object, keyWord);
-      if (ChangesetMapper.TYPE.equals(object.getType()) && stateChanger.isStateChangeForCommitsDisabled()) {
-        LOG.trace("ignoring state change for {} because state change for commits is disabled", object.getRepository());
-      } else {
+      if (stateChanger.isStateChangeActivatedFor(object.getType())) {
         stateChanger.changeState(issueKey, keyWord);
+      } else {
+        LOG.trace("ignoring state change for type {} in repository {}, because state change for this type is disabled", object.getType(), object.getRepository());
       }
       commentator.comment(issueKey, comment);
       store.mark(issueKey, object, keyWord);

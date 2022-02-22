@@ -26,7 +26,6 @@ package sonia.scm.issuetracker.internal.review;
 
 import com.cloudogu.scm.review.comment.service.BasicComment;
 import com.cloudogu.scm.review.pullrequest.service.PullRequest;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import sonia.scm.config.ScmConfiguration;
@@ -45,8 +44,7 @@ import java.util.List;
 @Requires("scm-review-plugin")
 public class PullRequestCommentMapper {
 
-  @VisibleForTesting
-  static final String TYPE = "comment";
+  public static final String TYPE = "comment";
 
   private final ScmConfiguration configuration;
   private final PersonMapper personMapper;
