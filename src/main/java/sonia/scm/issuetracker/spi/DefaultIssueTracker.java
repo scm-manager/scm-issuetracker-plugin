@@ -151,7 +151,7 @@ class DefaultIssueTracker implements IssueTracker {
       if (stateChanger.isStateChangeActivatedFor(object.getType())) {
         changeState(object, issueKey, stateChange.get());
       } else {
-        LOG.trace("ignoring state change for type {} in repository {}, because state change for this type is disabled", object.getType(), object.getRepository());
+        LOG.trace("ignoring state change for type '{}' in repository {}, because state change for this type is disabled", object.getType(), object.getRepository());
         comment(object, issueKey);
       }
     } else {
