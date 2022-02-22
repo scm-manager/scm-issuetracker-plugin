@@ -64,6 +64,9 @@ public interface StateChanger {
    *   <li>{@link PullRequestCommentMapper#TYPE} (<code>{@value PullRequestCommentMapper#TYPE}</code>), or</li>
    *   <li>another value if this is used by further plugins.</li>
    * </ul>
+   * The default implementation delegates to {@link #isStateChangeActivatedForCommits()} for commits and
+   * {@link #isStateChangeActivatedForPullRequests()} for pull requests and returns <code>true</code> for
+   * all other types.
    * @param type The type of the event that triggers the state change.
    * @return <code>true</code>, if the state change should be performed, <code>false</code> otherwise.
    */
