@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -256,11 +257,12 @@ class DefaultIssueTrackerTest {
     void shouldNotChangeStateForCommitIfDisabled() throws IOException {
       IssueReferencingObject ref = content("Fixes #42");
       when(stateChanger.getKeyWords("#42")).thenReturn(Collections.singleton("fixes"));
-      when(stateChangeCommentRenderer.render(ref, "fixes")).thenReturn("Incredible");
+      when(referenceCommentRenderer.render(ref)).thenReturn("Incredible");
 
       tracker.process(ref);
       verify(stateChanger, never()).changeState("#42", "fixes");
       verify(commentator).comment("#42", "Incredible");
+      verify(stateChangeCommentRenderer, never()).render(any(), any());
     }
 
     @Test
