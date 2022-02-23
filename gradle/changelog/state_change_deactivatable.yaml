@@ -1,0 +1,2 @@
+- type: added
+  description: Make state change deactivatable for types ([#31](https://github.com/scm-manager/scm-issuetracker-plugin/pull/31))
