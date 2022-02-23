@@ -148,7 +148,12 @@ class DefaultIssueTracker implements IssueTracker {
     Iterable<String> keyWords = getKeyWords(issueKey);
     Optional<String> stateChange = Issues.detectStateChange(issueKey, keyWords, object);
     if (stateChange.isPresent()) {
-      changeState(object, issueKey, stateChange.get());
+      if (stateChanger.isStateChangeActivatedFor(object.getType())) {
+        changeState(object, issueKey, stateChange.get());
+      } else {
+        LOG.trace("ignoring state change for type '{}' in repository {}, because state change for this type is disabled", object.getType(), object.getRepository());
+        comment(object, issueKey);
+      }
     } else {
       comment(object, issueKey);
     }

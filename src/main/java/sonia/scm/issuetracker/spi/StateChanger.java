@@ -24,6 +24,9 @@
 
 package sonia.scm.issuetracker.spi;
 
+import sonia.scm.issuetracker.internal.ChangesetMapper;
+import sonia.scm.issuetracker.internal.review.PullRequestCommentMapper;
+
 import java.io.IOException;
 
 /**
@@ -54,4 +57,51 @@ public interface StateChanger {
    */
   Iterable<String> getKeyWords(String issueKey) throws IOException;
 
+  /**
+   * This will be called before a state change is performed for the given type. The type might be
+   * <ul>
+   *   <li>{@link ChangesetMapper#TYPE} (<code>{@value ChangesetMapper#TYPE}</code>),</li>
+   *   <li>{@link PullRequestCommentMapper#TYPE} (<code>{@value PullRequestCommentMapper#TYPE}</code>), or</li>
+   *   <li>another value if this is used by further plugins.</li>
+   * </ul>
+   * The default implementation delegates to {@link #isStateChangeActivatedForCommits()} for commits and
+   * {@link #isStateChangeActivatedForPullRequests()} for pull requests and returns <code>true</code> for
+   * all other types.
+   * @param type The type of the event that triggers the state change.
+   * @return <code>true</code>, if the state change should be performed, <code>false</code> otherwise.
+   */
+  default boolean isStateChangeActivatedFor(String type) {
+    switch (type) {
+      case ChangesetMapper.TYPE:
+        return isStateChangeActivatedForCommits();
+      case PullRequestCommentMapper.TYPE:
+        return isStateChangeActivatedForPullRequests();
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * This is used by {@link #isStateChangeActivatedFor(String)} and therefore will not be called, if the
+   * default implementation of {@link #isStateChangeActivatedFor(String)} is not used by the implementation of this
+   * interface.
+   * If this returns <code>false</code>, state changes will be performed for commits. The default implementation
+   * returns <code>true</code>.
+   * @return <code>true</code> by default.
+   */
+  default boolean isStateChangeActivatedForCommits() {
+    return true;
+  }
+
+  /**
+   * This is used by {@link #isStateChangeActivatedFor(String)} and therefore will not be called, if the
+   * default implementation of {@link #isStateChangeActivatedFor(String)} is not used by the implementation of this
+   * interface.
+   * If this returns <code>false</code>, state changes will be performed for pull requests. The default implementation
+   * returns <code>true</code>.
+   * @return <code>true</code> by default.
+   */
+  default boolean isStateChangeActivatedForPullRequests() {
+    return true;
+  }
 }

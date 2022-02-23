@@ -39,7 +39,7 @@ import java.util.List;
 
 public class ChangesetMapper {
 
-  static final String TYPE = "changeset";
+  public static final String TYPE = "changeset";
 
   private final ScmConfiguration configuration;
 
