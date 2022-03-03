@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.2.0 - 2022-03-03
+### Added
+- Make state change deactivatable for types ([#31](https://github.com/scm-manager/scm-issuetracker-plugin/pull/31))
+
 ## 3.1.0 - 2021-04-22
 ### Added
 - Option to resend comments which could not be added ([#12](https://github.com/scm-manager/scm-issuetracker-plugin/pull/12)
@@ -28,3 +32,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Changeover to MIT license ([#2](https://github.com/scm-manager/scm-issuetracker-plugin/pull/2))
 - Rebuild for api changes from core
+
