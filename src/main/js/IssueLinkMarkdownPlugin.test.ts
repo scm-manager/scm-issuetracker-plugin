@@ -55,21 +55,21 @@ describe("IssueLinkMarkdownPlugin tests", () => {
       { type: "text", value: "I am a description of issue " },
       {
         children: [{ type: "text", value: "#22" }],
-        title: "#22",
+        title: "Issue #22",
         type: "link",
         url: "https://hitchhiker.com/issues/22"
       },
       { type: "text", value: ". This issue, (" },
       {
         children: [{ type: "text", value: "#22" }],
-        title: "#22",
+        title: "Issue #22",
         type: "link",
         url: "https://hitchhiker.com/issues/22"
       },
       { type: "text", value: ") is awesome. Lets see more " },
       {
         children: [{ type: "text", value: "#22" }],
-        title: "#22",
+        title: "Issue #22",
         type: "link",
         url: "https://hitchhiker.com/issues/22"
       },
@@ -93,14 +93,14 @@ describe("IssueLinkMarkdownPlugin tests", () => {
       { type: "text", value: "Something on " },
       {
         children: [{ type: "text", value: "#1" }],
-        title: "#1",
+        title: "Issue #1",
         type: "link",
         url: "https://hitchhiker.com/issues/1"
       },
       { type: "text", value: " should work as described in " },
       {
         children: [{ type: "text", value: "#2" }],
-        title: "#2",
+        title: "Issue #2",
         type: "link",
         url: "https://hitchhiker.com/issues/2"
       },
@@ -124,7 +124,7 @@ describe("IssueLinkMarkdownPlugin tests", () => {
       { type: "text", value: "More luck in a heading? " },
       {
         children: [{ type: "text", value: "#1" }],
-        title: "#1",
+        title: "Issue #1",
         type: "link",
         url: "https://hitchhiker.com/issues/1"
       }
