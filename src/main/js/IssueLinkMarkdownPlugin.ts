@@ -27,6 +27,59 @@ import { HalRepresentation } from "@scm-manager/ui-types";
 import { Issue } from "./types";
 
 type IssueLinkMarkdownPluginOptions = { halObject: HalRepresentation };
+type FoundIndex = {
+  idx: number;
+  name: string;
+  href: string;
+};
+
+function findIndicesOfIssues(issues: Issue[], nodeText: string) {
+  const foundIndices: FoundIndex[] = [];
+  for (const { href, name } of issues) {
+    let idx = -1;
+    while ((idx = nodeText.indexOf(name, idx + 1)) !== -1) {
+      foundIndices.push({ idx, name, href });
+    }
+  }
+  foundIndices.sort((a, b) => a.idx - b.idx);
+  return foundIndices;
+}
+
+function buildChildrenNodes(foundIndices: FoundIndex[], nodeText: string) {
+  const children = [];
+  let lastIndex = 0;
+  for (const { idx, name, href } of foundIndices) {
+    if (idx > 0) {
+      children.push({
+        type: "text",
+        value: nodeText.substring(lastIndex, idx)
+      });
+    }
+
+    children.push({
+      type: "link",
+      url: href,
+      title: `Issue ${name}`,
+      children: [
+        {
+          type: "text",
+          value: name
+        }
+      ]
+    });
+
+    lastIndex = idx + name.length;
+  }
+
+  if (lastIndex + 1 < nodeText.length) {
+    children.push({
+      type: "text",
+      value: nodeText.substring(lastIndex)
+    });
+  }
+  return children;
+}
+
 export default function IssueLinkMarkdownPlugin({ halObject }: IssueLinkMarkdownPluginOptions): AstPlugin {
   const issues = halObject._links.issues as Issue[];
 
@@ -40,41 +93,10 @@ export default function IssueLinkMarkdownPlugin({ halObject }: IssueLinkMarkdown
       if (!parent || parent.type === "link" || !node.value) {
         return;
       }
-      let nodeText = node.value as string;
+      const nodeText = node.value as string;
       if (issues.length > 0) {
-        const children = [];
-        for (const { href, name } of issues) {
-          let idx: number;
-          while ((idx = nodeText.indexOf(name)) !== -1) {
-            if (idx > 0) {
-              children.push({
-                type: "text",
-                value: nodeText.substring(0, idx)
-              });
-            }
-
-            children.push({
-              type: "link",
-              url: href,
-              title: `Issue ${name}`,
-              children: [
-                {
-                  type: "text",
-                  value: name
-                }
-              ]
-            });
-
-            nodeText = nodeText.substring(idx + name.length);
-          }
-        }
-
-        if (nodeText.length > 0) {
-          children.push({
-            type: "text",
-            value: nodeText
-          });
-        }
+        const foundIndices = findIndicesOfIssues(issues, nodeText);
+        const children = buildChildrenNodes(foundIndices, nodeText);
 
         parent.children[index] = {
           type: "text",
