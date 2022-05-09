@@ -50,7 +50,7 @@ describe("IssueLinkMarkdownPlugin tests", () => {
         href: "https://hitchhiker.com/issues/22"
       }
     ] as Issue[];
-    const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s.";
+    const content = "I am a description of issue #22. This issue, (#22) is awesome. Lets see more #22s";
     const expected = [
       { type: "text", value: "I am a description of issue " },
       {
@@ -73,7 +73,7 @@ describe("IssueLinkMarkdownPlugin tests", () => {
         type: "link",
         url: "https://hitchhiker.com/issues/22"
       },
-      { type: "text", value: "s." }
+      { type: "text", value: "s" }
     ];
     test(issues, content, expected);
   });

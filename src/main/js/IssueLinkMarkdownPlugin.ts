@@ -71,7 +71,7 @@ function buildChildrenNodes(foundIndices: FoundIndex[], nodeText: string) {
     lastIndex = idx + name.length;
   }
 
-  if (lastIndex + 1 < nodeText.length) {
+  if (lastIndex < nodeText.length) {
     children.push({
       type: "text",
       value: nodeText.substring(lastIndex)
