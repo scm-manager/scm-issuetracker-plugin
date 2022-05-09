@@ -77,7 +77,7 @@ describe("IssueLinkMarkdownPlugin tests", () => {
     ];
     test(issues, content, expected);
   });
-  it("should replace issue ids with links #2", () => {
+  it("should replace issue ids with links #2.1", () => {
     const issues = [
       {
         name: "#1",
@@ -103,6 +103,37 @@ describe("IssueLinkMarkdownPlugin tests", () => {
         title: "Issue #2",
         type: "link",
         url: "https://hitchhiker.com/issues/2"
+      },
+      { type: "text", value: " but it does not look as int " }
+    ];
+    test(issues, content, expected);
+  });
+  it("should replace issue ids with links #2.2", () => {
+    const issues = [
+      {
+        name: "#1",
+        href: "https://hitchhiker.com/issues/1"
+      },
+      {
+        name: "#2",
+        href: "https://hitchhiker.com/issues/2"
+      }
+    ] as Issue[];
+    const content = "Something on #2 should work as described in #1 but it does not look as int ";
+    const expected = [
+      { type: "text", value: "Something on " },
+      {
+        children: [{ type: "text", value: "#2" }],
+        title: "Issue #2",
+        type: "link",
+        url: "https://hitchhiker.com/issues/2"
+      },
+      { type: "text", value: " should work as described in " },
+      {
+        children: [{ type: "text", value: "#1" }],
+        title: "Issue #1",
+        type: "link",
+        url: "https://hitchhiker.com/issues/1"
       },
       { type: "text", value: " but it does not look as int " }
     ];
