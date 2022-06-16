@@ -34,11 +34,17 @@ type FoundIndex = {
 };
 
 function findIndicesOfIssues(issues: Issue[], nodeText: string) {
+  issues.sort((a, b) => b.name.length - a.name.length);
   const foundIndices: FoundIndex[] = [];
   for (const { href, name } of issues) {
-    let idx = -1;
-    while ((idx = nodeText.indexOf(name, idx + 1)) !== -1) {
-      foundIndices.push({ idx, name, href });
+    let idx = nodeText.indexOf(name, 0);
+
+    while (idx !== -1) {
+      const safeIdx = idx;
+      if (!foundIndices.some(it => it.idx === safeIdx)) {
+        foundIndices.push({ idx, name, href });
+      }
+      idx = nodeText.indexOf(name, idx + 1);
     }
   }
   foundIndices.sort((a, b) => a.idx - b.idx);

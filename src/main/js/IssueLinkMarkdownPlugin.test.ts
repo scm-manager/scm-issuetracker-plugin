@@ -162,6 +162,86 @@ describe("IssueLinkMarkdownPlugin tests", () => {
     ];
     test(issues, content, expected);
   });
+  it("should replace issue ids with links #4.1", () => {
+    const issues = [
+      {
+        name: "#2",
+        href: "https://hitchhiker.com/issues/2"
+      },
+      {
+        name: "#21",
+        href: "https://hitchhiker.com/issues/21"
+      }
+    ] as Issue[];
+    const content = "Lets try #2 and #21 together";
+    const expected = [
+      { type: "text", value: "Lets try " },
+      {
+        children: [{ type: "text", value: "#2" }],
+        title: "Issue #2",
+        type: "link",
+        url: "https://hitchhiker.com/issues/2"
+      },
+      { type: "text", value: " and " },
+      {
+        children: [{ type: "text", value: "#21" }],
+        title: "Issue #21",
+        type: "link",
+        url: "https://hitchhiker.com/issues/21"
+      },
+      { type: "text", value: " together" }
+    ];
+    test(issues, content, expected);
+  });
+  it("should replace issue ids with links #4.2", () => {
+    const issues = [
+      {
+        name: "#2",
+        href: "https://hitchhiker.com/issues/2"
+      },
+      {
+        name: "#234",
+        href: "https://hitchhiker.com/issues/234"
+      },
+      {
+        name: "#21",
+        href: "https://hitchhiker.com/issues/21"
+      }
+    ] as Issue[];
+    const content = "What about #2, #234 and (#21) OR [#234]";
+    const expected = [
+      { type: "text", value: "What about " },
+      {
+        children: [{ type: "text", value: "#2" }],
+        title: "Issue #2",
+        type: "link",
+        url: "https://hitchhiker.com/issues/2"
+      },
+      { type: "text", value: ", " },
+      {
+        children: [{ type: "text", value: "#234" }],
+        title: "Issue #234",
+        type: "link",
+        url: "https://hitchhiker.com/issues/234"
+      },
+      { type: "text", value: " and (" },
+      {
+        children: [{ type: "text", value: "#21" }],
+        title: "Issue #21",
+        type: "link",
+        url: "https://hitchhiker.com/issues/21"
+      },
+      { type: "text", value: ") OR [" },
+      {
+        children: [{ type: "text", value: "#234" }],
+        title: "Issue #234",
+        type: "link",
+        url: "https://hitchhiker.com/issues/234"
+      },
+      { type: "text", value: "]" }
+    ];
+    test(issues, content, expected);
+  });
   it("should do nothing if there are no issue links", () => {
     const halObject = {
       _links: {}
