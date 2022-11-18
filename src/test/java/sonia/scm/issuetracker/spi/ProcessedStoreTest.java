@@ -24,6 +24,7 @@
 
 package sonia.scm.issuetracker.spi;
 
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
@@ -32,6 +33,7 @@ import sonia.scm.repository.RepositoryTestData;
 import sonia.scm.store.InMemoryDataStore;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,6 +84,7 @@ class ProcessedStoreTest {
       type,
       id,
       Person.toPerson("Trillian"),
+      Maps.newHashMap("bystanders", Arrays.asList(new Person("Arthur"), new Person("Ford"))),
       Instant.now(),
       Collections.emptyList(),
       "https://hitchhiker.com",

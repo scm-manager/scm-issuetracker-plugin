@@ -25,17 +25,25 @@
 package sonia.scm.issuetracker.internal;
 
 import com.google.common.base.Strings;
+import org.apache.commons.collections.MultiMap;
+import org.apache.commons.collections.map.MultiValueMap;
 import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.repository.Changeset;
+import sonia.scm.repository.Contributor;
+import sonia.scm.repository.Person;
 import sonia.scm.repository.Repository;
 import sonia.scm.util.HttpUtil;
 
 import javax.inject.Inject;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.Collections.emptyMap;
 
 public class ChangesetMapper {
 
@@ -54,12 +62,24 @@ public class ChangesetMapper {
       TYPE,
       changeset.getId(),
       changeset.getAuthor(),
+      mapContributors(changeset.getContributors()),
       Instant.ofEpochMilli(changeset.getDate()),
       content(changeset),
       link(repository, changeset),
       true,
       changeset
     );
+  }
+
+  private Map<String, Collection<Person>> mapContributors(Collection<Contributor> contributors) {
+    if (contributors == null) {
+      return emptyMap();
+    }
+    MultiMap map = new MultiValueMap();
+    contributors.forEach(
+      contributor -> map.put(contributor.getType(), contributor.getPerson())
+    );
+    return map;
   }
 
   @SuppressWarnings("java:S1192") // constant does not mean the same

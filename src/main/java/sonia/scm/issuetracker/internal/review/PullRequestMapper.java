@@ -38,6 +38,7 @@ import sonia.scm.util.HttpUtil;
 
 import javax.inject.Inject;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 @Requires("scm-review-plugin")
@@ -60,6 +61,7 @@ public class PullRequestMapper {
       TYPE,
       pr.getId(),
       personMapper.person(pr.getAuthor()),
+      Collections.emptyMap(),
       date(pr),
       content(pr),
       link(repository, pr),

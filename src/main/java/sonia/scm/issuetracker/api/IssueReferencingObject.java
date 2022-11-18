@@ -29,7 +29,9 @@ import sonia.scm.repository.Person;
 import sonia.scm.repository.Repository;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract model for handling issue references. An {@link IssueReferencingObject} can be build for a changeset,
@@ -44,6 +46,7 @@ public class IssueReferencingObject {
   String type;
   String id;
   Person author;
+  Map<String, Collection<Person>> contributors;
   Instant date;
   List<Content> content;
   String link;

@@ -65,6 +65,7 @@ public class PullRequestCommentMapper {
       TYPE,
       comment.getId(),
       personMapper.person(comment.getAuthor()),
+      Collections.emptyMap(),
       comment.getDate(),
       content(comment),
       link(repository, pullRequest, comment),
