@@ -30,11 +30,13 @@ import sonia.scm.config.ScmConfiguration;
 import sonia.scm.issuetracker.api.Content;
 import sonia.scm.issuetracker.api.IssueReferencingObject;
 import sonia.scm.repository.Changeset;
+import sonia.scm.repository.Contributor;
 import sonia.scm.repository.Person;
 import sonia.scm.repository.Repository;
 import sonia.scm.repository.RepositoryTestData;
 
 import java.time.Instant;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,12 +57,21 @@ class ChangesetMapperTest {
     Instant now = Instant.now();
     Person trillian = Person.toPerson("trillian");
     Changeset changeset = new Changeset("42", now.toEpochMilli(), trillian, "ABC-42 is fixed");
+    changeset.setContributors(
+      Arrays.asList(
+        new Contributor("captain", new Person("Zaphod")),
+        new Contributor("crew", new Person("Trillian")),
+        new Contributor("crew", new Person("Marvin"))
+      )
+    );
 
     IssueReferencingObject ref = mapper.ref(heartOfGold, changeset);
     assertThat(ref.getType()).isEqualTo(ChangesetMapper.TYPE);
     assertThat(ref.getId()).isEqualTo("42");
     assertThat(ref.getAuthor()).isEqualTo(trillian);
     assertThat(ref.getDate().toEpochMilli()).isEqualTo(now.toEpochMilli());
+    assertThat(ref.getContributors().get("captain")).contains(new Person("Zaphod"));
+    assertThat(ref.getContributors().get("crew")).contains(new Person("Trillian"), new Person("Marvin"));
 
     Content content = ref.getContent().get(0);
     assertThat(content.getType()).isEqualTo("description");

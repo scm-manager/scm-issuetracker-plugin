@@ -82,6 +82,7 @@ class TemplateCommentRenderer implements ReferenceCommentRenderer, StateChangeCo
     put(builder, "type", object.getType());
     put(builder, "id", object.getId());
     put(builder, "author", object.getAuthor());
+    put(builder, "contributors", object.getContributors());
     put(builder, "date", object.getDate());
     put(builder, "content", object.getContent());
     put(builder, "link", object.getLink());
