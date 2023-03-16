@@ -32,7 +32,13 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  *
  * @author Sebastian Sdorra
  * @since 1.1
+ * @deprecated Use {@link sonia.scm.xml.XmlEncryptionAdapter} from SCM-Manager
+ *   core instead. Otherwise, other plugins like the audit log cannot
+ *   mask passwords correctly.
+ *   The annotation from the core is compatible to this annotation, so
+ *   no data has to be migrated.
  */
+@Deprecated
 public class XmlEncryptionAdapter extends XmlAdapter<String, String>
 {
 
