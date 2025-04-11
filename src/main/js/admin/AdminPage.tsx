@@ -16,7 +16,7 @@
 
 import React, { FC } from "react";
 import { useTranslation } from "react-i18next";
-import { Subtitle, Title } from "@scm-manager/ui-components";
+import { Subtitle, Title, useDocumentTitle } from "@scm-manager/ui-core";
 import { Link } from "@scm-manager/ui-types";
 import ResubmitSection from "./ResubmitSection";
 import ResubmitConfigurationSection from "./ResubmitConfigurationSection";
@@ -27,6 +27,7 @@ type Props = {
 
 const AdminPage: FC<Props> = ({ links }) => {
   const [t] = useTranslation("plugins");
+  useDocumentTitle(t("scm-issuetracker-plugin.title"));
   const resubmitConfigurationLink = links.find(l => l.name === "resubmitConfiguration");
   const resubmitLink = links.find(l => l.name === "resubmit");
   return (

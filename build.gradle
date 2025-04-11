@@ -34,7 +34,7 @@ dependencies {
 }
 
 scmPlugin {
-  scmVersion = "3.0.0"
+  scmVersion = "3.7.0"
   displayName = "Issue Tracker"
   description = "Helper classes for issuetracker plugins"
   author = "Cloudogu GmbH"
