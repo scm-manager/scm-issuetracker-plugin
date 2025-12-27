@@ -10,11 +10,11 @@ This documentation describes the usage of the scm-issuetracker-plugin. It is ava
 The issue tracker plugin provides functions to simplify the integration of issue trackers into the SCM-Manager.
 The functions include:
 
-* Finding issue keys in commit messages, markdown texts, pull requests and their comments
-* The creation of references in the form of comments
-* Changing the state of an issue based on keywords
-* Resubmitting comments
-* Send notifications if comments could not be added
+* Finding issue keys in commit messages, markdown texts and pull requests (including their comments),
+* creating references within comments,
+* changing the state of an issue based on keywords,
+* ŕesubmitting comments, and
+* sending notifications if comments could not be added.
 
 Examples of this integration are the [Jira Plugin](/plugins/scm-jira-plugin) and the [Redmine Plugin](/plugins/scm-redmine-plugin).
 
@@ -28,4 +28,4 @@ If the comments should not be resent, they can also be cleared via the admin int
 
 ![Admin Interface](assets/admin_interface.png)
 
-In the interface you can also enter contacts in form of email addresses that should be notified in case of an error.
+In the interface you can also enter email addresses as contacts; these shall be notified in case of an error.

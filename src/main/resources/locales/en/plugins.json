@@ -1,24 +1,24 @@
 {
   "scm-issuetracker-plugin": {
     "title": "Issue Tracker",
-    "subtitle": "General Issue Tracker Configuration",
+    "subtitle": "General issue tracker configuration",
     "navLink": "Issue Tracker",
     "resubmit": {
       "title": "Resubmit",
-      "description": "Resubmit or clear pending comments",
+      "description": "Resubmit or clear pending comments.",
       "empty": "No pending comments found",
-      "issueTracker": "Issue Tracker",
-      "queueCount": "Queue Count",
+      "issueTracker": "Issue tracker",
+      "queueCount": "Queue count",
       "resubmit": "Resubmit",
       "clear": "Clear",
       "config": {
-        "title": "Resubmit Configuration",
-        "description": "Configuration related to the resubmit function",
-        "address": "Email Address",
-        "addAddress": "Add Address",
+        "title": "Resubmit configuration",
+        "description": "Configuration related to the “resubmit” function.",
+        "address": "Email address",
+        "addAddress": "Add address",
         "removeAddress": "Remove address",
-        "invalidMail": "Invalid email address format",
-        "updated": "Successfully updated resubmit configuration",
+        "invalidMail": "Invalid email address format.",
+        "updated": "Successfully updated resubmit configuration.",
         "submit": "Submit"
       }
     }
@@ -27,7 +27,7 @@
     "issuetracker": {
       "resubmit": {
         "displayName": "Perform resubmits",
-        "description": "Perform and configure resubmits of pending issue tracker comments"
+        "description": "Perform and configure resubmits of pending issue tracker comments."
       }
     }
   }

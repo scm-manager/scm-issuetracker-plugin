@@ -1,24 +1,24 @@
 {
   "scm-issuetracker-plugin": {
-    "title": "Issue Tracker",
-    "subtitle": "Allgemeine Issue Tracker Konfiguration",
-    "navLink": "Issue Tracker",
+    "title": "Issue-Tracker",
+    "subtitle": "Allgemeine Issue-Tracker-Konfiguration",
+    "navLink": "Issue-Tracker",
     "resubmit": {
       "title": "Kommentare erneut senden",
-      "description": "Ausstehende Kommentare erneut senden",
-      "empty": "Keine ausstehenden Kommentare gefunden",
-      "issueTracker": "Issue Tracker",
+      "description": "Ausstehende Kommentare erneut senden.",
+      "empty": "Keine ausstehenden Kommentare gefunden.",
+      "issueTracker": "Issue-Tracker",
       "queueCount": "Anzahl ausstehender Kommentare",
       "resubmit": "Erneut senden",
       "clear": "Kommentare entfernen",
       "config": {
         "title": "Konfiguration für erneutes Senden",
-        "description": "Konfiguration für die \"Erneut Senden\" Funktion",
-        "address": "Email Adresse",
+        "description": "Konfiguration für die „Erneut-Senden“-Funktion.",
+        "address": "E-Mail-Adresse",
         "addAddress": "Adresse hinzufügen",
         "removeAddress": "Adresse entfernen",
-        "invalidMail": "Falsches Email Adressformat",
-        "updated": "Die Konfiguration wurde erfolgreich aktualisiert",
+        "invalidMail": "Falsches E-Mail-Adressformat.",
+        "updated": "Die Konfiguration wurde erfolgreich aktualisiert.",
         "submit": "Speichern"
       }
     }
@@ -27,7 +27,7 @@
     "issuetracker": {
       "resubmit": {
         "displayName": "Kommentare erneut senden",
-        "description": "Erneutes Senden ausstehender Issue Tracker Kommentare veranlassen und konfigurieren"
+        "description": "Erneutes Senden ausstehender Issue-Tracker Kommentare-veranlassen und konfigurieren."
       }
     }
   }
