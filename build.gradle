@@ -23,13 +23,13 @@ dependencies {
   optionalPlugin "sonia.scm.plugins:scm-review-plugin:2.7.0"
 
   testImplementation 'com.github.sdorra:junit-shiro-extension:1.0.1'
-  testImplementation "com.github.sdorra:shiro-unit:1.0.1"
-  testImplementation 'org.awaitility:awaitility:4.0.3'
+  testImplementation "com.github.sdorra:shiro-unit:1.0.2"
+  testImplementation 'org.awaitility:awaitility:4.3.0'
 
   // bean validation tests
-  testImplementation "org.jboss.resteasy:resteasy-validator-provider:6.2.5.Final"
-  testImplementation "org.hibernate.validator:hibernate-validator:8.0.1.Final"
-  testImplementation "javax.el:javax.el-api:3.0.0"
+  testImplementation "org.jboss.resteasy:resteasy-validator-provider:7.0.1.Final"
+  testImplementation "org.hibernate.validator:hibernate-validator:9.1.0.Final"
+  testImplementation "javax.el:javax.el-api:3.0.1-b06"
   testImplementation "org.glassfish:jakarta.el:4.0.2"
 }
 
