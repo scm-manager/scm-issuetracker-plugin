@@ -19,8 +19,8 @@ plugins {
 }
 
 dependencies {
-  plugin "sonia.scm.plugins:scm-mail-plugin:2.1.0"
-  optionalPlugin "sonia.scm.plugins:scm-review-plugin:2.7.0"
+  plugin "sonia.scm.plugins:scm-mail-plugin:4.0.0-SNAPSHOT"
+  optionalPlugin "sonia.scm.plugins:scm-review-plugin:4.0.0-SNAPSHOT"
 
   testImplementation 'com.github.sdorra:junit-shiro-extension:1.0.1'
   testImplementation "com.github.sdorra:shiro-unit:1.0.2"
@@ -34,7 +34,7 @@ dependencies {
 }
 
 scmPlugin {
-  scmVersion = "3.7.0"
+  scmVersion = "4.0.0-SNAPSHOT"
   displayName = "Issue Tracker"
   description = "Helper classes for issuetracker plugins"
   author = "Cloudogu GmbH"

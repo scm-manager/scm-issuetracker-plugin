@@ -14,19 +14,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/.
  */
 
-import React, { FC } from "react";
-import { Link, Links } from "@scm-manager/ui-types";
-import { Route } from "react-router-dom";
+import React from "react";
 import AdminPage from "./AdminPage";
 
-type Props = {
-  links: Links;
-};
 
-const IssueTrackerRoute: FC<Props> = ({ links }) => (
-  <Route path="/admin/issue-tracker">
-    <AdminPage links={links["issueTracker"] as Link[]} />
-  </Route>
-);
+const IssueTrackerRoute = () => ({
+  path: "issue-tracker",
+  element: <AdminPage />
+});
 
 export default IssueTrackerRoute;

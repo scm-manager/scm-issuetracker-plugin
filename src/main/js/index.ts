@@ -18,15 +18,11 @@ import { binder } from "@scm-manager/ui-extensions";
 import replaceIssueKeys from "./replaceIssueKeys";
 import IssueLinkMarkdownPlugin from "./IssueLinkMarkdownPlugin";
 import IssueTrackerRoute from "./admin/IssueTrackerRoute";
-import { Links } from "@scm-manager/ui-types";
 import IssueTrackerNavLink from "./admin/IssueTrackerNavLink";
+import { useIndexLinks } from "@scm-manager/ui-api";
 
-type PredicateProps = {
-  links: Links;
-};
-
-export const predicate = ({ links }: PredicateProps) => {
-  return !!(links && links.issueTracker);
+export const predicate = () => {
+  return useIndexLinks()?.issueTracker;
 };
 
 binder.bind("changeset.description.tokens", replaceIssueKeys);
@@ -34,5 +30,5 @@ binder.bind("reviewPlugin.pullrequest.title.tokens", replaceIssueKeys);
 binder.bind("pullrequest.comment.plugins", IssueLinkMarkdownPlugin);
 binder.bind("pullrequest.description.plugins", IssueLinkMarkdownPlugin);
 
-binder.bind("admin.route", IssueTrackerRoute, predicate);
+binder.bind("admin.route", IssueTrackerRoute);
 binder.bind("admin.navigation", IssueTrackerNavLink, predicate);

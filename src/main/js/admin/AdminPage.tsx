@@ -20,13 +20,11 @@ import { Subtitle, Title, useDocumentTitle } from "@scm-manager/ui-core";
 import { Link } from "@scm-manager/ui-types";
 import ResubmitSection from "./ResubmitSection";
 import ResubmitConfigurationSection from "./ResubmitConfigurationSection";
+import { useIndexLinks } from "@scm-manager/ui-api";
 
-type Props = {
-  links: Link[];
-};
-
-const AdminPage: FC<Props> = ({ links }) => {
+const AdminPage: FC = () => {
   const [t] = useTranslation("plugins");
+  const links = useIndexLinks().issueTracker as unknown as Link[]
   useDocumentTitle(t("scm-issuetracker-plugin.title"));
   const resubmitConfigurationLink = links.find(l => l.name === "resubmitConfiguration");
   const resubmitLink = links.find(l => l.name === "resubmit");
